@@ -1,0 +1,50 @@
+.contacto-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 80px 30px;
+  text-align: center;
+}
+
+.contacto-page h1 {
+  font-size: 36px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 60px;
+  letter-spacing: 1px;
+}
+
+.contacto-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.contacto-dato {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.contacto-icon {
+  font-size: 28px;
+}
+
+.contacto-dato p,
+.contacto-dato a {
+  font-size: 22px;
+  color: #111;
+  text-decoration: none;
+  font-weight: 400;
+  transition: color 0.2s;
+}
+
+.contacto-dato a:hover {
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .contacto-page { padding: 60px 20px; }
+  .contacto-dato p,
+  .contacto-dato a { font-size: 18px; }
+}

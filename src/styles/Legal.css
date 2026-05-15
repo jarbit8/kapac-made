@@ -1,0 +1,18 @@
+.legal-page { max-width: 800px; margin: 0 auto; padding: 60px 30px; }
+
+.legal-page h1 { font-size: 28px; font-weight: 600; color: #111; margin-bottom: 50px; }
+
+.legal-section { margin-bottom: 40px; }
+
+.legal-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.legal-section p { font-size: 15px; color: #555; line-height: 1.8; }
+
+@media (max-width: 768px) { .legal-page { padding: 40px 20px; } }
