@@ -12,6 +12,7 @@ export default function Header() {
     { label: 'El alma de Kapac Made', to: '/alma' },
     { label: 'Contacto',              to: '/contacto' },
     { label: 'Legal',                 to: '/legal' },
+    { label: '🎮 Marcador Bomber',    to: '/bomber' },
   ];
 
   return (

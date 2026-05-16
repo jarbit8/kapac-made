@@ -1,0 +1,308 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+.bomber-page {
+  --bomber-bg-dark: #0a0e27;
+  --bomber-grid-line: rgba(99, 178, 255, 0.08);
+  --bomber-neon-cyan: #00f0ff;
+  --bomber-neon-pink: #ff2e9a;
+  --bomber-neon-yellow: #ffd400;
+  --bomber-neon-green: #39ff14;
+  --bomber-neon-orange: #ff6b1a;
+
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top, #2a1850 0%, #0a0e27 60%),
+    var(--bomber-bg-dark);
+  font-family: 'VT323', monospace;
+  color: white;
+  overflow-x: hidden;
+  padding: 20px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.bomber-page * { margin: 0; padding: 0; box-sizing: border-box; }
+
+.bomber-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--bomber-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bomber-grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bomber-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.15),
+    rgba(0,0,0,0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: multiply;
+}
+
+.bomber-container { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
+
+.bomber-header { text-align: center; padding: 30px 20px 20px; margin-bottom: 20px; position: relative; }
+
+.bomber-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(26px, 6vw, 52px);
+  letter-spacing: 4px;
+  background: linear-gradient(180deg, #fff 0%, var(--bomber-neon-yellow) 50%, var(--bomber-neon-orange) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(255, 212, 0, 0.5), 4px 4px 0px rgba(255, 46, 154, 0.8);
+  filter: drop-shadow(0 4px 0 #000);
+  animation: bomber-titleBounce 2s ease-in-out infinite;
+}
+
+@keyframes bomber-titleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.bomber-subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--bomber-neon-cyan);
+  letter-spacing: 3px;
+  margin-top: 16px;
+  text-shadow: 0 0 10px var(--bomber-neon-cyan);
+  animation: bomber-blink 1.5s step-end infinite;
+}
+
+@keyframes bomber-blink { 50% { opacity: 0.4; } }
+
+.bomber-bomb-decor { position: absolute; font-size: 28px; animation: bomber-float 3s ease-in-out infinite; }
+.bomber-bomb-decor.left { left: 8%; top: 35%; animation-delay: 0s; }
+.bomber-bomb-decor.right { right: 8%; top: 50%; animation-delay: 1.5s; }
+
+@keyframes bomber-float {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+.bomber-podium-section {
+  background: linear-gradient(145deg, #1e2547, #0f1330);
+  border: 4px solid #000;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: inset 0 0 0 2px var(--bomber-neon-yellow), 0 8px 0 #000;
+}
+
+.bomber-podium-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: var(--bomber-neon-yellow);
+  letter-spacing: 3px;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px var(--bomber-neon-yellow);
+}
+
+.bomber-ranking-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+.bomber-ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: rgba(0,0,0,0.4);
+  border-left: 6px solid var(--player-color);
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: visible;
+}
+
+.bomber-ranking-item:hover { background: rgba(0,0,0,0.6); transform: translateX(4px); box-shadow: -4px 0 20px var(--player-color); }
+.bomber-ranking-item:active { transform: translateX(4px) scale(0.98); }
+.bomber-ranking-item.popping { animation: bomber-itemPop 0.4s ease-out; }
+
+@keyframes bomber-itemPop {
+  0% { transform: translateX(4px) scale(1); }
+  40% { transform: translateX(4px) scale(1.05); box-shadow: -4px 0 30px var(--player-color); }
+  100% { transform: translateX(4px) scale(1); }
+}
+
+.bomber-ranking-position {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: var(--bomber-neon-yellow);
+  min-width: 36px;
+  text-align: center;
+}
+
+.bomber-ranking-name {
+  flex: 1;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(16px, 4vw, 22px);
+  color: var(--player-color);
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 0 #000, 0 0 14px var(--player-color);
+  line-height: 1;
+}
+
+.bomber-ranking-score {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(12px, 3vw, 16px);
+  color: white;
+  text-shadow: 2px 2px 0 #000;
+  letter-spacing: 1px;
+}
+
+.bomber-ranking-item.leader::after {
+  content: '\1F451';
+  position: absolute;
+  top: -12px;
+  right: 8px;
+  font-size: 24px;
+  transform: rotate(15deg);
+  filter: drop-shadow(0 0 8px var(--bomber-neon-yellow));
+  animation: bomber-crownSpin 2s ease-in-out infinite;
+}
+
+@keyframes bomber-crownSpin {
+  0%, 100% { transform: rotate(15deg) scale(1); }
+  50% { transform: rotate(-10deg) scale(1.1); }
+}
+
+.bomber-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+.bomber-btn-action {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  padding: 14px 20px;
+  border: 4px solid #000;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  box-shadow: 0 5px 0 #000;
+  transition: all 0.1s;
+  color: #000;
+}
+
+.bomber-btn-action:active { transform: translateY(5px); box-shadow: 0 0 0 #000; }
+.bomber-btn-minus { background: var(--bomber-neon-pink); color: #fff; text-shadow: 1px 1px 0 #000; }
+.bomber-btn-minus:hover { background: #ff5fb0; }
+.bomber-btn-reset { background: var(--bomber-neon-orange); }
+.bomber-btn-reset:hover { background: var(--bomber-neon-yellow); }
+
+.bomber-explosion {
+  position: fixed;
+  pointer-events: none;
+  font-size: 60px;
+  z-index: 1000;
+  animation: bomber-explode 0.6s ease-out forwards;
+}
+
+@keyframes bomber-explode {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+  100% { transform: scale(2.5) rotate(360deg); opacity: 0; }
+}
+
+.bomber-hint {
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.bomber-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+.bomber-modal-overlay.active { display: flex; }
+
+.bomber-modal {
+  background: linear-gradient(145deg, #1e2547, #0f1330);
+  border: 4px solid #000;
+  box-shadow: inset 0 0 0 2px var(--bomber-neon-pink), 0 8px 0 #000;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.bomber-modal-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: var(--bomber-neon-pink);
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px var(--bomber-neon-pink);
+}
+
+.bomber-modal-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+.bomber-modal-list button {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0,0,0,0.5);
+  border: 2px solid var(--player-color);
+  color: var(--player-color);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.bomber-modal-list button:hover { background: var(--player-color); color: #000; }
+
+.bomber-modal-close {
+  width: 100%;
+  padding: 12px;
+  background: #444;
+  color: white;
+  border: 2px solid #000;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  border-radius: 4px;
+}
+
+.bomber-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 2px;
+}
+
+.bomber-back {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--bomber-neon-cyan);
+  text-decoration: none;
+  font-size: 10px;
+}
+.bomber-back:hover { color: var(--bomber-neon-yellow); }

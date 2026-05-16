@@ -9,6 +9,7 @@ import Catalogo from './pages/Catalogo';
 import Alma from './pages/Alma';
 import Contacto from './pages/Contacto';
 import Legal from './pages/Legal';
+import Bomber from './pages/Bomber';
 import './styles/App.css';
 
 function Home() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/alma"     element={<Alma />} />
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/legal"    element={<Legal />} />
+        <Route path="/bomber"   element={<Bomber />} />
       </Routes>
     </HashRouter>
   );
