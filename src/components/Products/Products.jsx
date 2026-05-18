@@ -1,21 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../styles/Products.css';
-import foto1 from '../../assets/images/foto 1.png';
-import foto2 from '../../assets/images/foto 2.png';
-import foto3 from '../../assets/images/foto 3.png';
-import foto4 from '../../assets/images/foto 4.png';
-import mochila1 from '../../assets/images/mochila 1.png';
-import mochila2 from '../../assets/images/mochila 2.png';
-import mochila3 from '../../assets/images/mochila 3.png';
-import mochila4 from '../../assets/images/mochila 4.png';
+import { obtenerProductos } from '../../firebase/productos';
+import { imagen } from '../../firebase/imagenesProductos';
+import { useCart } from '../../context/CartContext';
 
 export default function Products() {
-  const productos = [
-    { id: 1, foto: foto1, mochila: mochila1, nombre: 'Mochila', precio: '$89.99' },
-    { id: 2, foto: foto2, mochila: mochila2, nombre: 'Mochila', precio: '$94.99' },
-    { id: 3, foto: foto3, mochila: mochila3, nombre: 'Mochila', precio: '$79.99' },
-    { id: 4, foto: foto4, mochila: mochila4, nombre: 'Mochila', precio: '$99.99' }
-  ];
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const { agregar } = useCart();
+
+  useEffect(() => {
+    obtenerProductos()
+      .then((data) => {
+        setProductos(data.filter(p => p.activo !== false));
+        setCargando(false);
+      })
+      .catch((e) => {
+        console.error(e);
+        setCargando(false);
+      });
+  }, []);
+
+  if (cargando) {
+    return (
+      <section className="products">
+        <div className="products-container">
+          <p style={{ color: '#666', textAlign: 'center' }}>Cargando productos...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="products">
@@ -23,14 +37,17 @@ export default function Products() {
         {productos.map((producto) => (
           <div key={producto.id} className="product-row">
             <div className="product-left">
-              <img src={producto.mochila} alt={producto.nombre} className="mochila-img" />
+              <img src={imagen(producto.imagenMochila)} alt={producto.nombre} className="mochila-img" />
               <div className="product-info">
                 <h3 className="product-name">{producto.nombre}</h3>
-                <p className="product-price">{producto.precio}</p>
+                <p className="product-price">{producto.moneda}{producto.precio}.00</p>
+                <button className="product-add-btn" onClick={() => agregar(producto)}>
+                  Agregar al carrito
+                </button>
               </div>
             </div>
             <div className="product-right">
-              <img src={producto.foto} alt="Foto contexto" className="foto-img" />
+              <img src={imagen(producto.imagenContexto)} alt="Foto contexto" className="foto-img" />
             </div>
           </div>
         ))}

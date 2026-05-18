@@ -1,5 +1,7 @@
 import React from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import Header from './components/Header/Header';
 import Hero from './components/Hero/Hero';
 import Products from './components/Products/Products';
@@ -9,6 +11,9 @@ import Catalogo from './pages/Catalogo';
 import Alma from './pages/Alma';
 import Contacto from './pages/Contacto';
 import Legal from './pages/Legal';
+import Admin from './pages/Admin';
+import Login from './pages/Login';
+import Carrito from './pages/Carrito';
 import './styles/App.css';
 
 function Home() {
@@ -27,15 +32,22 @@ function Home() {
 
 function App() {
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/"         element={<Home />} />
-        <Route path="/catalogo" element={<Catalogo />} />
-        <Route path="/alma"     element={<Alma />} />
-        <Route path="/contacto" element={<Contacto />} />
-        <Route path="/legal"    element={<Legal />} />
-      </Routes>
-    </HashRouter>
+    <AuthProvider>
+      <CartProvider>
+        <HashRouter>
+          <Routes>
+            <Route path="/"         element={<Home />} />
+            <Route path="/catalogo" element={<Catalogo />} />
+            <Route path="/alma"     element={<Alma />} />
+            <Route path="/contacto" element={<Contacto />} />
+            <Route path="/legal"    element={<Legal />} />
+            <Route path="/admin"    element={<Admin />} />
+            <Route path="/login"    element={<Login />} />
+            <Route path="/carrito"  element={<Carrito />} />
+          </Routes>
+        </HashRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

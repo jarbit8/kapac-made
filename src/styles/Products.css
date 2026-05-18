@@ -52,6 +52,23 @@
   letter-spacing: 1px;
 }
 
+.product-add-btn {
+  margin-top: 14px;
+  padding: 11px 28px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.product-add-btn:hover {
+  background: #333;
+}
+
 /* Bloque derecha: foto grande */
 .product-right .foto-img {
   width: 100%;

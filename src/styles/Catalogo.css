@@ -49,5 +49,23 @@
   text-decoration: line-through;
 }
 
+.catalogo-add-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.catalogo-add-btn:hover {
+  background: #333;
+}
+
 @media (max-width: 1024px) { .catalogo-page-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px)  { .catalogo-page { padding: 40px 20px; } }
