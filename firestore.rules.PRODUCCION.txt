@@ -1,0 +1,51 @@
+// ============================================================
+// REGLAS DE SEGURIDAD FIRESTORE - PARA PRODUCCIÓN
+// ============================================================
+//
+// ⚠️ AHORA estamos en "modo prueba" (cualquiera lee/escribe).
+//    Eso está BIEN para desarrollar, pero ANTES DE LANZAR
+//    al público hay que aplicar estas reglas seguras.
+//
+// CÓMO APLICARLAS (cuando la tienda esté lista para vender):
+//   1. Firebase Console -> Firestore Database -> pestaña "Reglas"
+//   2. Borra lo que haya y pega TODO lo de abajo
+//      (desde "rules_version" hasta la última llave)
+//   3. Click "Publicar"
+//
+// QUÉ HACEN ESTAS REGLAS:
+//   - productos: cualquiera puede VER, solo admin puede MODIFICAR
+//   - pedidos:   cada usuario solo ve/crea SUS pedidos
+//   - Nadie puede borrar pedidos desde la web
+// ============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // PRODUCTOS: lectura pública, escritura solo autenticado
+    // (más adelante se puede restringir a un email admin específico)
+    match /productos/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // PEDIDOS: cada usuario solo accede a los suyos
+    match /pedidos/{id} {
+      allow create: if request.auth != null
+                    && request.resource.data.usuarioId == request.auth.uid;
+      allow read:   if request.auth != null
+                    && resource.data.usuarioId == request.auth.uid;
+      allow update, delete: if false; // nadie edita/borra pedidos desde la web
+    }
+  }
+}
+
+// ============================================================
+// NOTA: para que SOLO el dueño (tu amigo) pueda editar productos,
+// cuando tengan el correo del negocio, cambiar la línea:
+//   allow write: if request.auth != null;
+// por:
+//   allow write: if request.auth != null
+//                && request.auth.token.email == 'kapac.made@gmail.com';
+// ============================================================

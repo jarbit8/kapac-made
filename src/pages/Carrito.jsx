@@ -1,25 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { imagen } from '../firebase/imagenesProductos';
+import { crearPedido } from '../firebase/pedidos';
 import '../styles/Carrito.css';
 
 export default function Carrito() {
   const { items, quitar, cambiarCantidad, vaciar, totalPrecio } = useCart();
   const { usuario } = useAuth();
   const navigate = useNavigate();
+  const [procesando, setProcesando] = useState(false);
 
-  const finalizar = () => {
+  const finalizar = async () => {
     if (!usuario) {
       navigate('/login');
       return;
     }
-    alert('¡Pedido registrado! (El pago se integrará en la siguiente fase)');
-    vaciar();
-    navigate('/');
+    setProcesando(true);
+    try {
+      await crearPedido({
+        usuarioId: usuario.uid,
+        email: usuario.email,
+        items,
+        total: totalPrecio,
+      });
+      alert('¡Pedido registrado! Lo verás en "Mis pedidos". (El pago se integrará en la siguiente fase)');
+      vaciar();
+      navigate('/pedidos');
+    } catch (e) {
+      console.error(e);
+      alert('Hubo un error al registrar el pedido. Intenta de nuevo.');
+    }
+    setProcesando(false);
   };
 
   return (
@@ -61,8 +76,10 @@ export default function Carrito() {
                 <span>Total:</span>
                 <strong>S/{totalPrecio}.00</strong>
               </div>
-              <button className="carrito-finalizar" onClick={finalizar}>
-                {usuario ? 'Finalizar compra' : 'Inicia sesión para comprar'}
+              <button className="carrito-finalizar" onClick={finalizar} disabled={procesando}>
+                {procesando
+                  ? 'Procesando...'
+                  : usuario ? 'Finalizar compra' : 'Inicia sesión para comprar'}
               </button>
               <button className="carrito-vaciar" onClick={vaciar}>Vaciar carrito</button>
             </div>

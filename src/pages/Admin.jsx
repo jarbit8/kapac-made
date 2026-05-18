@@ -1,68 +1,139 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header/Header';
-import { seedProductos } from '../firebase/seed';
-import { obtenerProductos } from '../firebase/productos';
+import {
+  obtenerProductos, agregarProducto, actualizarProducto, eliminarProducto,
+} from '../firebase/productos';
+import { IMAGENES, imagen } from '../firebase/imagenesProductos';
+import '../styles/Admin.css';
+
+const VACIO = {
+  nombre: '', precio: '', precioOriginal: '', moneda: 'S/',
+  imagenMochila: 'mochila-1', imagenContexto: 'foto-1',
+  descripcion: '', stock: '', activo: true,
+};
 
 export default function Admin() {
-  const [estado, setEstado] = useState('');
   const [productos, setProductos] = useState([]);
-  const [cargando, setCargando] = useState(false);
+  const [form, setForm] = useState(VACIO);
+  const [editandoId, setEditandoId] = useState(null);
+  const [msg, setMsg] = useState('');
+  const claves = Object.keys(IMAGENES);
 
-  const subir = async () => {
-    setCargando(true);
-    setEstado('Subiendo...');
-    try {
-      const r = await seedProductos();
-      setEstado(`✅ ${r.mensaje} (creados: ${r.creados})`);
-    } catch (e) {
-      setEstado('❌ Error: ' + e.message);
-    }
-    setCargando(false);
+  const cargar = async () => {
+    setProductos(await obtenerProductos());
   };
 
-  const ver = async () => {
-    setCargando(true);
+  useEffect(() => { cargar(); }, []);
+
+  const guardar = async (e) => {
+    e.preventDefault();
+    const datos = {
+      ...form,
+      precio: Number(form.precio),
+      precioOriginal: Number(form.precioOriginal) || null,
+      stock: Number(form.stock) || 0,
+    };
     try {
-      const p = await obtenerProductos();
-      setProductos(p);
-      setEstado(`📦 ${p.length} productos en la base de datos`);
-    } catch (e) {
-      setEstado('❌ Error: ' + e.message);
+      if (editandoId) {
+        await actualizarProducto(editandoId, datos);
+        setMsg('✅ Producto actualizado');
+      } else {
+        await agregarProducto(datos);
+        setMsg('✅ Producto agregado');
+      }
+      setForm(VACIO);
+      setEditandoId(null);
+      cargar();
+    } catch (err) {
+      setMsg('❌ ' + err.message);
     }
-    setCargando(false);
+  };
+
+  const editar = (p) => {
+    setForm({
+      nombre: p.nombre, precio: p.precio, precioOriginal: p.precioOriginal || '',
+      moneda: p.moneda || 'S/', imagenMochila: p.imagenMochila,
+      imagenContexto: p.imagenContexto, descripcion: p.descripcion || '',
+      stock: p.stock || '', activo: p.activo !== false,
+    });
+    setEditandoId(p.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const borrar = async (id) => {
+    if (!window.confirm('¿Eliminar este producto?')) return;
+    await eliminarProducto(id);
+    setMsg('🗑️ Producto eliminado');
+    cargar();
   };
 
   return (
     <>
       <Header />
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '40px 30px' }}>
-        <h1 style={{ marginBottom: 20 }}>Panel temporal — Admin</h1>
-        <p style={{ color: '#666', marginBottom: 30 }}>
-          Esta página es temporal, solo para cargar/verificar productos en Firebase.
-        </p>
+      <div className="admin-page">
+        <h1>Panel de productos</h1>
+        <p className="admin-sub">Gestiona el catálogo de Kapac Made (página interna).</p>
+        {msg && <div className="admin-msg">{msg}</div>}
 
-        <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-          <button onClick={subir} disabled={cargando}
-            style={{ padding: '12px 24px', background: '#111', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
-            Subir mochilas a Firebase
-          </button>
-          <button onClick={ver} disabled={cargando}
-            style={{ padding: '12px 24px', background: '#fff', color: '#111', border: '1px solid #ccc', borderRadius: 6, cursor: 'pointer' }}>
-            Ver productos guardados
-          </button>
-        </div>
-
-        {estado && (
-          <div style={{ padding: 16, background: '#f5f5f5', borderRadius: 6, marginBottom: 20 }}>
-            {estado}
+        <form className="admin-form" onSubmit={guardar}>
+          <h2>{editandoId ? 'Editar producto' : 'Agregar producto'}</h2>
+          <div className="admin-grid">
+            <label>Nombre
+              <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required />
+            </label>
+            <label>Precio
+              <input type="number" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} required />
+            </label>
+            <label>Precio original (opcional)
+              <input type="number" value={form.precioOriginal} onChange={(e) => setForm({ ...form, precioOriginal: e.target.value })} />
+            </label>
+            <label>Stock
+              <input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+            </label>
+            <label>Imagen mochila
+              <select value={form.imagenMochila} onChange={(e) => setForm({ ...form, imagenMochila: e.target.value })}>
+                {claves.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+            <label>Imagen contexto
+              <select value={form.imagenContexto} onChange={(e) => setForm({ ...form, imagenContexto: e.target.value })}>
+                {claves.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
           </div>
-        )}
+          <label>Descripción
+            <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} rows="2" />
+          </label>
+          <label className="admin-check">
+            <input type="checkbox" checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />
+            Producto activo (visible en la tienda)
+          </label>
+          <div className="admin-acciones">
+            <button type="submit">{editandoId ? 'Guardar cambios' : 'Agregar producto'}</button>
+            {editandoId && (
+              <button type="button" className="admin-cancelar" onClick={() => { setForm(VACIO); setEditandoId(null); }}>
+                Cancelar
+              </button>
+            )}
+          </div>
+        </form>
 
-        {productos.length > 0 && (
-          <pre style={{ background: '#1a1a1a', color: '#0f0', padding: 20, borderRadius: 6, overflow: 'auto', fontSize: 12 }}>
-            {JSON.stringify(productos, null, 2)}
-          </pre>
-        )}
+        <h2 className="admin-lista-titulo">Productos ({productos.length})</h2>
+        <div className="admin-lista">
+          {productos.map((p) => (
+            <div key={p.id} className="admin-card">
+              <img src={imagen(p.imagenMochila)} alt={p.nombre} />
+              <div className="admin-card-info">
+                <strong>{p.nombre}</strong>
+                <span>{p.moneda}{p.precio}.00 · stock: {p.stock} · {p.activo !== false ? 'activo' : 'oculto'}</span>
+              </div>
+              <div className="admin-card-btns">
+                <button onClick={() => editar(p)}>Editar</button>
+                <button className="del" onClick={() => borrar(p.id)}>Eliminar</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );

@@ -14,6 +14,7 @@ import Legal from './pages/Legal';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Carrito from './pages/Carrito';
+import Pedidos from './pages/Pedidos';
 import './styles/App.css';
 
 function Home() {
@@ -44,6 +45,7 @@ function App() {
             <Route path="/admin"    element={<Admin />} />
             <Route path="/login"    element={<Login />} />
             <Route path="/carrito"  element={<Carrito />} />
+            <Route path="/pedidos"  element={<Pedidos />} />
           </Routes>
         </HashRouter>
       </CartProvider>

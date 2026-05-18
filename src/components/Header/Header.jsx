@@ -53,6 +53,11 @@ export default function Header() {
                   <Link to={cat.to} onClick={() => setMenuOpen(false)}>{cat.label}</Link>
                 </li>
               ))}
+              {usuario && (
+                <li>
+                  <Link to="/pedidos" onClick={() => setMenuOpen(false)}>Mis pedidos</Link>
+                </li>
+              )}
             </ul>
           </nav>
         )}

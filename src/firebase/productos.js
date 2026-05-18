@@ -1,5 +1,7 @@
 // Servicio de productos - Firestore
-import { collection, getDocs, doc, getDoc, addDoc } from 'firebase/firestore';
+import {
+  collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc,
+} from 'firebase/firestore';
 import { db } from './config';
 
 const COLECCION = 'productos';
@@ -17,8 +19,18 @@ export async function obtenerProducto(id) {
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-// Agregar un producto (uso interno / admin / seed)
+// Agregar un producto (admin)
 export async function agregarProducto(producto) {
   const ref = await addDoc(collection(db, COLECCION), producto);
   return ref.id;
+}
+
+// Actualizar un producto (admin)
+export async function actualizarProducto(id, datos) {
+  await updateDoc(doc(db, COLECCION, id), datos);
+}
+
+// Eliminar un producto (admin)
+export async function eliminarProducto(id) {
+  await deleteDoc(doc(db, COLECCION, id));
 }
