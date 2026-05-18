@@ -1,6 +1,6 @@
 // Servicio de pedidos - Firestore
 import {
-  collection, addDoc, getDocs, query, where, orderBy, serverTimestamp,
+  collection, addDoc, getDocs, query, where, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -26,12 +26,22 @@ export async function crearPedido({ usuarioId, email, items, total }) {
 }
 
 // Obtener pedidos de un usuario
+// (sin orderBy en la query → no necesita índice compuesto;
+//  ordenamos por fecha aquí mismo en el código)
 export async function obtenerPedidosUsuario(usuarioId) {
   const q = query(
     collection(db, COLECCION),
-    where('usuarioId', '==', usuarioId),
-    orderBy('fecha', 'desc')
+    where('usuarioId', '==', usuarioId)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const pedidos = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  // Ordenar más reciente primero (maneja fecha pendiente de serverTimestamp)
+  pedidos.sort((a, b) => {
+    const fa = a.fecha?.seconds || 0;
+    const fb = b.fecha?.seconds || 0;
+    return fb - fa;
+  });
+
+  return pedidos;
 }

@@ -10,6 +10,7 @@ export default function Pedidos() {
   const { usuario, cargando: cargandoAuth } = useAuth();
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,15 +26,28 @@ export default function Pedidos() {
       })
       .catch((e) => {
         console.error(e);
+        setError('No se pudieron cargar los pedidos. Intenta recargar la página.');
         setCargando(false);
       });
   }, [usuario, cargandoAuth, navigate]);
 
   const formatoFecha = (ts) => {
-    if (!ts?.toDate) return '';
+    if (!ts?.toDate) return 'Recién creado';
     return ts.toDate().toLocaleDateString('es-PE', {
       day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
+  };
+
+  const estadoLabel = (e) => {
+    const mapa = {
+      pendiente: '🕐 Pendiente de pago',
+      pagado: '✅ Pagado',
+      enviado: '📦 Enviado',
+      entregado: '🎉 Entregado',
+      cancelado: '❌ Cancelado',
+    };
+    return mapa[e] || e;
   };
 
   return (
@@ -44,18 +58,22 @@ export default function Pedidos() {
 
         {cargando && <p style={{ color: '#666' }}>Cargando pedidos...</p>}
 
-        {!cargando && pedidos.length === 0 && (
+        {!cargando && error && (
+          <p style={{ color: 'crimson' }}>{error}</p>
+        )}
+
+        {!cargando && !error && pedidos.length === 0 && (
           <div className="pedidos-vacio">
             <p>Aún no tienes pedidos.</p>
             <button onClick={() => navigate('/catalogo')}>Ver catálogo</button>
           </div>
         )}
 
-        {!cargando && pedidos.map((p) => (
+        {!cargando && !error && pedidos.map((p) => (
           <div key={p.id} className="pedido-card">
             <div className="pedido-header">
               <span className="pedido-id">Pedido #{p.id.slice(0, 8)}</span>
-              <span className={`pedido-estado estado-${p.estado}`}>{p.estado}</span>
+              <span className={`pedido-estado estado-${p.estado}`}>{estadoLabel(p.estado)}</span>
             </div>
             <p className="pedido-fecha">{formatoFecha(p.fecha)}</p>
             <ul className="pedido-items">
