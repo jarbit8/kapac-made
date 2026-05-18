@@ -21,15 +21,16 @@ export default function Carrito() {
     }
     setProcesando(true);
     try {
-      await crearPedido({
+      const pedidoId = await crearPedido({
         usuarioId: usuario.uid,
         email: usuario.email,
         items,
         total: totalPrecio,
       });
-      alert('¡Pedido registrado! Lo verás en "Mis pedidos". (El pago se integrará en la siguiente fase)');
       vaciar();
-      navigate('/pedidos');
+      // Guardar total para mostrarlo en la página de pago
+      sessionStorage.setItem('pago_total', totalPrecio);
+      navigate(`/pago/${pedidoId}`);
     } catch (e) {
       console.error(e);
       alert('Hubo un error al registrar el pedido. Intenta de nuevo.');

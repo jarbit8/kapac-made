@@ -1,6 +1,7 @@
 // Servicio de pedidos - Firestore
 import {
-  collection, addDoc, getDocs, query, where, serverTimestamp,
+  collection, addDoc, getDocs, doc, updateDoc,
+  query, where, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -43,5 +44,23 @@ export async function obtenerPedidosUsuario(usuarioId) {
     return fb - fa;
   });
 
+  return pedidos;
+}
+
+// Actualizar estado de un pedido
+export async function actualizarEstadoPedido(pedidoId, nuevoEstado) {
+  const ref = doc(db, COLECCION, pedidoId);
+  await updateDoc(ref, { estado: nuevoEstado });
+}
+
+// Obtener TODOS los pedidos (para el admin)
+export async function obtenerTodosPedidos() {
+  const snap = await getDocs(collection(db, COLECCION));
+  const pedidos = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  pedidos.sort((a, b) => {
+    const fa = a.fecha?.seconds || 0;
+    const fb = b.fecha?.seconds || 0;
+    return fb - fa;
+  });
   return pedidos;
 }

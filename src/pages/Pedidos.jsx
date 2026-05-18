@@ -42,6 +42,7 @@ export default function Pedidos() {
   const estadoLabel = (e) => {
     const mapa = {
       pendiente: '🕐 Pendiente de pago',
+      verificando: '🔍 Verificando pago',
       pagado: '✅ Pagado',
       enviado: '📦 Enviado',
       entregado: '🎉 Entregado',

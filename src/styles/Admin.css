@@ -158,8 +158,140 @@
   border-color: #f0c0c0;
 }
 
+/* ====== Pestañas ====== */
+.admin-pestanas {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0;
+}
+
+.admin-pestanas button {
+  padding: 10px 22px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-family: inherit;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+
+.admin-pestanas button.activa {
+  color: #111;
+  font-weight: 600;
+  border-bottom-color: #111;
+}
+
+.admin-badge {
+  background: #5f0a87;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 2px 7px;
+}
+
+/* ====== Pedidos en Admin ====== */
+.admin-pedidos {
+  margin-bottom: 40px;
+}
+
+.admin-verificando-aviso {
+  font-size: 14px;
+  font-weight: 400;
+  color: #5f0a87;
+}
+
+.admin-pedido-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+
+.admin-pedido-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.admin-pedido-id {
+  font-weight: 700;
+  font-size: 14px;
+  color: #111;
+  margin-right: 10px;
+}
+
+.admin-pedido-email {
+  font-size: 13px;
+  color: #888;
+}
+
+.admin-pedido-estado {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.admin-pedido-fecha {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 10px;
+}
+
+.admin-pedido-items {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #555;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-pedido-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.admin-pedido-footer strong {
+  font-size: 15px;
+  color: #111;
+}
+
+.admin-pedido-select {
+  padding: 7px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  background: #fff;
+}
+
+.admin-pedido-select:focus {
+  border-color: #5f0a87;
+}
+
 @media (max-width: 768px) {
   .admin-page { padding: 30px 20px; }
   .admin-grid { grid-template-columns: 1fr; }
   .admin-card { flex-wrap: wrap; }
+  .admin-pedido-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
 }
