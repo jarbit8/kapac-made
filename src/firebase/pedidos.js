@@ -8,7 +8,7 @@ import { db } from './config';
 const COLECCION = 'pedidos';
 
 // Crear un pedido
-export async function crearPedido({ usuarioId, email, items, total }) {
+export async function crearPedido({ usuarioId, email, items, total, envio, metodoPago }) {
   const pedido = {
     usuarioId,
     email,
@@ -20,6 +20,8 @@ export async function crearPedido({ usuarioId, email, items, total }) {
     })),
     total,
     estado: 'pendiente',
+    metodoPago: metodoPago || 'yape',
+    envio: envio || null,       // null = recojo en tienda
     fecha: serverTimestamp(),
   };
   const ref = await addDoc(collection(db, COLECCION), pedido);

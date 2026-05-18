@@ -17,6 +17,8 @@ import Carrito from './pages/Carrito';
 import Pedidos from './pages/Pedidos';
 import Producto from './pages/Producto';
 import Pago from './pages/Pago';
+import Checkout from './pages/Checkout';
+import MetodoPago from './pages/MetodoPago';
 import './styles/App.css';
 
 function Home() {
@@ -48,8 +50,10 @@ function App() {
             <Route path="/admin"    element={<Admin />} />
             <Route path="/login"    element={<Login />} />
             <Route path="/carrito"  element={<Carrito />} />
-            <Route path="/pedidos"  element={<Pedidos />} />
-            <Route path="/pago/:pedidoId" element={<Pago />} />
+            <Route path="/pedidos"       element={<Pedidos />} />
+            <Route path="/checkout"      element={<Checkout />} />
+            <Route path="/metodo-pago"   element={<MetodoPago />} />
+            <Route path="/pago/:metodo/:pedidoId" element={<Pago />} />
           </Routes>
         </HashRouter>
       </CartProvider>

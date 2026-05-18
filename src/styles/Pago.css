@@ -34,9 +34,11 @@
   margin-bottom: 24px;
 }
 
-.pago-monto strong {
-  color: #5f0a87;
-}
+.pago-monto strong { color: #5f0a87; }
+
+.yape-color { color: #5f0a87; }
+.btc-color  { color: #F7931A; }
+.btc-nota   { font-size: 12px; color: #aaa; display: block; margin-top: 4px; font-weight: 400; }
 
 .pago-qr {
   width: 220px;
@@ -78,6 +80,9 @@
   font-size: 13px;
   font-weight: 700;
 }
+
+.paso-num.yape-bg { background: #5f0a87; }
+.paso-num.btc-bg  { background: #F7931A; }
 
 .pago-btn-pague {
   width: 100%;
@@ -166,8 +171,66 @@
   background: #333;
 }
 
+/* ====== Botones de color ====== */
+.yape-btn { background: #5f0a87 !important; }
+.yape-btn:hover:not(:disabled) { background: #4a0869 !important; }
+
+.btc-btn { background: #F7931A !important; }
+.btc-btn:hover:not(:disabled) { background: #d97d10 !important; }
+
+/* ====== BTC QR ====== */
+.btc-qr { border-color: #F7931A !important; }
+
+/* ====== BTC address box ====== */
+.btc-address-box {
+  background: #fffbf5;
+  border: 1px solid #f7d5a0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.btc-address-label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.btc-address-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btc-address {
+  font-size: 11px;
+  color: #333;
+  word-break: break-all;
+  flex: 1;
+  background: transparent;
+  font-family: monospace;
+}
+
+.btc-copiar {
+  padding: 6px 14px;
+  background: #F7931A;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.btc-copiar:hover { background: #d97d10; }
+
 @media (max-width: 480px) {
   .pago-page { padding: 40px 16px; }
   .pago-card { padding: 24px 18px; }
   .pago-qr { width: 180px; height: 180px; }
+  .btc-address { font-size: 10px; }
 }
