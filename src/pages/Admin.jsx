@@ -6,10 +6,12 @@ import {
 import { IMAGENES, imagen } from '../firebase/imagenesProductos';
 import '../styles/Admin.css';
 
+const CATEGORIAS = ['Aventura', 'Urbana', 'Viaje', 'Trabajo'];
+
 const VACIO = {
   nombre: '', precio: '', precioOriginal: '', moneda: 'S/',
   imagenMochila: 'mochila-1', imagenContexto: 'foto-1',
-  descripcion: '', stock: '', activo: true,
+  descripcion: '', stock: '', activo: true, categoria: 'Aventura',
 };
 
 export default function Admin() {
@@ -55,6 +57,7 @@ export default function Admin() {
       moneda: p.moneda || 'S/', imagenMochila: p.imagenMochila,
       imagenContexto: p.imagenContexto, descripcion: p.descripcion || '',
       stock: p.stock || '', activo: p.activo !== false,
+      categoria: p.categoria || 'Aventura',
     });
     setEditandoId(p.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -89,6 +92,11 @@ export default function Admin() {
             </label>
             <label>Stock
               <input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+            </label>
+            <label>Categoría
+              <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
+                {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
             </label>
             <label>Imagen mochila
               <select value={form.imagenMochila} onChange={(e) => setForm({ ...form, imagenMochila: e.target.value })}>

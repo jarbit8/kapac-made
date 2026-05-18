@@ -161,6 +161,55 @@
   height: 100%;
 }
 
+/* Buscador del header */
+.header-buscador {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 210;
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  padding: 10px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  animation: slideIn 0.2s ease;
+}
+
+.header-buscador input {
+  width: 260px;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.header-buscador input:focus { border-color: #111; }
+
+.header-buscador button {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0 14px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.header-buscador button[type="button"] {
+  background: #fff;
+  color: #999;
+  border: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+  .header-buscador input { width: 60vw; }
+}
+
 /* Badge del carrito (número de items) */
 .cart-btn {
   position: relative;

@@ -15,6 +15,7 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Carrito from './pages/Carrito';
 import Pedidos from './pages/Pedidos';
+import Producto from './pages/Producto';
 import './styles/App.css';
 
 function Home() {
@@ -39,6 +40,7 @@ function App() {
           <Routes>
             <Route path="/"         element={<Home />} />
             <Route path="/catalogo" element={<Catalogo />} />
+            <Route path="/producto/:id" element={<Producto />} />
             <Route path="/alma"     element={<Alma />} />
             <Route path="/contacto" element={<Contacto />} />
             <Route path="/legal"    element={<Legal />} />

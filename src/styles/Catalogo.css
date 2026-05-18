@@ -7,8 +7,72 @@
 .catalogo-page-title {
   font-size: 28px;
   font-weight: 600;
-  margin-bottom: 50px;
+  margin-bottom: 24px;
   color: #111;
+}
+
+.catalogo-busqueda-info {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.catalogo-limpiar {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 13px;
+  margin-left: 10px;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.catalogo-filtros {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.catalogo-cats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.catalogo-cats button {
+  padding: 8px 18px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.catalogo-cats button:hover { border-color: #111; }
+
+.catalogo-cats button.activo {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.catalogo-orden {
+  padding: 8px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
 }
 
 .catalogo-page-grid {
@@ -33,11 +97,15 @@
 .catalogo-page-info { margin-top: 12px; }
 
 .catalogo-page-name {
+  display: block;
   font-size: 15px;
   font-weight: 500;
   color: #111;
   margin-bottom: 6px;
+  text-decoration: none;
 }
+
+.catalogo-page-name:hover { color: #555; }
 
 .catalogo-page-precios { display: flex; gap: 10px; align-items: center; }
 

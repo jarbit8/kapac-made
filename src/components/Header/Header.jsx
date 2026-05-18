@@ -8,9 +8,20 @@ import { cerrarSesion } from '../../firebase/auth';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [buscarOpen, setBuscarOpen] = useState(false);
+  const [termino, setTermino] = useState('');
   const navigate = useNavigate();
   const { totalItems } = useCart();
   const { usuario } = useAuth();
+
+  const handleBuscar = (e) => {
+    e.preventDefault();
+    if (termino.trim()) {
+      navigate(`/catalogo?q=${encodeURIComponent(termino.trim())}`);
+      setBuscarOpen(false);
+      setTermino('');
+    }
+  };
 
   const categories = [
     { label: 'Inicio',                to: '/' },
@@ -66,8 +77,26 @@ export default function Header() {
           <LogoAnimado />
         </Link>
 
+        {buscarOpen && (
+          <form className="header-buscador" onSubmit={handleBuscar}>
+            <input
+              type="text"
+              placeholder="Buscar productos..."
+              value={termino}
+              onChange={(e) => setTermino(e.target.value)}
+              autoFocus
+            />
+            <button type="submit" aria-label="Buscar">→</button>
+            <button type="button" onClick={() => setBuscarOpen(false)} aria-label="Cerrar">✕</button>
+          </form>
+        )}
+
         <div className="header-icons">
-          <button className="icon-btn" aria-label="Buscar">
+          <button
+            className="icon-btn"
+            aria-label="Buscar"
+            onClick={() => setBuscarOpen(!buscarOpen)}
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8"></circle>
               <path d="m21 21-4.35-4.35"></path>
