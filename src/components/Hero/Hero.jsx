@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../../styles/Hero.css';
 import heroImg from '../../assets/images/foto 5.png';
 
@@ -10,7 +11,7 @@ export default function Hero() {
       <div className="hero-content">
         <p className="hero-tagline">Mochilas para explorar sin límites</p>
         <h1 className="hero-title">KAPAC MADE</h1>
-        <a href="#productos" className="hero-btn">Ver colección</a>
+        <Link to="/catalogo" className="hero-btn">Ver colección</Link>
       </div>
     </section>
   );
