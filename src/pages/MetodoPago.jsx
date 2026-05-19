@@ -46,10 +46,6 @@ export default function MetodoPago() {
       setError('Por favor selecciona un método de pago.');
       return;
     }
-    if (metodo === 'tarjeta') {
-      setError('Pago con tarjeta próximamente. Elige otro método por ahora.');
-      return;
-    }
 
     setProcesando(true);
     setError('');
@@ -75,6 +71,8 @@ export default function MetodoPago() {
         navigate(`/pago/yape/${pedidoId}`);
       } else if (metodo === 'bitcoin') {
         navigate(`/pago/btc/${pedidoId}`);
+      } else if (metodo === 'tarjeta') {
+        navigate(`/pago/tarjeta/${pedidoId}`);
       }
     } catch (e) {
       console.error(e);
@@ -138,15 +136,15 @@ export default function MetodoPago() {
 
           {/* Tarjeta */}
           <button
-            className={`metodo-opcion proximamente ${metodo === 'tarjeta' ? 'seleccionada' : ''}`}
+            className={`metodo-opcion ${metodo === 'tarjeta' ? 'seleccionada' : ''}`}
             onClick={() => setMetodo('tarjeta')}
           >
             <div className="metodo-icono tarjeta-icono"><IconoTarjeta /></div>
             <div className="metodo-info">
               <strong>Tarjeta de crédito / débito</strong>
-              <span>Visa, Mastercard · próximamente</span>
+              <span>Visa, Mastercard, Amex · seguro con Culqi</span>
             </div>
-            <span className="prox-badge">Próximamente</span>
+            <div className={`opcion-radio ${metodo === 'tarjeta' ? 'on' : ''}`} />
           </button>
         </div>
 

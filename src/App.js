@@ -19,6 +19,7 @@ import Producto from './pages/Producto';
 import Pago from './pages/Pago';
 import Checkout from './pages/Checkout';
 import MetodoPago from './pages/MetodoPago';
+import PagoTarjeta from './pages/PagoTarjeta';
 import './styles/App.css';
 
 function Home() {
@@ -54,6 +55,7 @@ function App() {
             <Route path="/checkout"      element={<Checkout />} />
             <Route path="/metodo-pago"   element={<MetodoPago />} />
             <Route path="/pago/:metodo/:pedidoId" element={<Pago />} />
+            <Route path="/pago/tarjeta/:pedidoId" element={<PagoTarjeta />} />
           </Routes>
         </HashRouter>
       </CartProvider>
