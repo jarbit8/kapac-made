@@ -56,7 +56,7 @@ export default function PagoTarjeta() {
       // Llamada al backend (Cloud Function) para hacer el cargo
       // Por ahora marcamos como "verificando" y el cargo se hace manualmente
       // cuando tengan el backend listo
-      const res = await fetch('https://us-central1-kapac-made.cloudfunctions.net/cobrarCulqi', {
+      const res = await fetch('https://cobrarculqi-3lp3eiv6xa-uc.a.run.app', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
