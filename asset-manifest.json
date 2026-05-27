@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/kapac-made/static/css/main.1e2619ba.css",
-    "main.js": "/kapac-made/static/js/main.6f7be669.js",
+    "main.css": "/kapac-made/static/css/main.a5cd12b3.css",
+    "main.js": "/kapac-made/static/js/main.01d413e7.js",
     "static/media/coser1.png": "/kapac-made/static/media/coser1.20835861b4c0f9614448.png",
     "static/media/foto 2.png": "/kapac-made/static/media/foto 2.aa4f9e74f2177bdb53e2.png",
     "static/media/foto 1.png": "/kapac-made/static/media/foto 1.d9583fdcebf6e236a4ec.png",
@@ -16,11 +16,11 @@
     "static/media/gonzalo.jpeg": "/kapac-made/static/media/gonzalo.60279df319f61406a8ad.jpeg",
     "static/media/gonzalo2.jpeg": "/kapac-made/static/media/gonzalo2.371bf1974fd01bafb78d.jpeg",
     "index.html": "/kapac-made/index.html",
-    "main.1e2619ba.css.map": "/kapac-made/static/css/main.1e2619ba.css.map",
-    "main.6f7be669.js.map": "/kapac-made/static/js/main.6f7be669.js.map"
+    "main.a5cd12b3.css.map": "/kapac-made/static/css/main.a5cd12b3.css.map",
+    "main.01d413e7.js.map": "/kapac-made/static/js/main.01d413e7.js.map"
   },
   "entrypoints": [
-    "static/css/main.1e2619ba.css",
-    "static/js/main.6f7be669.js"
+    "static/css/main.a5cd12b3.css",
+    "static/js/main.01d413e7.js"
   ]
 }
