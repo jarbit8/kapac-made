@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/kapac-made/static/css/main.a84473ad.css",
-    "main.js": "/kapac-made/static/js/main.719b8bcb.js",
+    "main.css": "/kapac-made/static/css/main.33fe081a.css",
+    "main.js": "/kapac-made/static/js/main.b135fca3.js",
     "static/media/pc_video.mp4": "/kapac-made/static/media/pc_video.51deccef7b644194108f.mp4",
     "static/media/motain.mp4": "/kapac-made/static/media/motain.829e73fd3e65198a20b8.mp4",
     "static/media/coser1.png": "/kapac-made/static/media/coser1.20835861b4c0f9614448.png",
@@ -14,14 +14,15 @@
     "static/media/mochila 2.png": "/kapac-made/static/media/mochila 2.74cf5b6ce32636e12bb6.png",
     "static/media/qr.jpeg": "/kapac-made/static/media/qr.a7392dc6d98a4cf92a65.jpeg",
     "static/media/kapac_made_3.png": "/kapac-made/static/media/kapac_made_3.42f89327b7a17078a0af.png",
+    "static/media/Ojo isotipo verde.png": "/kapac-made/static/media/Ojo isotipo verde.1a5a0af82f038260b0df.png",
     "static/media/gonzalo.jpeg": "/kapac-made/static/media/gonzalo.60279df319f61406a8ad.jpeg",
     "static/media/gonzalo2.jpeg": "/kapac-made/static/media/gonzalo2.371bf1974fd01bafb78d.jpeg",
     "index.html": "/kapac-made/index.html",
-    "main.a84473ad.css.map": "/kapac-made/static/css/main.a84473ad.css.map",
-    "main.719b8bcb.js.map": "/kapac-made/static/js/main.719b8bcb.js.map"
+    "main.33fe081a.css.map": "/kapac-made/static/css/main.33fe081a.css.map",
+    "main.b135fca3.js.map": "/kapac-made/static/js/main.b135fca3.js.map"
   },
   "entrypoints": [
-    "static/css/main.a84473ad.css",
-    "static/js/main.719b8bcb.js"
+    "static/css/main.33fe081a.css",
+    "static/js/main.b135fca3.js"
   ]
 }
