@@ -1,14 +1,12 @@
 {
   "files": {
-    "main.css": "/kapac-made/static/css/main.fd22e7e0.css",
-    "main.js": "/kapac-made/static/js/main.1ea083f4.js",
+    "main.css": "/kapac-made/static/css/main.61744302.css",
+    "main.js": "/kapac-made/static/js/main.848edd06.js",
     "static/media/pc_video.mp4": "/kapac-made/static/media/pc_video.51deccef7b644194108f.mp4",
     "static/media/motain.mp4": "/kapac-made/static/media/motain.829e73fd3e65198a20b8.mp4",
     "static/media/coser1.png": "/kapac-made/static/media/coser1.20835861b4c0f9614448.png",
     "static/media/foto 2.png": "/kapac-made/static/media/foto 2.aa4f9e74f2177bdb53e2.png",
     "static/media/foto 1.png": "/kapac-made/static/media/foto 1.d9583fdcebf6e236a4ec.png",
-    "static/media/coser2.png": "/kapac-made/static/media/coser2.76885f542c07a6da7d53.png",
-    "static/media/paisaje.mp4": "/kapac-made/static/media/paisaje.cd9fab338891181ecd92.mp4",
     "static/media/ojo.mp4": "/kapac-made/static/media/ojo.e505f50c6da641232bfe.mp4",
     "static/media/mochila 1.png": "/kapac-made/static/media/mochila 1.2955c178719ce5b06d2b.png",
     "static/media/mochila 2.png": "/kapac-made/static/media/mochila 2.74cf5b6ce32636e12bb6.png",
@@ -19,11 +17,11 @@
     "static/media/gonzalo2.jpeg": "/kapac-made/static/media/gonzalo2.371bf1974fd01bafb78d.jpeg",
     "static/media/kapac_ai.jpeg": "/kapac-made/static/media/kapac_ai.74b71406c502e166f061.jpeg",
     "index.html": "/kapac-made/index.html",
-    "main.fd22e7e0.css.map": "/kapac-made/static/css/main.fd22e7e0.css.map",
-    "main.1ea083f4.js.map": "/kapac-made/static/js/main.1ea083f4.js.map"
+    "main.61744302.css.map": "/kapac-made/static/css/main.61744302.css.map",
+    "main.848edd06.js.map": "/kapac-made/static/js/main.848edd06.js.map"
   },
   "entrypoints": [
-    "static/css/main.fd22e7e0.css",
-    "static/js/main.1ea083f4.js"
+    "static/css/main.61744302.css",
+    "static/js/main.848edd06.js"
   ]
 }
