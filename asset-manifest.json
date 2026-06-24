@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/kapac-made/static/css/main.246230f8.css",
+    "main.css": "/kapac-made/static/css/main.5a68c688.css",
     "main.js": "/kapac-made/static/js/main.0d4a3475.js",
     "static/media/pc_video.mp4": "/kapac-made/static/media/pc_video.51deccef7b644194108f.mp4",
     "static/media/motain.mp4": "/kapac-made/static/media/motain.829e73fd3e65198a20b8.mp4",
@@ -19,7 +19,7 @@
     "index.html": "/kapac-made/index.html"
   },
   "entrypoints": [
-    "static/css/main.246230f8.css",
+    "static/css/main.5a68c688.css",
     "static/js/main.0d4a3475.js"
   ]
 }
