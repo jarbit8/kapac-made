@@ -6,6 +6,8 @@ import { actualizarEstadoPedido } from '../firebase/pedidos';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import qrImg from '../assets/images/qr.jpeg';
+import imgYape from '../assets/images/yape.avif';
+import imgEfectivo from '../assets/images/pago efectivo.avif';
 import '../styles/Pago.css';
 
 const CREAR_ORDEN_URL = 'https://us-central1-kapac-made.cloudfunctions.net/crearOrdenCulqi';
@@ -139,10 +141,14 @@ export default function Pago() {
         {/* ===== YAPE — solo QR (rápido, sin código) ===== */}
         {metodo === 'yape' && (
           <>
+            <div style={{ textAlign: 'left' }}>
+              <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
+            </div>
             <h1>{t('pago.yape.titulo')}</h1>
             <p className="pago-sub">{t('pago.yape.sub')}</p>
             <div className="pago-card">
               {total && <div className="pago-monto">{t('pago.yape.monto')} <strong className="yape-color">S/{total}.00</strong></div>}
+              <img src={imgYape} alt="Yape" style={{ height: 48, objectFit: 'contain', marginBottom: 16, display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
               <img src={qrImg} alt="QR Yape Kapac Made" className="pago-qr" />
               <div className="pago-pasos">
                 {[
@@ -168,10 +174,14 @@ export default function Pago() {
         {/* ===== PAGO EFECTIVO ===== */}
         {metodo === 'efectivo' && (
           <>
+            <div style={{ textAlign: 'left' }}>
+              <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
+            </div>
             <h1>{t('pago.ef.titulo')}</h1>
             <p className="pago-sub">{t('pago.ef.sub')}</p>
             <div className="pago-card">
               {total && <div className="pago-monto">{t('pago.yape.monto')} <strong className="efectivo-color">S/{total}.00</strong></div>}
+              <img src={imgEfectivo} alt="PagoEfectivo" style={{ height: 40, objectFit: 'contain', marginBottom: 16, display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
 
               {cargando && !codigoCIP && (
                 <p style={{ padding: '40px 0', color: '#666' }}>{t('pago.ef.generando')}</p>

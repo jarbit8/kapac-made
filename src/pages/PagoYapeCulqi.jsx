@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { useIdioma } from '../context/LanguageContext';
+import imgYape from '../assets/images/yape.avif';
 import '../styles/PagoTarjeta.css';
 
 const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
@@ -139,6 +140,10 @@ export default function PagoYapeCulqi() {
           <div className="step activo"><span className="step-num">3</span><span className="step-label">{t('steps.confirmacion')}</span></div>
         </div>
 
+        <div style={{ textAlign: 'left' }}>
+          <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
+        </div>
+
         <h1>{t('pago.yapeculqi.titulo')}</h1>
         <p className="tarjeta-sub">{t('pago.tarjeta.sub')} <strong>Culqi</strong> 🔒</p>
 
@@ -147,8 +152,8 @@ export default function PagoYapeCulqi() {
             {t('pago.tarjeta.total')} <strong>S/{total}.00</strong>
           </div>
 
-          <div className="tarjeta-marcas" style={{ justifyContent: 'center', gap: '14px' }}>
-            <span className="marca" style={{ background: '#142F8F', color: '#fff', fontStyle: 'italic', letterSpacing: '-0.5px' }}>yape</span>
+          <div className="tarjeta-marcas" style={{ justifyContent: 'center' }}>
+            <img src={imgYape} alt="Yape" style={{ height: 52, objectFit: 'contain' }} />
           </div>
 
           <div className="tarjeta-seguro">

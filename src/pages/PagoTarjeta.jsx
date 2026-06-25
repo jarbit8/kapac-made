@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { useIdioma } from '../context/LanguageContext';
+import imgTarjeta from '../assets/images/tarjeta.jpg';
 import '../styles/PagoTarjeta.css';
 
 const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
@@ -162,6 +163,10 @@ export default function PagoTarjeta() {
           <div className="step activo"><span className="step-num">3</span><span className="step-label">{t('steps.confirmacion')}</span></div>
         </div>
 
+        <div style={{ textAlign: 'left' }}>
+          <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
+        </div>
+
         <h1>{t('pago.tarjeta.titulo')}</h1>
         <p className="tarjeta-sub">{t('pago.tarjeta.sub')} <strong>Culqi</strong> 🔒</p>
 
@@ -171,9 +176,7 @@ export default function PagoTarjeta() {
           </div>
 
           <div className="tarjeta-marcas">
-            <span className="marca visa">VISA</span>
-            <span className="marca master">MC</span>
-            <span className="marca amex">AMEX</span>
+            <img src={imgTarjeta} alt="Visa / Mastercard / Amex" style={{ height: 52, objectFit: 'contain' }} />
           </div>
 
           <div className="tarjeta-seguro">
