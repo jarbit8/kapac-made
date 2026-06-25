@@ -34,20 +34,22 @@ export default function Hero() {
 
   return (
     <section className="hero">
-      {usarSubido && medio.tipo === 'imagen' ? (
-        <img src={medio.url} alt="Kapac Made" className="hero-bg"
-          onError={() => setFallo(true)} />
-      ) : (
-        <video
-          key={usarSubido ? medio.url : videoLocal}
-          src={usarSubido ? medio.url : videoLocal}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="hero-bg"
-          onError={() => { if (usarSubido) setFallo(true); }}
-        />
+      {videoCfg !== null && (
+        usarSubido && medio.tipo === 'imagen' ? (
+          <img src={medio.url} alt="Kapac Made" className="hero-bg"
+            onError={() => setFallo(true)} />
+        ) : (
+          <video
+            key={usarSubido ? medio.url : videoLocal}
+            src={usarSubido ? medio.url : videoLocal}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="hero-bg"
+            onError={() => { if (usarSubido) setFallo(true); }}
+          />
+        )
       )}
       <div className="hero-overlay" />
 

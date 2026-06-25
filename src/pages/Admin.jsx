@@ -353,16 +353,19 @@ export default function Admin() {
                   prevStyle={{
                     background: bgLogo,
                     objectFit: 'contain',
-                    aspectRatio: '3/1',
-                    maxWidth: 'none',
                     width: '100%',
-                    padding: '16px',
+                    height: '180px',
+                    maxWidth: 'none',
+                    aspectRatio: 'unset',
+                    padding: '20px',
                     boxSizing: 'border-box',
                   }}
                   vaciStyle={{
                     background: bgLogo,
-                    aspectRatio: '3/1',
+                    width: '100%',
+                    height: '180px',
                     maxWidth: 'none',
+                    aspectRatio: 'unset',
                     color: bgLogo === '#fff' || bgLogo === '#f0f0f0' ? '#aaa' : '#555',
                   }}
                 />
