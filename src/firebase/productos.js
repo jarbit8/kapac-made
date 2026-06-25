@@ -1,8 +1,22 @@
 // Servicio de productos - Firestore
 import {
-  collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc,
+  collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, increment,
 } from 'firebase/firestore';
 import { db } from './config';
+
+// Descontar stock al comprar (no baja de 0)
+export async function descontarStock(id, cantidad) {
+  try {
+    const ref = doc(db, 'productos', id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const actual = Number(snap.data().stock || 0);
+    const restar = Math.min(cantidad, actual); // nunca negativo
+    if (restar > 0) await updateDoc(ref, { stock: increment(-restar) });
+  } catch (e) {
+    console.warn('No se pudo descontar stock de', id, e?.message);
+  }
+}
 
 const COLECCION = 'productos';
 

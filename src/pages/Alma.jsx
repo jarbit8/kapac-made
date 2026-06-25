@@ -1,66 +1,65 @@
 import React from 'react';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import paisajeVideo from '../assets/videos/paisaje.mp4';
-import coser1 from '../assets/images/coser1.png';
-import coser2 from '../assets/images/coser2.png';
+import { useIdioma } from '../context/LanguageContext';
 import '../styles/Alma.css';
 
 export default function Alma() {
+  const { idioma } = useIdioma();
+  const es = idioma === 'es';
+
   return (
     <>
       <Header />
       <main className="alma-page">
+        <div className="alma-wrap">
 
-        {/* Hero video paisaje */}
-        <div className="alma-hero">
-          <video src={paisajeVideo} autoPlay loop muted playsInline className="alma-video" />
-          <h1>El alma de Kapac Made</h1>
-          <p className="alma-subtitulo">Mochilas para explorar sin límites</p>
-        </div>
+          <p className="alma-eyebrow">Kapac Made · Arequipa, {es ? 'Perú' : 'Peru'}</p>
 
-        {/* Video Facebook */}
-        <div className="alma-section">
-          <h2>Así nacen nuestras mochilas</h2>
-          <div className="alma-fb-video">
-            <iframe
-              src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F2062139780577196&show_text=false&appId"
-              scrolling="no"
-              frameBorder="0"
-              allowFullScreen
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              title="Kapac Made - Proceso"
-            />
+          <h1 className="alma-manifiesto">
+            {es
+              ? 'Mochilas hechas a mano para explorar sin límites.'
+              : 'Handmade backpacks built to explore without limits.'}
+          </h1>
+
+          <p className="alma-intro">
+            {es
+              ? 'Kapac Made nace de los Andes: un laboratorio de diseño donde cada mochila se cose una a una, con identidad propia. Creemos en el trabajo local, en los materiales que duran y en acompañarte en cada camino.'
+              : 'Kapac Made is born from the Andes: a design lab where each backpack is sewn one by one, with its own identity. We believe in local craft, materials that last, and gear that follows you on every path.'}
+          </p>
+
+          <div className="alma-bloques">
+            <section className="alma-bloque">
+              <h2>{es ? '01 — Origen' : '01 — Origin'}</h2>
+              <p>
+                {es
+                  ? 'Nacimos en Arequipa, a los pies del Misti. Cada diseño se inspira en los paisajes andinos y la riqueza cultural de nuestra tierra.'
+                  : 'We were born in Arequipa, at the foot of the Misti. Every design draws from the Andean landscapes and the cultural richness of our land.'}
+              </p>
+            </section>
+
+            <section className="alma-bloque">
+              <h2>{es ? '02 — Artesanía' : '02 — Craft'}</h2>
+              <p>
+                {es
+                  ? 'Cada mochila es fabricada a mano con materiales de alta calidad y técnicas de serigrafía únicas. Sin fast fashion, sin atajos.'
+                  : 'Each backpack is handcrafted with high-quality materials and unique screen-printing techniques. No fast fashion, no shortcuts.'}
+              </p>
+            </section>
+
+            <section className="alma-bloque">
+              <h2>{es ? '03 — Diseño' : '03 — Design'}</h2>
+              <p>
+                {es
+                  ? 'Nuestras ilustraciones las crean artistas locales que plasman la esencia de los Andes. Cada mochila cuenta una historia; ninguna es igual a otra.'
+                  : 'Our illustrations are made by local artists who capture the essence of the Andes. Every backpack tells a story; no two are alike.'}
+              </p>
+            </section>
           </div>
+
+          <p className="alma-cierre">{es ? 'Explorar sin límites.' : 'Explore without limits.'}</p>
+
         </div>
-
-        {/* Fotos del proceso */}
-        <div className="alma-section">
-          <h2>El proceso</h2>
-          <div className="alma-fotos-grid">
-            <img src={coser1} alt="Proceso de costura 1" />
-            <img src={coser2} alt="Proceso de costura 2" />
-          </div>
-        </div>
-
-        {/* Historia */}
-        <div className="alma-content">
-          <section className="alma-section">
-            <h2>Nuestra historia</h2>
-            <p>Kapac Made nació en Arequipa, Perú, con una visión simple: crear mochilas que sean tan únicas como las personas que las usan. Inspirados por los paisajes andinos y la riqueza cultural de nuestra tierra, diseñamos cada producto con identidad propia.</p>
-          </section>
-
-          <section className="alma-section">
-            <h2>Hecho en Arequipa</h2>
-            <p>Cada mochila es fabricada artesanalmente en Arequipa, usando materiales de alta calidad y técnicas de serigrafía únicas. Creemos en el trabajo local y en apoyar a nuestra comunidad.</p>
-          </section>
-
-          <section className="alma-section">
-            <h2>Diseño que destaca</h2>
-            <p>Nuestras ilustraciones son creadas por artistas locales que plasman la esencia de los Andes en cada pieza. Cada mochila cuenta una historia, cada diseño es un reflejo de nuestra cultura.</p>
-          </section>
-        </div>
-
       </main>
       <Footer />
     </>

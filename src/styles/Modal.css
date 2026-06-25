@@ -1,0 +1,118 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.2s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 18px;
+  max-width: 420px;
+  width: 100%;
+  padding: 36px 32px 28px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  animation: modalSlideUp 0.25s ease;
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-icono {
+  font-size: 42px;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.modal-titulo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  font-style: italic;
+  font-weight: 400;
+  color: #111;
+  margin: 0 0 10px;
+  line-height: 1.2;
+}
+
+.modal-mensaje {
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.7;
+  margin: 0 0 28px;
+  letter-spacing: -0.2px;
+}
+
+.modal-acciones {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modal-btn {
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s ease;
+  min-width: 130px;
+}
+
+.modal-btn-secundario {
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.modal-btn-secundario:hover {
+  background: #f5f5f5;
+  border-color: #aaa;
+  color: #111;
+}
+
+.modal-btn-primario {
+  background: #111;
+  color: #fff;
+}
+
+.modal-btn-primario:hover {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+.btn-peligro {
+  background: #c0392b;
+}
+
+.btn-peligro:hover {
+  background: #a53224;
+}
+
+@media (max-width: 480px) {
+  .modal-card { padding: 28px 22px 22px; }
+  .modal-titulo { font-size: 22px; }
+  .modal-btn { padding: 11px 20px; min-width: 110px; font-size: 12px; }
+  .modal-acciones { flex-direction: column-reverse; }
+  .modal-btn { width: 100%; }
+}

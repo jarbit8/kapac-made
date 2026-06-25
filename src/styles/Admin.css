@@ -210,6 +210,110 @@
   color: #5f0a87;
 }
 
+/* Resumen contadores */
+.admin-pedidos-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.admin-resumen-card {
+  border-radius: 10px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-resumen-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.admin-resumen-card.pendientes  { background: #fff8e6; border: 1px solid #f5d87a; }
+.admin-resumen-card.completados { background: #eaf7ee; border: 1px solid #7ecf96; }
+.admin-resumen-card.cancelados  { background: #fdf0f0; border: 1px solid #f0a0a0; }
+
+.admin-resumen-num {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  color: #111;
+}
+
+.admin-resumen-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-resumen-alerta {
+  font-size: 12px;
+  color: #5f0a87;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Filtros de pedidos */
+.admin-pedidos-filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.admin-filtro-btn {
+  padding: 8px 18px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.admin-filtro-btn:hover { border-color: #111; color: #111; }
+
+.admin-filtro-btn.activo {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  font-weight: 600;
+}
+
+/* Info de envío en card */
+.admin-pedido-envio {
+  font-size: 12px;
+  color: #666;
+  background: #f8f8f8;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.admin-pedido-codigo-yape {
+  font-size: 14px;
+  color: #5f0a87;
+  background: #f5f0fa;
+  border: 1px solid #d6c4ec;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.admin-pedido-codigo-yape strong {
+  font-size: 18px;
+  letter-spacing: 3px;
+}
+
 .admin-pedido-card {
   border: 1px solid #e0e0e0;
   border-radius: 10px;
@@ -295,3 +399,423 @@
   .admin-card { flex-wrap: wrap; }
   .admin-pedido-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
 }
+
+/* ── Visitas / estadísticas ── */
+.admin-visitas {
+  padding: 10px 0;
+}
+
+.admin-tabla-stats {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.stat-row:last-child { border-bottom: none; }
+
+.stat-fecha {
+  flex: 0 0 130px;
+  font-size: 14px;
+  color: #555;
+  font-family: 'DM Sans', monospace, sans-serif;
+}
+
+.stat-bar-wrap {
+  flex: 1;
+  background: #f0f0f0;
+  border-radius: 10px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.stat-bar {
+  height: 100%;
+  background: #2196f3;
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+.stat-num {
+  flex: 0 0 50px;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.admin-contadores {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 1100px) {
+  .admin-contadores { grid-template-columns: repeat(3, 1fr); }
+}
+
+.contador-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  transition: transform 0.15s;
+}
+
+.contador-card:hover { transform: translateY(-2px); }
+
+.contador-num {
+  font-size: 38px;
+  font-weight: 800;
+  color: #111;
+  line-height: 1;
+}
+
+.contador-label {
+  font-size: 12px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .admin-contadores { grid-template-columns: 1fr; }
+  .stat-fecha { flex: 0 0 100px; font-size: 12px; }
+}
+
+/* ── Lista de visitas detallada ── */
+.admin-visitas-lista {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.visita-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f3f3f3;
+  transition: background 0.15s;
+}
+
+.visita-row:last-child { border-bottom: none; }
+.visita-row:hover { background: #fafafa; }
+
+.visita-row.visita-admin {
+  background: #fff8e6;
+}
+
+.visita-row.visita-admin:hover {
+  background: #fff3d6;
+}
+
+.visita-avatar {
+  font-size: 26px;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 50%;
+}
+
+.visita-row.visita-admin .visita-avatar {
+  background: #ffe28a;
+}
+
+/* ── Bandera del país (nueva, más limpio) ── */
+.visita-bandera {
+  font-size: 28px;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.visita-pagina {
+  display: inline-block;
+  background: #f3f0ff;
+  color: #5f0a87;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+
+.visita-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.visita-quien {
+  font-size: 15px;
+  color: #111;
+  margin-bottom: 3px;
+}
+
+.visita-meta {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.4;
+}
+
+.visita-ruta {
+  flex-shrink: 0;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-end;
+}
+
+.visita-ruta code {
+  font-size: 13px;
+  color: #5f0a87;
+  background: #f5f0fa;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: 'DM Sans', monospace, sans-serif;
+}
+
+.visita-fecha {
+  font-size: 11px;
+  color: #aaa;
+}
+
+@media (max-width: 768px) {
+  .visita-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .visita-ruta { align-items: flex-start; text-align: left; flex-direction: row; gap: 10px; align-items: center; }
+}
+
+/* ── Tipografía del panel admin ── */
+.admin-page { padding-top: 90px; }
+
+.admin-page h1 {
+  font-family: var(--font-display) !important;
+  font-size: 38px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.admin-sub {
+  font-size: 15px !important;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+
+.admin-msg {
+  font-size: 14.5px !important;
+  padding: 14px 18px;
+}
+
+.admin-form h2,
+.admin-lista-titulo {
+  font-family: var(--font-display) !important;
+  font-size: 24px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em;
+  margin-bottom: 22px;
+}
+
+.admin-form label {
+  font-size: 13px !important;
+  color: var(--ink-soft);
+  gap: 6px;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+  padding: 12px 14px !important;
+  font-size: 14.5px !important;
+}
+
+.admin-check { font-size: 14px !important; }
+
+.admin-acciones button {
+  padding: 13px 30px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.admin-card-info strong { font-size: 16px !important; }
+.admin-card-info span { font-size: 13.5px !important; }
+
+.admin-card-btns button {
+  padding: 10px 18px !important;
+  font-size: 13px !important;
+}
+
+.admin-pestanas button {
+  font-size: 14px !important;
+  padding: 12px 24px !important;
+}
+
+.admin-resumen-num { font-size: 34px !important; }
+.admin-resumen-label { font-size: 13px !important; }
+.admin-resumen-alerta { font-size: 13px !important; }
+
+.admin-filtro-btn {
+  padding: 10px 22px !important;
+  font-size: 13px !important;
+}
+
+.admin-pedido-id { font-size: 14.5px !important; }
+.admin-pedido-email { font-size: 13.5px !important; }
+.admin-pedido-estado { font-size: 12px !important; padding: 5px 14px !important; }
+.admin-pedido-fecha { font-size: 13px !important; }
+.admin-pedido-items { font-size: 13.5px !important; gap: 5px; }
+.admin-pedido-items li { font-size: 13.5px !important; }
+.admin-pedido-envio { font-size: 13.5px !important; padding: 10px 14px !important; }
+.admin-pedido-codigo-yape { font-size: 18px !important; padding: 10px 14px !important; }
+.admin-pedido-codigo-yape strong { font-size: 22px !important; }
+.admin-pedido-footer strong { font-size: 22px !important; }
+.admin-pedido-select { font-size: 16px !important; padding: 8px 14px !important; }
+
+.contador-num { font-size: 44px !important; }
+.contador-label { font-size: 14px !important; }
+
+.stat-fecha { font-size: 17px !important; flex-basis: 150px; }
+.stat-num { font-size: 18px !important; }
+
+.visita-quien { font-size: 18px !important; }
+.visita-meta { font-size: 14px !important; }
+.visita-ruta code { font-size: 15px !important; }
+.visita-fecha { font-size: 13px !important; }
+
+/* ══════════════════════════════════════════════════════════
+   ULTIMATUM: admin legible (fondo claro) + pestaña Reseñas
+   ══════════════════════════════════════════════════════════ */
+.admin-page {
+  background: #f7f5f1 !important;
+  min-height: 100vh;
+}
+.admin-page, .admin-page * { color-scheme: light; }
+.admin-page h1, .admin-page h2, .admin-page h3,
+.admin-page p, .admin-page label, .admin-page span:not(.admin-badge):not(.admin-pedido-estado) {
+  color: #1d1b15;
+}
+
+.admin-vacio { color: #888 !important; padding: 28px 0; }
+
+.admin-resenas-grupo { margin-bottom: 36px; }
+.admin-resenas-titulo {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--clay) !important;
+  margin: 24px 0 14px;
+}
+
+.admin-resena {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  background: #fff;
+  border: 1px solid #e8e4dc;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+.admin-resena.pendiente { border-left: 4px solid var(--clay); }
+
+.admin-resena-info { flex: 1; }
+.admin-resena-info strong { font-size: 14px !important; color: #1d1b15 !important; display: block; margin-bottom: 2px; }
+.admin-resena-prod { font-size: 12px !important; color: #999 !important; display: block; margin-bottom: 8px; }
+.admin-resena-info p { font-size: 13.5px !important; color: #444 !important; margin: 0; line-height: 1.55; }
+
+.admin-resena-btns { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.admin-resena-btns button {
+  padding: 8px 16px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 7px;
+  cursor: pointer;
+  border: none;
+}
+.btn-aprobar { background: #2d5a3d !important; color: #fff !important; }
+.btn-aprobar:hover { background: #1a3a26 !important; }
+.btn-borrar { background: #f0e2da !important; color: var(--clay) !important; }
+.btn-borrar:hover { background: var(--clay) !important; color: #fff !important; }
+
+/* ── Subida de fotos (control reutilizable) ── */
+.subir-foto { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.subir-foto-prev {
+  width: 100%; max-width: 220px; aspect-ratio: 4/5; object-fit: cover;
+  border-radius: 8px; border: 1px solid #e2e2e2; background: #f3f3f3; display: block;
+}
+.subir-foto-vacio {
+  width: 100%; max-width: 220px; aspect-ratio: 4/5; border-radius: 8px;
+  border: 1px dashed #ccc; background: #fafafa; color: #999;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+}
+.subir-foto-btn {
+  display: inline-block; cursor: pointer; background: var(--clay); color: #fff;
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  transition: background 0.15s;
+}
+.subir-foto-btn:hover { background: #8a3d1e; }
+.subir-foto-err { color: #c0392b; font-size: 12px; }
+
+/* ── Pestaña Fotos ── */
+.admin-fotos-intro { color: #666; font-size: 14px; margin-bottom: 18px; }
+.admin-fotos-titulo {
+  font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: #111; margin: 28px 0 14px; border-bottom: 1px solid #eee; padding-bottom: 8px;
+}
+.admin-fotos-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px; align-items: start;
+}
+.admin-foto-card {
+  display: flex; flex-direction: column; gap: 8px;
+  background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 14px;
+}
+.admin-foto-input {
+  width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px;
+  font-size: 13px; font-family: inherit; resize: vertical;
+}
+.admin-foto-quitar {
+  background: none; border: 1px solid #e0a0a0; color: #c0392b; border-radius: 6px;
+  padding: 6px 12px; font-size: 12px; cursor: pointer; align-self: flex-start;
+}
+.admin-foto-quitar:hover { background: #fdf0f0; }
+.admin-foto-agregar {
+  border: 1px dashed #bbb; background: #fafafa; color: #555; border-radius: 10px;
+  font-size: 14px; cursor: pointer; min-height: 120px; padding: 14px;
+}
+.admin-foto-agregar:hover { background: #f0f0f0; color: #111; }
+.admin-fotos-guardar { margin-top: 26px; display: flex; align-items: center; gap: 16px; }
+.admin-fotos-guardar button {
+  background: var(--clay); color: #fff; border: none; border-radius: 8px;
+  padding: 12px 28px; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.admin-fotos-guardar button:disabled { opacity: 0.6; cursor: default; }
+.admin-fotos-msg { font-size: 14px; color: #155724; font-weight: 600; }

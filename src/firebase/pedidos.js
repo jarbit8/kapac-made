@@ -8,10 +8,11 @@ import { db } from './config';
 const COLECCION = 'pedidos';
 
 // Crear un pedido
-export async function crearPedido({ usuarioId, email, items, total, envio, metodoPago }) {
+export async function crearPedido({ usuarioId, email, nombre, items, total, envio, metodoPago, esInvitado }) {
   const pedido = {
     usuarioId,
     email,
+    nombre: nombre || '',
     items: items.map((i) => ({
       id: i.id,
       nombre: i.nombre,
@@ -19,9 +20,10 @@ export async function crearPedido({ usuarioId, email, items, total, envio, metod
       cantidad: i.cantidad,
     })),
     total,
-    estado: 'pendiente',
+    estado: 'procesando_pago',
     metodoPago: metodoPago || 'yape',
     envio: envio || null,       // null = recojo en tienda
+    esInvitado: !!esInvitado,   // true = compró sin cuenta
     fecha: serverTimestamp(),
   };
   const ref = await addDoc(collection(db, COLECCION), pedido);
@@ -53,6 +55,12 @@ export async function obtenerPedidosUsuario(usuarioId) {
 export async function actualizarEstadoPedido(pedidoId, nuevoEstado) {
   const ref = doc(db, COLECCION, pedidoId);
   await updateDoc(ref, { estado: nuevoEstado });
+}
+
+// Actualizar pedido con datos extra (ej. codigoAprobacion de Yape)
+export async function actualizarPedido(pedidoId, datos) {
+  const ref = doc(db, COLECCION, pedidoId);
+  await updateDoc(ref, datos);
 }
 
 // Obtener TODOS los pedidos (para el admin)

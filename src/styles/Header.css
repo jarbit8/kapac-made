@@ -1,83 +1,247 @@
+/* ── Header ── */
 .header {
-  background-color: #ffffff;
-  padding: 60px 0;
-  position: relative;
-  z-index: 100;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  height: 70px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  /* deja pasar los clicks al NavBar de abajo; solo el logo es clickeable */
+  pointer-events: none;
 }
 
+.header-container { pointer-events: none; }
+.header .logo { pointer-events: auto; }
+
+/* Sin fondo sólido — el NavBar maneja la barra al scrollear */
+.header-solido {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+
 .header-container {
-  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: relative;
-  padding: 0;
+  padding: 0 24px;
 }
 
-/* Menú hamburguesa - fijo mientras scrolleas */
+/* ── Hamburguesa ── */
 .menu-toggle {
   display: flex;
   flex-direction: column;
   cursor: pointer;
   background: none;
   border: none;
-  gap: 6px;
-  padding: 0 30px;
-  width: auto;
-  height: 30px;
-  align-items: center;
+  gap: 5px;
+  padding: 4px;
+  width: 32px;
+  align-items: flex-start;
   justify-content: center;
-  position: fixed;
-  top: 30px;
-  left: 0;
-  z-index: 200;
+  z-index: 210;
+  flex-shrink: 0;
 }
 
 .menu-toggle span {
-  width: 25px;
-  height: 2px;
-  background-color: #333;
+  width: 22px;
+  height: 1.5px;
+  background-color: #fff;
   transition: all 0.3s ease;
   display: block;
 }
 
-.menu-toggle.active span:nth-child(1) {
-  transform: rotate(45deg) translate(10px, 10px);
+.header-solido .menu-toggle span {
+  background-color: #111;
 }
 
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
 .menu-toggle.active span:nth-child(2) {
   opacity: 0;
 }
-
 .menu-toggle.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px);
+  transform: rotate(-45deg) translate(5px, -5px);
 }
 
-/* Menú sidebar */
+/* ── Logo centrado ── */
+.logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  height: 100%;
+}
+
+.logo-simbolo {
+  height: 26px;
+  max-height: 45%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+/* Cuando el header es solo logo transparente, logo siempre visible */
+.header-solido .logo-simbolo {
+  opacity: 1;
+}
+
+.logo-texto {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #fff;
+  transition: color 0.35s ease;
+  white-space: nowrap;
+}
+
+.header-solido .logo-texto {
+  color: #111;
+}
+
+/* ── Iconos derecha ── */
+.header-icons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: color 0.2s ease, transform 0.2s ease;
+  padding: 0;
+  position: relative;
+}
+
+.icon-btn:hover {
+  color: rgba(255,255,255,0.7);
+}
+
+.header-solido .icon-btn {
+  color: #111;
+}
+
+.header-solido .icon-btn:hover {
+  color: #555;
+}
+
+.icon-btn svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Badge carrito ── */
+.cart-btn {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  background: var(--clay);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── Punto sesión ── */
+.icon-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
+  background: #2ecc71;
+  border-radius: 50%;
+}
+
+/* ── Sidebar backdrop ── */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 198;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ── Sidebar menu ── */
 .sidebar-menu {
   position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
-  background-color: #fff;
-  border-right: 1px solid #e0e0e0;
-  padding: 80px 0 20px;
-  min-width: 220px;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
-  animation: slideIn 0.3s ease;
+  left: 16px;
+  top: 70px;
+  max-height: calc(100vh - 90px);
+  background: rgba(244, 239, 227, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(176, 83, 46, 0.15);
+  border-radius: 16px;
+  padding: 12px 0 12px;
+  width: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+  animation: slideInMenu 0.25s ease;
   z-index: 199;
   overflow-y: auto;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes slideInMenu {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.sidebar-seccion {
+  margin-bottom: 18px;
+}
+
+.sidebar-seccion:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar-titulo {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #888;
+  padding: 0 24px 6px;
+  margin: 0;
+}
+
+.sidebar-menu a,
+.sidebar-menu button {
+  padding: 8px 24px !important;
 }
 
 .sidebar-menu ul {
@@ -94,174 +258,299 @@
 .sidebar-menu button {
   display: block;
   width: 100%;
-  padding: 12px 30px;
-  color: #333;
+  padding: 11px 32px;
+  color: var(--clay, var(--clay));
   text-decoration: none;
   background: none;
   border: none;
-  font-size: 16px;
-  font-family: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background 0.15s, color 0.15s;
 }
 
 .sidebar-menu a:hover,
 .sidebar-menu button:hover {
-  background-color: #f5f5f5;
-  color: #000;
+  background: rgba(176, 83, 46, 0.08);
+  color: #8a3d1e;
 }
 
-/* Logo centrado */
-.logo {
-  position: absolute;
+/* ── Buscador overlay moderno ── */
+.buscador-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 220;
+  animation: fadeIn 0.2s ease;
+}
+
+.buscador-overlay {
+  position: fixed;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-
-/* Iconos header - fijos a la derecha */
-.header-icons {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  padding: 0 30px;
-  position: fixed;
-  top: 30px;
-  right: 0;
-  z-index: 200;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #333;
-  transition: color 0.2s ease, transform 0.2s ease;
-  padding: 0;
-}
-
-.icon-btn:hover {
-  color: #666;
-  transform: scale(1.1);
-}
-
-.icon-btn svg {
+  z-index: 221;
   width: 100%;
-  height: 100%;
+  max-width: 640px;
+  margin-top: 80px;
+  padding: 0 20px;
+  animation: slideDownSearch 0.25s ease;
 }
 
-/* Buscador del header */
-.header-buscador {
-  position: fixed;
-  top: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 210;
+@keyframes slideDownSearch {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.buscador-form {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
   background: #fff;
-  padding: 10px 14px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-  animation: slideIn 0.2s ease;
+  padding: 16px 20px;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
 }
 
-.header-buscador input {
-  width: 260px;
-  padding: 10px 14px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
+.buscador-icono {
+  width: 20px;
+  height: 20px;
+  color: #888;
+  flex-shrink: 0;
 }
 
-.header-buscador input:focus { border-color: #111; }
-
-.header-buscador button {
-  background: #111;
-  color: #fff;
+.buscador-form input {
+  flex: 1;
   border: none;
-  border-radius: 6px;
-  padding: 0 14px;
-  cursor: pointer;
-  font-size: 14px;
+  outline: none;
+  font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  color: #111;
+  background: transparent;
 }
 
-.header-buscador button[type="button"] {
-  background: #fff;
+.buscador-form input::placeholder {
   color: #999;
-  border: 1px solid #ddd;
 }
 
-@media (max-width: 768px) {
-  .header-buscador input { width: 60vw; }
+.buscador-cerrar {
+  background: #f0f0f0;
+  color: #555;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
 }
 
-/* Badge del carrito (número de items) */
-.cart-btn {
-  position: relative;
+.buscador-cerrar:hover { background: #e0e0e0; }
+
+/* Sugerencias */
+.buscador-sugerencias {
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  overflow: hidden;
+  padding: 8px 0;
 }
 
-.cart-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: #111;
-  color: #fff;
+.buscador-titulo {
   font-size: 11px;
   font-weight: 600;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #888;
+  padding: 10px 20px 6px;
+  margin: 0;
+}
+
+.buscador-vacio {
+  font-size: 14px;
+  color: #888;
+  padding: 16px 20px;
+  margin: 0;
+  text-align: center;
+}
+
+.buscador-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 5px;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.12s;
 }
 
-/* Punto verde cuando hay sesión */
-.icon-dot {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background: #2ecc71;
-  border-radius: 50%;
+.buscador-item:hover { background: #f8f8f8; }
+
+.buscador-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-/* Responsive */
+.buscador-item strong {
+  font-size: 14px;
+  color: #111;
+  font-weight: 600;
+}
+
+.buscador-item span {
+  font-size: 12px;
+  color: #888;
+}
+
+.item-flecha {
+  color: #ccc;
+  font-size: 16px;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.buscador-item:hover .item-flecha {
+  transform: translateX(4px);
+  color: #111;
+}
+
+.buscador-ver-todos {
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  padding: 14px 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: #111;
+  font-weight: 600;
+  text-align: left;
+  margin-top: 6px;
+  transition: background 0.12s;
+}
+
+.buscador-ver-todos:hover { background: #f8f8f8; }
+
+/* Link admin en menú */
+.link-admin {
+  color: var(--clay, var(--clay)) !important;
+  font-weight: 800;
+}
+
+
+/* Páginas con header sólido necesitan espacio arriba */
+.header-solido ~ *,
+.header-solido + * {
+  padding-top: 0;
+}
+
 @media (max-width: 768px) {
-  .header-container {
-    gap: 15px;
-  }
+  .header { height: 52px; }
+  .header-container { padding: 0 14px; }
+  .logo-simbolo { height: 18px; max-height: 45%; }
+  .sidebar-menu { width: 100%; min-width: unset; }
+  .header-icons { gap: 14px; }
+  .buscador-overlay { margin-top: 64px; padding: 0 12px; }
+  .buscador-form { padding: 14px 16px; }
+}
 
-  .logo {
-    margin: 0;
+@media (max-width: 768px) {
+  main, .admin-page, .catalogo-page, .carrito-page,
+  .pedidos-page, .checkout-page, .pago-page, .pago-tarjeta-page,
+  .confirmacion-page, .producto-page, .alma-page, .contacto-page,
+  .legal-page, .login-page, .perfil-page {
+    padding-top: 52px;
   }
+}
 
-  .logo-img {
-    height: 40px;
-  }
+/* ── Selector de idioma en sidebar ── */
+.sidebar-idiomas {
+  margin-top: 8px;
+  padding-top: 8px;
+}
 
-  .header-icons {
-    gap: 15px;
-  }
+.idioma-toggle {
+  display: flex;
+  gap: 18px;
+  padding: 4px 32px 0;
+}
 
-  .sidebar-menu {
-    width: 100%;
-  }
+.idioma-btn {
+  padding: 4px 0 !important;
+  background: transparent !important;
+  color: var(--clay, var(--clay)) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left !important;
+  display: inline-block !important;
+  opacity: 0.55;
+}
+
+.idioma-btn:hover {
+  background: transparent !important;
+  opacity: 0.85;
+}
+
+.idioma-btn.activo {
+  background: transparent !important;
+  color: var(--clay, var(--clay)) !important;
+  font-weight: 800 !important;
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ── Instagram en sidebar ── */
+.sidebar-redes {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.sidebar-instagram {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px !important;
+  color: var(--clay, var(--clay)) !important;
+  text-decoration: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px !important;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  transition: opacity 0.15s;
+}
+
+.sidebar-instagram:hover {
+  opacity: 0.7;
+  background: transparent !important;
+}
+
+.sidebar-instagram svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
 }

@@ -1,54 +1,123 @@
 .values {
-  padding: 80px 30px;
+  padding: 110px 60px;
   max-width: 1400px;
   margin: 0 auto;
-  text-align: center;
 }
 
-.values-isotipo {
-  margin-bottom: 60px;
+.values-top {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin-bottom: 70px;
 }
 
+.values-isotipo img,
 .values-isotipo video {
-  width: 120px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--line);
+}
+
+.values-heading {
+  font-size: clamp(30px, 3.4vw, 50px);
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+
+.values-heading span {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--clay);
+  display: block;
+  margin-bottom: 12px;
 }
 
 .values-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 60px;
+  gap: 0;
+  border-top: 1px solid var(--line);
 }
 
 .value-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
+  padding: 44px 44px 44px 0;
+  border-right: 1px solid var(--line);
 }
 
-.value-icon {
-  font-size: 28px;
-  color: #333;
+.value-item:last-child {
+  border-right: none;
+  padding-right: 0;
+  padding-left: 44px;
+}
+
+.value-item:nth-child(2) {
+  padding-left: 44px;
+}
+
+.value-num {
+  font-size: 44px;
+  font-weight: 500;
+  color: var(--green);
+  opacity: 0.28;
+  line-height: 1;
 }
 
 .value-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: #111;
-  letter-spacing: 0.5px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0;
 }
 
 .value-desc {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.7;
-  max-width: 260px;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  line-height: 1.75;
+  max-width: 300px;
+}
+
+@media (max-width: 900px) {
+  .values {
+    padding: 70px 30px;
+  }
+
+  .values-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .value-item,
+  .value-item:last-child,
+  .value-item:nth-child(2) {
+    padding: 32px 0;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding-left: 0;
+  }
+
+  .value-item:last-child {
+    border-bottom: none;
+  }
 }
 
 @media (max-width: 768px) {
-  .values-grid {
-    grid-template-columns: 1fr;
-    gap: 40px;
+  .values {
+    padding: 60px 20px;
+  }
+
+  .values-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
 }

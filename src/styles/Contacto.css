@@ -1,50 +1,71 @@
-.contacto-page {
-  max-width: 600px;
+/* ══════════════════════════════════════════════════════════
+   INFO — contacto + legal, tema oscuro / blanco pastel
+   ══════════════════════════════════════════════════════════ */
+
+.info-page {
+  background: #ffffff;
+  min-height: 100vh;
+  padding: 110px 40px 100px;
+}
+
+.info-wrap {
+  max-width: 720px;
   margin: 0 auto;
-  padding: 80px 30px;
-  text-align: center;
 }
 
-.contacto-page h1 {
-  font-size: 36px;
-  font-weight: 600;
-  color: #111;
-  margin-bottom: 60px;
-  letter-spacing: 1px;
+.info-eyebrow {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase;
+  color: var(--clay) !important;
+  margin-bottom: 14px;
 }
 
-.contacto-content {
+.info-titulo {
+  font-size: clamp(28px, 4vw, 44px) !important;
+  font-weight: 500 !important;
+  color: #1d1b15 !important;
+  letter-spacing: -0.5px !important;
+  margin: 0 0 56px;
+}
+
+.info-bloque {
+  padding: 28px 0;
+  border-top: 1px solid rgba(176, 83, 46, 0.22);
+}
+
+.info-bloque h2 {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+  color: var(--clay) !important;
+  margin: 0 0 16px;
+}
+
+.info-bloque p {
+  font-size: 14px !important;
+  line-height: 1.75 !important;
+  color: #4a463c !important;
+  margin: 0 0 12px;
+  font-weight: 400 !important;
+}
+.info-bloque p:last-child { margin-bottom: 0; }
+
+.info-redes {
   display: flex;
-  flex-direction: column;
-  gap: 30px;
+  gap: 22px;
+  flex-wrap: wrap;
 }
-
-.contacto-dato {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-
-.contacto-icon {
-  font-size: 28px;
-}
-
-.contacto-dato p,
-.contacto-dato a {
-  font-size: 22px;
-  color: #111;
+.info-redes a {
+  color: #1d1b15 !important;
   text-decoration: none;
-  font-weight: 400;
+  font-size: 14px !important;
   transition: color 0.2s;
 }
-
-.contacto-dato a:hover {
-  color: #555;
-}
+.info-redes a:hover { color: var(--clay) !important; }
 
 @media (max-width: 768px) {
-  .contacto-page { padding: 60px 20px; }
-  .contacto-dato p,
-  .contacto-dato a { font-size: 18px; }
+  .info-page { padding: 88px 24px 70px; }
 }

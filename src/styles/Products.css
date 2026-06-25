@@ -1,97 +1,165 @@
-.products {
+/* ══════════════════════════════════════════════════
+   PRODUCTS — grid 2×2 centrado, estilo japonés minimalista
+   ══════════════════════════════════════════════════ */
+
+.products-grid-section {
   width: 100%;
-  padding: 60px 0;
-  background: #ffffff;
+  background: var(--cream, #2b2b2b);
+  padding: 80px 40px 100px;
 }
 
-.products-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 80px;
+.products-cargando {
+  text-align: center;
+  color: #aaa;
+  letter-spacing: 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 4rem 0;
 }
 
-.product-row {
+/* Grid 2×2 centrado */
+.products-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  max-width: 880px;
+  margin: 0 auto;
+  border-top: 1px solid rgba(29,27,21,0.12);
+  border-left: 1px solid rgba(29,27,21,0.12);
 }
 
-/* Bloque izquierda: mochila + precio debajo */
-.product-left {
+/* Cada tarjeta */
+.pgrid-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  text-decoration: none;
+  color: inherit;
+  border-right: 1px solid rgba(29,27,21,0.12);
+  border-bottom: 1px solid rgba(29,27,21,0.12);
+  transition: background 0.2s ease;
+  background: var(--cream, #2b2b2b);
 }
 
-.product-left .mochila-img {
+.pgrid-card:hover {
+  background: rgba(176,83,46,0.03);
+}
+
+/* Imagen */
+.pgrid-img-wrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background: var(--paper, #fbf8f1);
+}
+
+.pgrid-img {
   width: 100%;
-  height: auto;
-  border-radius: 8px;
+  height: 100%;
+  object-fit: cover;
   display: block;
+  transition: transform 0.5s ease;
 }
 
-.product-info {
-  margin-top: 16px;
+.pgrid-card:hover .pgrid-img {
+  transform: scale(1.04);
 }
 
-.product-name {
-  font-size: 16px;
-  font-weight: 400;
-  color: #333;
-  margin-bottom: 6px;
+/* Badge descuento */
+.pgrid-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--clay);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
   letter-spacing: 0.5px;
 }
 
-.product-price {
-  font-size: 22px;
-  font-weight: 600;
-  color: #111;
-  letter-spacing: 1px;
+/* Info */
+.pgrid-info {
+  padding: 20px 24px 28px;
+  border-top: 1px solid rgba(29,27,21,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.product-add-btn {
-  margin-top: 14px;
-  padding: 11px 28px;
-  background: #111;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
+.pgrid-cat {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--clay);
+}
+
+.pgrid-nombre {
+  font-family: var(--font-display, serif);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ink, #1d1b15);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.pgrid-precios {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.pgrid-precio {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink, #1d1b15);
+}
+
+.pgrid-original {
   font-size: 13px;
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.pgrid-btn {
+  margin-top: 10px;
+  padding: 10px 0;
+  background: transparent;
+  border: 1px solid rgba(29,27,21,0.25);
+  color: var(--ink, #1d1b15);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.2s;
-}
-
-.product-add-btn:hover {
-  background: #333;
-}
-
-/* Bloque derecha: foto grande */
-.product-right .foto-img {
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
   width: 100%;
-  height: auto;
-  border-radius: 8px;
-  display: block;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .product-row {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
-
-  .product-right .foto-img {
-    height: 400px;
-  }
+.pgrid-btn:hover {
+  background: var(--ink, #1d1b15);
+  color: #fff;
+  border-color: var(--ink, #1d1b15);
 }
 
+/* ── Responsive ── */
 @media (max-width: 768px) {
-  .products-container {
-    gap: 50px;
-    padding: 0 20px;
+  .products-grid-section { padding: 60px 0 80px; }
+  .products-grid { max-width: 100%; }
+  .pgrid-nombre { font-size: 17px; }
+  .pgrid-info { padding: 16px 18px 22px; }
+}
+
+@media (max-width: 480px) {
+  .products-grid { grid-template-columns: 1fr; }
+  .products-grid {
+    border-left: none;
+  }
+  .pgrid-card {
+    border-right: none;
   }
 }

@@ -1,0 +1,35 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  max-width: 1400px;
+  width: 100%;
+  margin: 40px auto;
+  padding: 0 20px;
+  flex: 1;
+}
+
+.content h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.content p {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .content {
+    margin: 20px auto;
+  }
+
+  .content h1 {
+    font-size: 24px;
+  }
+}

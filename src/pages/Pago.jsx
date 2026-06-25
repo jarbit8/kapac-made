@@ -3,32 +3,78 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { actualizarEstadoPedido } from '../firebase/pedidos';
+import { useAuth } from '../context/AuthContext';
+import { useIdioma } from '../context/LanguageContext';
 import qrImg from '../assets/images/qr.jpeg';
-import btcImg from '../assets/images/btc.png';
 import '../styles/Pago.css';
 
-// Dirección BTC de Kapac Made
-const BTC_ADDRESS = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'; // ← reemplaza con la real
+const CREAR_ORDEN_URL = 'https://us-central1-kapac-made.cloudfunctions.net/crearOrdenCulqi';
 
 export default function Pago() {
   const { metodo, pedidoId } = useParams(); // /pago/:metodo/:pedidoId
   const navigate = useNavigate();
+  const { usuario } = useAuth();
+  const { t, idioma } = useIdioma();
   const [enviado, setEnviado] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const [total, setTotal] = useState(null);
+  const [codigoCIP, setCodigoCIP] = useState(null);
+  const [vencimientoCIP, setVencimientoCIP] = useState(null);
+  const [errorCIP, setErrorCIP] = useState('');
+  const [copiadoCIP, setCopiadoCIP] = useState(false);
 
   useEffect(() => {
     const t = sessionStorage.getItem('pago_total');
     if (t) setTotal(t);
   }, []);
 
-  const yaPague = async () => {
+  // Generar código PagoEfectivo automáticamente al entrar
+  useEffect(() => {
+    if (metodo !== 'efectivo' || !total || !usuario || codigoCIP) return;
+    const generar = async () => {
+      setCargando(true);
+      setErrorCIP('');
+      try {
+        const resp = await fetch(CREAR_ORDEN_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: Number(total) * 100, // céntimos
+            pedidoId,
+            email: usuario.email,
+            nombre: usuario.displayName || '',
+          }),
+        });
+        const data = await resp.json();
+        if (data.ok) {
+          setCodigoCIP(data.codigoPago);
+          setVencimientoCIP(data.expiration);
+        } else {
+          setErrorCIP(data.mensaje || 'No se pudo generar el código.');
+        }
+      } catch (e) {
+        console.error(e);
+        setErrorCIP('Error de conexión. Intenta de nuevo.');
+      }
+      setCargando(false);
+    };
+    generar();
+  }, [metodo, total, usuario, codigoCIP, pedidoId]);
+
+  const copiarCIP = () => {
+    if (!codigoCIP) return;
+    navigator.clipboard.writeText(codigoCIP);
+    setCopiadoCIP(true);
+    setTimeout(() => setCopiadoCIP(false), 2500);
+  };
+
+  const yaGenereCIP = async () => {
     setCargando(true);
     try {
-      await actualizarEstadoPedido(pedidoId, 'verificando');
-      setEnviado(true);
+      await actualizarEstadoPedido(pedidoId, 'verificando_pago');
       sessionStorage.removeItem('pago_total');
+      navigate(`/confirmacion/${pedidoId}`);
     } catch (e) {
       console.error(e);
       alert('Hubo un error. Intenta de nuevo.');
@@ -36,10 +82,17 @@ export default function Pago() {
     setCargando(false);
   };
 
-  const copiarBTC = () => {
-    navigator.clipboard.writeText(BTC_ADDRESS);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2500);
+  const yaPague = async () => {
+    setCargando(true);
+    try {
+      await actualizarEstadoPedido(pedidoId, 'verificando_pago');
+      sessionStorage.removeItem('pago_total');
+      navigate(`/confirmacion/${pedidoId}`);
+    } catch (e) {
+      console.error(e);
+      alert('Hubo un error. Intenta de nuevo.');
+    }
+    setCargando(false);
   };
 
   // Pantalla de confirmación (igual para ambos métodos)
@@ -50,14 +103,18 @@ export default function Pago() {
         <main className="pago-page">
           <div className="pago-confirmado">
             <div className="pago-check">✅</div>
-            <h1>¡Gracias por tu compra!</h1>
+            <h1>{t('conf.titulo')}</h1>
             <p>
-              Tu pago está siendo verificado por el equipo de Kapac Made.<br />
-              Te avisaremos cuando sea confirmado.
+              {idioma === 'en'
+                ? 'Your payment is being verified by the Kapac Made team.'
+                : 'Tu pago está siendo verificado por el equipo de Kapac Made.'}<br />
+              {idioma === 'en'
+                ? 'We\'ll notify you once it\'s confirmed.'
+                : 'Te avisaremos cuando sea confirmado.'}
             </p>
-            <p className="pago-pedido-id">Pedido: <strong>#{pedidoId.slice(0, 8)}</strong></p>
+            <p className="pago-pedido-id">{t('conf.pedido')} <strong>#{pedidoId.slice(0, 8)}</strong></p>
             <button onClick={() => navigate('/pedidos')} className="pago-btn-pedidos">
-              Ver mis pedidos
+              {t('conf.ver_pedidos')}
             </button>
           </div>
         </main>
@@ -72,23 +129,28 @@ export default function Pago() {
       <main className="pago-page">
         {/* Indicador de pasos */}
         <div className="checkout-steps">
-          <div className="step completado"><span className="step-num">✓</span><span className="step-label">Entrega</span></div>
+          <div className="step completado"><span className="step-num">✓</span><span className="step-label">{t('steps.entrega')}</span></div>
           <div className="step-linea completada" />
-          <div className="step completado"><span className="step-num">✓</span><span className="step-label">Pago</span></div>
+          <div className="step completado"><span className="step-num">✓</span><span className="step-label">{t('steps.pago')}</span></div>
           <div className="step-linea completada" />
-          <div className="step activo"><span className="step-num">3</span><span className="step-label">Confirmación</span></div>
+          <div className="step activo"><span className="step-num">3</span><span className="step-label">{t('steps.confirmacion')}</span></div>
         </div>
 
-        {/* ===== YAPE ===== */}
+        {/* ===== YAPE — solo QR (rápido, sin código) ===== */}
         {metodo === 'yape' && (
           <>
-            <h1>Pago con Yape</h1>
-            <p className="pago-sub">Escanea el código QR con tu app de Yape y transfiere el monto exacto.</p>
+            <h1>{t('pago.yape.titulo')}</h1>
+            <p className="pago-sub">{t('pago.yape.sub')}</p>
             <div className="pago-card">
-              {total && <div className="pago-monto">Monto: <strong className="yape-color">S/{total}.00</strong></div>}
+              {total && <div className="pago-monto">{t('pago.yape.monto')} <strong className="yape-color">S/{total}.00</strong></div>}
               <img src={qrImg} alt="QR Yape Kapac Made" className="pago-qr" />
               <div className="pago-pasos">
-                {['Abre tu app de Yape', 'Toca "Yapear" → "Código QR"', 'Escanea y confirma el monto', 'Presiona el botón de abajo'].map((p, i) => (
+                {[
+                  t('pago.yape.paso1'),
+                  t('pago.yape.paso2'),
+                  t('pago.yape.paso3'),
+                  t('pago.yape.paso4'),
+                ].map((p, i) => (
                   <div className="pago-paso" key={i}>
                     <span className="paso-num yape-bg">{i + 1}</span>
                     <span>{p}</span>
@@ -96,57 +158,74 @@ export default function Pago() {
                 ))}
               </div>
               <button className="pago-btn-pague yape-btn" onClick={yaPague} disabled={cargando}>
-                {cargando ? 'Enviando...' : '✅ Ya pagué con Yape'}
+                {cargando ? t('pago.yape.enviando') : t('pago.yape.boton')}
               </button>
-              <p className="pago-aviso">Nuestro equipo verificará tu pago y actualizará el estado de tu pedido.</p>
+              <p className="pago-aviso">{t('pago.yape.aviso')}</p>
             </div>
           </>
         )}
 
-        {/* ===== BITCOIN ===== */}
-        {metodo === 'btc' && (
+        {/* ===== PAGO EFECTIVO ===== */}
+        {metodo === 'efectivo' && (
           <>
-            <h1>Pago con Bitcoin</h1>
-            <p className="pago-sub">Envía el monto exacto en BTC a la dirección de abajo o escanea el QR.</p>
+            <h1>{t('pago.ef.titulo')}</h1>
+            <p className="pago-sub">{t('pago.ef.sub')}</p>
             <div className="pago-card">
-              {total && (
-                <div className="pago-monto">
-                  Monto: <strong className="btc-color">S/{total}.00</strong>
-                  <span className="btc-nota"> (el equivalente en BTC al momento de pagar)</span>
+              {total && <div className="pago-monto">{t('pago.yape.monto')} <strong className="efectivo-color">S/{total}.00</strong></div>}
+
+              {cargando && !codigoCIP && (
+                <p style={{ padding: '40px 0', color: '#666' }}>{t('pago.ef.generando')}</p>
+              )}
+
+              {errorCIP && (
+                <div className="codigo-cip-error">
+                  ⚠️ {errorCIP}
+                  <br />
+                  <small>{t('pago.ef.error_falla')}</small>
                 </div>
               )}
-              <img src={btcImg} alt="QR Bitcoin Kapac Made" className="pago-qr btc-qr" />
-              <div className="btc-address-box">
-                <p className="btc-address-label">Dirección BTC:</p>
-                <div className="btc-address-row">
-                  <code className="btc-address">{BTC_ADDRESS}</code>
-                  <button className="btc-copiar" onClick={copiarBTC}>
-                    {copiado ? '✓ Copiado' : 'Copiar'}
-                  </button>
-                </div>
-              </div>
-              <div className="pago-pasos">
-                {[
-                  'Abre tu wallet de Bitcoin (Trust Wallet, Muun, etc.)',
-                  'Escanea el QR o pega la dirección',
-                  'Ingresa el monto equivalente en BTC',
-                  'Confirma la transacción y presiona el botón de abajo',
-                ].map((p, i) => (
-                  <div className="pago-paso" key={i}>
-                    <span className="paso-num btc-bg">{i + 1}</span>
-                    <span>{p}</span>
+
+              {codigoCIP && (
+                <>
+                  <div className="codigo-cip-box">
+                    <p className="codigo-cip-label">{t('pago.ef.codigo_label')}</p>
+                    <div className="codigo-cip-numero">{codigoCIP}</div>
+                    <button className="codigo-cip-copiar" onClick={copiarCIP}>
+                      {copiadoCIP ? t('pago.ef.copiado') : t('pago.ef.copiar')}
+                    </button>
+                    {vencimientoCIP && (
+                      <p className="codigo-cip-vence">
+                        {t('pago.ef.vence')} {new Date(vencimientoCIP * 1000).toLocaleString(idioma === 'en' ? 'en-US' : 'es-PE', { dateStyle: 'medium', timeStyle: 'short' })}
+                      </p>
+                    )}
                   </div>
-                ))}
-              </div>
-              <button className="pago-btn-pague btc-btn" onClick={yaPague} disabled={cargando}>
-                {cargando ? 'Enviando...' : '₿ Ya pagué con Bitcoin'}
-              </button>
-              <p className="pago-aviso">Nuestro equipo verificará tu pago en blockchain y actualizará el estado del pedido.</p>
+
+                  <div className="pago-pasos">
+                    {[
+                      t('pago.ef.paso1'),
+                      t('pago.ef.paso2'),
+                      t('pago.ef.paso3'),
+                      t('pago.ef.paso4'),
+                      t('pago.ef.paso5'),
+                    ].map((p, i) => (
+                      <div className="pago-paso" key={i}>
+                        <span className="paso-num efectivo-bg">{i + 1}</span>
+                        <span>{p}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button className="pago-btn-pague efectivo-btn" onClick={yaGenereCIP} disabled={cargando}>
+                    {cargando ? t('pago.yape.enviando') : t('pago.ef.boton')}
+                  </button>
+                  <p className="pago-aviso">{t('pago.ef.aviso')}</p>
+                </>
+              )}
             </div>
           </>
         )}
 
-        <p className="pago-id-ref">Referencia: <code>#{pedidoId.slice(0, 8)}</code></p>
+        <p className="pago-id-ref">{t('pago.referencia')} <code>#{pedidoId.slice(0, 8)}</code></p>
       </main>
       <Footer />
     </>

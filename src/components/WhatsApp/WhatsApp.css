@@ -1,0 +1,47 @@
+.wa-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  background: var(--clay);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(176, 83, 46, 0.4);
+  z-index: 250;
+  transition: transform 0.3s ease, box-shadow 0.2s ease, opacity 0.3s ease, visibility 0.3s ease;
+  text-decoration: none;
+}
+
+.wa-float:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 22px rgba(176, 83, 46, 0.6);
+}
+
+/* Oculto hasta pasar el video (home) */
+.wa-oculto {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px) scale(0.8);
+  pointer-events: none;
+}
+
+.wa-float svg {
+  width: 22px;
+  height: 22px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .wa-float {
+    bottom: 18px;
+    right: 18px;
+    width: 40px;
+    height: 40px;
+  }
+  .wa-float svg { width: 20px; height: 20px; }
+}

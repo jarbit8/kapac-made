@@ -1,0 +1,468 @@
+/* ══════════════════════════════════════════════════════════════════
+   LIFESTYLE — editorial magazine andino
+   Fraunces (display) + Hanken Grotesk (body)
+   Paleta: cream #f4efe3, ink #1d1b15, terracota var(--clay), verde #1a3a26
+   ══════════════════════════════════════════════════════════════════ */
+
+.lifestyle {
+  background: #f4efe3;
+  overflow: hidden;
+}
+
+/* ── Entrada por scroll ── */
+.ls-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.75s cubic-bezier(0.25,0.46,0.45,0.94),
+              transform 0.75s cubic-bezier(0.25,0.46,0.45,0.94);
+  transition-delay: var(--delay, 0s);
+}
+.ls-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Eyebrow compartido ── */
+.ls-eyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--clay);
+  margin-bottom: 18px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   01 — HERO
+   ══════════════════════════════════════════════════════════════════ */
+.ls-hero {
+  position: relative;
+  height: 92vh;
+  min-height: 580px;
+  max-height: 900px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.ls-hero-img-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.ls-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+  transition: transform 8s ease-out;
+}
+
+.ls-hero:hover .ls-hero-img { transform: scale(1.04); }
+
+.ls-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10,8,4,0.72) 0%,
+    rgba(10,8,4,0.18) 55%,
+    rgba(10,8,4,0.0) 100%
+  );
+}
+
+.ls-hero-text {
+  position: relative;
+  z-index: 2;
+  padding: 0 72px 72px;
+  color: #fff;
+  max-width: 560px;
+}
+
+.ls-hero-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(56px, 9vw, 110px);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin: 0 0 24px;
+  color: #fff;
+}
+
+.ls-hero-title em {
+  font-style: italic;
+  color: #d4896a;
+}
+
+.ls-hero-sub {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.3px;
+}
+
+.ls-hero-number {
+  position: absolute;
+  top: 44px;
+  right: 48px;
+  font-family: 'Fraunces', serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  color: rgba(255,255,255,0.35);
+  writing-mode: vertical-rl;
+  z-index: 2;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   02 — GRID ASIMÉTRICO
+   ══════════════════════════════════════════════════════════════════ */
+.ls-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 0;
+  min-height: 620px;
+}
+
+/* Imagen grande */
+.ls-grid-big {
+  position: relative;
+  overflow: hidden;
+}
+
+.ls-grid-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s ease;
+}
+
+.ls-grid-big:hover .ls-grid-img { transform: scale(1.04); }
+
+.ls-grid-big-tag {
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+  background: var(--clay);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 8px 18px;
+}
+
+/* Columna derecha */
+.ls-grid-col {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(29,27,21,0.1);
+}
+
+.ls-card {
+  flex: 1;
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-bottom: 1px solid rgba(29,27,21,0.1);
+  background: #f4efe3;
+}
+
+.ls-card:last-child { border-bottom: none; }
+
+.ls-card-num {
+  font-family: 'Fraunces', serif;
+  font-size: 40px;
+  font-weight: 500;
+  color: rgba(176,83,46,0.18);
+  line-height: 1;
+  margin-bottom: 18px;
+}
+
+.ls-card-title {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: #1d1b15;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  margin: 0 0 16px;
+}
+
+.ls-card-body {
+  font-size: 14px;
+  color: #6b6256;
+  line-height: 1.75;
+  max-width: 280px;
+  margin-bottom: 24px;
+}
+
+.ls-card-line {
+  width: 36px;
+  height: 2px;
+  background: var(--clay);
+}
+
+/* Card con imagen */
+.ls-card-img {
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.ls-card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s ease;
+}
+
+.ls-card-img:hover .ls-card-photo { transform: scale(1.05); }
+
+.ls-card-img-label {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(244,239,227,0.9);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #1d1b15;
+  padding: 6px 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   03 — PANORAMA
+   ══════════════════════════════════════════════════════════════════ */
+.ls-panorama {
+  position: relative;
+  height: 540px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.ls-panorama-img-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.ls-panorama-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  display: block;
+}
+
+.ls-panorama-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(26,10,4,0.78) 0%,
+    rgba(26,10,4,0.42) 50%,
+    rgba(26,10,4,0.10) 100%
+  );
+}
+
+.ls-panorama-content {
+  position: relative;
+  z-index: 2;
+  padding: 0 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  max-width: 640px;
+}
+
+.ls-panorama-quote {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(44px, 6vw, 76px);
+  font-weight: 500;
+  color: #fff;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.ls-panorama-quote em {
+  font-style: italic;
+  color: #d4896a;
+}
+
+.ls-panorama-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.ls-panorama-num {
+  font-family: 'Fraunces', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 4px;
+}
+
+.ls-panorama-copy {
+  font-size: 14px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   04 — VALORES
+   ══════════════════════════════════════════════════════════════════ */
+.ls-valores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgba(29,27,21,0.1);
+}
+
+.ls-valor {
+  padding: 60px 52px;
+  border-right: 1px solid rgba(29,27,21,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ls-valor:last-child { border-right: none; }
+
+.ls-valor-num {
+  font-family: 'Fraunces', serif;
+  font-size: 38px;
+  font-weight: 500;
+  color: rgba(176,83,46,0.2);
+  line-height: 1;
+}
+
+.ls-valor-tit {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #1d1b15;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.ls-valor-txt {
+  font-size: 14px;
+  color: #7a7065;
+  line-height: 1.7;
+  max-width: 260px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   05 — CTA FINAL
+   ══════════════════════════════════════════════════════════════════ */
+.ls-cta {
+  position: relative;
+  height: 520px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ls-cta-img-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.ls-cta-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 8s ease-out;
+}
+
+.ls-cta:hover .ls-cta-img { transform: scale(1.04); }
+
+.ls-cta-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 8, 4, 0.55);
+}
+
+.ls-cta-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.ls-cta-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(52px, 8vw, 96px);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin: 0;
+}
+
+.ls-cta-title em {
+  font-style: italic;
+  color: #d4896a;
+}
+
+.ls-cta-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 16px 44px;
+  border: 1px solid rgba(255,255,255,0.7);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.25s, color 0.25s;
+}
+
+.ls-cta-btn:hover {
+  background: #fff;
+  color: #1d1b15;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .ls-grid { grid-template-columns: 1fr; }
+  .ls-grid-big { height: 480px; }
+  .ls-grid-col { border-left: none; border-top: 1px solid rgba(29,27,21,0.1); }
+
+  .ls-valores { grid-template-columns: 1fr; }
+  .ls-valor { border-right: none; border-bottom: 1px solid rgba(29,27,21,0.1); padding: 44px 36px; }
+  .ls-valor:last-child { border-bottom: none; }
+}
+
+@media (max-width: 768px) {
+  .ls-hero-text { padding: 0 28px 56px; }
+  .ls-hero-number { display: none; }
+
+  .ls-panorama-content { padding: 0 32px; }
+  .ls-panorama-quote { font-size: 40px; }
+
+  .ls-card { padding: 36px 28px; }
+  .ls-card-title { font-size: 24px; }
+
+  .ls-cta-title { font-size: 44px; }
+  .ls-cta-btn { padding: 14px 32px; }
+}

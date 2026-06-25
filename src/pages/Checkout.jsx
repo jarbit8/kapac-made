@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import { useAuth } from '../context/AuthContext';
+import { useIdioma } from '../context/LanguageContext';
+import { obtenerPerfil } from '../firebase/perfil';
 import '../styles/Checkout.css';
 
 // Iconos SVG inline
@@ -23,26 +26,65 @@ const IconoTienda = () => (
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { usuario } = useAuth();
+  const { t, idioma } = useIdioma();
   const [modo, setModo] = useState(null); // 'envio' | 'recojo'
   const [form, setForm] = useState({
-    nombre: '', telefono: '', direccion: '', distrito: '', referencia: '',
+    nombre: '', telefono: '', direccion: '', distrito: '', referencia: '', email: '',
   });
   const [formRecojo, setFormRecojo] = useState({
     nombre: '', telefono: '',
   });
   const [error, setError] = useState('');
 
+  // Autocompletar con datos del perfil guardado
+  useEffect(() => {
+    if (!usuario) return;
+    const cargar = async () => {
+      const datos = await obtenerPerfil(usuario.uid);
+      if (datos) {
+        setForm({
+          nombre:    datos.nombre    || usuario.displayName || '',
+          telefono:  datos.telefono  || '',
+          direccion: datos.direccion || '',
+          distrito:  datos.distrito  || '',
+          referencia: datos.referencia || '',
+        });
+        setFormRecojo({
+          nombre:   datos.nombre   || usuario.displayName || '',
+          telefono: datos.telefono || '',
+        });
+      } else {
+        const nombre = usuario.displayName || '';
+        setForm(prev => ({ ...prev, nombre }));
+        setFormRecojo(prev => ({ ...prev, nombre }));
+      }
+    };
+    cargar();
+  }, [usuario]);
+
   const continuar = () => {
     setError('');
 
     if (!modo) {
-      setError('Por favor selecciona una opción de entrega.');
+      setError(idioma === 'en' ? 'Please select a delivery option.' : 'Por favor selecciona una opción de entrega.');
       return;
+    }
+
+    // Email obligatorio para invitados
+    if (!usuario) {
+      if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) {
+        setError(idioma === 'en' ? 'Please enter a valid email address.' : 'Por favor ingresa un correo válido.');
+        return;
+      }
+      sessionStorage.setItem('checkout_email', form.email);
+    } else {
+      sessionStorage.setItem('checkout_email', usuario.email);
     }
 
     if (modo === 'envio') {
       if (!form.nombre || !form.telefono || !form.direccion || !form.distrito) {
-        setError('Por favor completa todos los campos obligatorios (*).');
+        setError(idioma === 'en' ? 'Please fill in all required fields (*).' : 'Por favor completa todos los campos obligatorios (*).');
         return;
       }
       sessionStorage.setItem('checkout_envio', JSON.stringify({
@@ -55,14 +97,14 @@ export default function Checkout() {
       }));
     } else {
       if (!formRecojo.nombre || !formRecojo.telefono) {
-        setError('Por favor completa tu nombre y teléfono.');
+        setError(idioma === 'en' ? 'Please enter your name and phone number.' : 'Por favor completa tu nombre y teléfono.');
         return;
       }
       sessionStorage.setItem('checkout_envio', JSON.stringify({
         tipo: 'recojo',
         nombre: formRecojo.nombre,
         telefono: formRecojo.telefono,
-        direccion: 'Casa de Sergio — Arequipa',
+        direccion: 'Casa de parce — Arequipa',
       }));
     }
 
@@ -77,21 +119,44 @@ export default function Checkout() {
         <div className="checkout-steps">
           <div className="step activo">
             <span className="step-num">1</span>
-            <span className="step-label">Entrega</span>
+            <span className="step-label">{t('steps.entrega')}</span>
           </div>
           <div className="step-linea" />
           <div className="step">
             <span className="step-num">2</span>
-            <span className="step-label">Pago</span>
+            <span className="step-label">{t('steps.pago')}</span>
           </div>
           <div className="step-linea" />
           <div className="step">
             <span className="step-num">3</span>
-            <span className="step-label">Confirmación</span>
+            <span className="step-label">{t('steps.confirmacion')}</span>
           </div>
         </div>
 
-        <h1>¿Cómo quieres recibir tu pedido?</h1>
+        <h1>{t('checkout.tipo_envio')}</h1>
+
+        {/* Email para invitados */}
+        {!usuario && (
+          <div className="checkout-form" style={{ marginBottom: '12px' }}>
+            <h2>{idioma === 'en' ? 'Your email' : 'Tu correo'}</h2>
+            <div className="checkout-grid">
+              <label className="full">
+                Email <span className="req">*</span>
+                <input
+                  type="email"
+                  placeholder="tucorreo@email.com"
+                  value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })}
+                />
+              </label>
+            </div>
+            <p style={{ fontSize: '12px', color: '#888', marginTop: '6px' }}>
+              {idioma === 'en'
+                ? 'We\'ll send your order confirmation here.'
+                : 'Te enviaremos la confirmación de tu pedido aquí.'}
+            </p>
+          </div>
+        )}
 
         {/* Tarjetas de opción */}
         <div className="checkout-opciones">
@@ -101,8 +166,8 @@ export default function Checkout() {
           >
             <div className="opcion-icono"><IconoCasa /></div>
             <div className="opcion-info">
-              <strong>Envío a domicilio</strong>
-              <span>Te lo llevamos donde tú estés</span>
+              <strong>{t('checkout.envio_dom')}</strong>
+              <span>{t('checkout.envio_dom_sub')}</span>
             </div>
             <div className={`opcion-radio ${modo === 'envio' ? 'on' : ''}`} />
           </button>
@@ -113,8 +178,8 @@ export default function Checkout() {
           >
             <div className="opcion-icono"><IconoTienda /></div>
             <div className="opcion-info">
-              <strong>Recojo en tienda</strong>
-              <span>Casa de Sergio · Arequipa</span>
+              <strong>{t('checkout.recojo')}</strong>
+              <span>{t('checkout.recojo_sub')}</span>
             </div>
             <div className={`opcion-radio ${modo === 'recojo' ? 'on' : ''}`} />
           </button>
@@ -123,18 +188,17 @@ export default function Checkout() {
         {/* Formulario envío a domicilio */}
         {modo === 'envio' && (
           <div className="checkout-form">
-            <h2>Datos de envío</h2>
+            <h2>{idioma === 'en' ? 'Shipping details' : 'Datos de envío'}</h2>
             <div className="checkout-grid">
               <label>
-                Nombre completo <span className="req">*</span>
+                {t('checkout.nombre')} <span className="req">*</span>
                 <input
-                  placeholder="Juan Quispe"
                   value={form.nombre}
                   onChange={e => setForm({ ...form, nombre: e.target.value })}
                 />
               </label>
               <label>
-                Teléfono / WhatsApp <span className="req">*</span>
+                {t('checkout.telefono')} <span className="req">*</span>
                 <input
                   placeholder="987 654 321"
                   value={form.telefono}
@@ -142,25 +206,22 @@ export default function Checkout() {
                 />
               </label>
               <label className="full">
-                Dirección completa <span className="req">*</span>
+                {t('checkout.direccion')} <span className="req">*</span>
                 <input
-                  placeholder="Calle Los Pinos 123, Urb. El Palomar"
                   value={form.direccion}
                   onChange={e => setForm({ ...form, direccion: e.target.value })}
                 />
               </label>
               <label>
-                Distrito <span className="req">*</span>
+                {t('checkout.distrito')} <span className="req">*</span>
                 <input
-                  placeholder="Miraflores, Arequipa..."
                   value={form.distrito}
                   onChange={e => setForm({ ...form, distrito: e.target.value })}
                 />
               </label>
               <label>
-                Referencia (opcional)
+                {t('checkout.referencia')}
                 <input
-                  placeholder="Frente al parque, casa azul..."
                   value={form.referencia}
                   onChange={e => setForm({ ...form, referencia: e.target.value })}
                 />
@@ -175,23 +236,26 @@ export default function Checkout() {
             <div className="recojo-info-box">
               <div className="recojo-pin">📍</div>
               <div>
-                <strong>Casa de Sergio</strong>
-                <p>Arequipa, Perú</p>
-                <p className="recojo-nota">Te contactaremos por WhatsApp para coordinar el horario de recojo.</p>
+                <strong>{t('checkout.recojo_sub')}</strong>
+                <p>Arequipa, {idioma === 'en' ? 'Peru' : 'Perú'}</p>
+                <p className="recojo-nota">
+                  {idioma === 'en'
+                    ? 'We\'ll contact you by WhatsApp to arrange a pickup time.'
+                    : 'Te contactaremos por WhatsApp para coordinar el horario de recojo.'}
+                </p>
               </div>
             </div>
-            <h2>Tus datos de contacto</h2>
+            <h2>{idioma === 'en' ? 'Your contact info' : 'Tus datos de contacto'}</h2>
             <div className="checkout-grid">
               <label>
-                Nombre completo <span className="req">*</span>
+                {t('checkout.nombre')} <span className="req">*</span>
                 <input
-                  placeholder="Juan Quispe"
                   value={formRecojo.nombre}
                   onChange={e => setFormRecojo({ ...formRecojo, nombre: e.target.value })}
                 />
               </label>
               <label>
-                Teléfono / WhatsApp <span className="req">*</span>
+                {t('checkout.telefono')} <span className="req">*</span>
                 <input
                   placeholder="987 654 321"
                   value={formRecojo.telefono}
@@ -205,7 +269,7 @@ export default function Checkout() {
         {error && <p className="checkout-error">{error}</p>}
 
         <button className="checkout-btn-continuar" onClick={continuar}>
-          Continuar al pago →
+          {t('checkout.continuar')} →
         </button>
       </main>
       <Footer />

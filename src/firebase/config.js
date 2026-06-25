@@ -1,5 +1,6 @@
 // Configuración de Firebase para Kapac Made
 import { initializeApp } from 'firebase/app';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
@@ -16,6 +17,19 @@ const firebaseConfig = {
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
+
+// App Check (anti-abuso). Solo se activa si hay una llave reCAPTCHA configurada;
+// si no, no hace nada y el sitio funciona igual.
+if (process.env.REACT_APP_RECAPTCHA_KEY) {
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(process.env.REACT_APP_RECAPTCHA_KEY),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (e) {
+    console.warn('App Check no se pudo inicializar:', e?.message);
+  }
+}
 
 // Servicios que usaremos
 export const db = getFirestore(app);          // Base de datos (productos, pedidos)

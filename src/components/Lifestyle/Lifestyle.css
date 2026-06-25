@@ -1,0 +1,127 @@
+/* ══════════════════════════════════════════════════
+   LIFESTYLE — minimalista japonés
+   ══════════════════════════════════════════════════ */
+
+.lm-section {
+  background: #ffffff;
+  padding: 72px 40px 88px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* ── Encabezado ── */
+.lm-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(176,83,46,0.25);
+  margin-bottom: 40px;
+}
+
+.lm-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--clay);
+}
+
+.lm-frase {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 400;
+  font-style: italic;
+  color: #6b6256;
+  margin: 0;
+  letter-spacing: 0;
+}
+
+/* ── Grid 2×2 ── */
+.lm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 56px 44px;
+}
+
+.lm-item {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+/* Imagen */
+.lm-img-wrap {
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #e8e2d8;
+}
+
+.lm-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s ease;
+  filter: saturate(0.88);
+}
+
+.lm-item:hover .lm-img {
+  transform: scale(1.03);
+  filter: saturate(1);
+}
+
+/* Caption */
+.lm-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px 2px 0;
+}
+
+.lm-caption-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #1d1b15;
+}
+
+.lm-caption-desc {
+  color: #6b6256;          /* gris oscuro, legible sobre el fondo crema */
+  line-height: 1.65;
+  margin: 0;
+  max-width: 340px;
+}
+
+/* ── Footer ── */
+.lm-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 36px;
+  margin-top: 40px;
+}
+
+.lm-footer .lm-footer-txt {
+  font-size: 16px !important;
+  color: var(--clay);
+  letter-spacing: 2px;
+  text-transform: lowercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s, letter-spacing 0.3s;
+}
+.lm-footer .lm-footer-txt:hover { opacity: 0.65; letter-spacing: 4px; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .lm-section { padding: 52px 20px 72px; }
+  .lm-header { flex-direction: column; gap: 8px; }
+  .lm-grid { gap: 1px; }
+  .lm-caption { flex-direction: column; gap: 4px; }
+}
+
+@media (max-width: 480px) {
+  .lm-grid { grid-template-columns: 1fr; }
+}

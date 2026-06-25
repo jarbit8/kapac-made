@@ -1,0 +1,188 @@
+/* Barra de anuncio — envío gratis */
+.navbar-anuncio {
+  background: var(--clay);
+  color: #fff;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+}
+
+/* NavBar sticky — inline en desktop, hamburguesa en móvil */
+.navbar-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 290;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: #ffffff;
+  border: none;
+}
+
+/* ── Hamburguesa (oculta en desktop) ── */
+.navbar-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 26px;
+  height: 26px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 292;
+}
+.navbar-burger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--clay);
+  transition: all 0.25s ease;
+}
+.navbar-burger.abierto span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.navbar-burger.abierto span:nth-child(2) { opacity: 0; }
+.navbar-burger.abierto span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* ── Links izquierda ── */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.navbar-link {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--clay);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.navbar-link:hover { opacity: 0.55; }
+.navbar-admin { font-size: 10px; opacity: 0.8; }
+
+/* idioma al lado de Contacto */
+.navbar-langs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+
+/* ── Derecha ── */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.navbar-lang {
+  background: none;
+  border: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--clay);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.55;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+.navbar-lang.activo { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+.navbar-lang:hover { opacity: 0.85; }
+.navbar-lang-sep { font-size: 10px; color: rgba(176, 83, 46, 0.35); font-weight: 300; }
+
+.navbar-ig {
+  color: var(--clay);
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.navbar-ig svg { width: 16px; height: 16px; }
+.navbar-ig:hover { opacity: 0.55; }
+
+.navbar-cart {
+  color: var(--clay) !important;
+  width: 18px;
+  height: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  position: relative;
+}
+.navbar-cart svg { width: 18px; height: 18px; }
+.navbar-cart:hover { opacity: 0.55; }
+
+.navbar-backdrop { display: none; }
+
+/* ══════════════════════════════════════════════
+   MÓVIL — hamburguesa + dropdown
+   ══════════════════════════════════════════════ */
+@media (max-width: 820px) {
+  .navbar-sticky { padding: 0 16px; }
+
+  /* mostrar hamburguesa */
+  .navbar-burger { display: flex; }
+
+  /* el bloque de links se vuelve un cuadrito compacto (abraza las letras) */
+  .navbar-left {
+    position: fixed;
+    top: 60px;
+    left: 14px;
+    width: max-content;
+    max-width: 70vw;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 13px;
+    background: #ffffff;
+    padding: 16px 20px;
+    border: 1px solid rgba(176, 83, 46, 0.25);
+    border-radius: 14px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+    z-index: 291;
+  }
+  .navbar-left.abierto {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .navbar-link { font-size: 13px; letter-spacing: 1.5px; }
+  .navbar-admin { font-size: 12px; }
+
+  /* idioma dentro del menú: separado abajo con una línea */
+  .navbar-langs {
+    margin-left: 0;
+    padding-top: 12px;
+    margin-top: 2px;
+    border-top: 1px solid rgba(176, 83, 46, 0.18);
+    width: 100%;
+  }
+  .navbar-langs .navbar-lang { font-size: 12px; }
+
+  /* fondo invisible solo para cerrar al tocar afuera (no oscurece) */
+  .navbar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    z-index: 290;
+  }
+}

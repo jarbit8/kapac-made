@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { useAuth } from '../context/AuthContext';
+import { useIdioma } from '../context/LanguageContext';
 import { obtenerPedidosUsuario } from '../firebase/pedidos';
+import Cargando from '../components/Cargando/Cargando';
 import '../styles/Pedidos.css';
 
 export default function Pedidos() {
   const { usuario, cargando: cargandoAuth } = useAuth();
+  const { t, idioma } = useIdioma();
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -32,32 +35,42 @@ export default function Pedidos() {
   }, [usuario, cargandoAuth, navigate]);
 
   const formatoFecha = (ts) => {
-    if (!ts?.toDate) return 'Recién creado';
-    return ts.toDate().toLocaleDateString('es-PE', {
+    const locale = idioma === 'en' ? 'en-US' : 'es-PE';
+    if (!ts?.toDate) return idioma === 'en' ? 'Just created' : 'Recién creado';
+    return ts.toDate().toLocaleDateString(locale, {
       day: '2-digit', month: 'long', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
   };
 
   const estadoLabel = (e) => {
-    const mapa = {
-      pendiente: '🕐 Pendiente de pago',
-      verificando: '🔍 Verificando pago',
-      pagado: '✅ Pagado',
-      enviado: '📦 Enviado',
-      entregado: '🎉 Entregado',
-      cancelado: '❌ Cancelado',
+    const iconos = {
+      procesando_pago: '🔄', verificando_pago: '🔍',
+      pendiente_envio: '📦', enviado: '🚚',
+      entregado: '🎉', cancelado: '❌',
+      pendiente: '🕐', verificando: '🔄', pagado: '📦',
     };
-    return mapa[e] || e;
+    const mapa = {
+      procesando_pago:  t('estado.procesando_pago'),
+      verificando_pago: t('estado.verificando_pago'),
+      pendiente_envio:  t('estado.pendiente_envio'),
+      enviado:          t('estado.enviado'),
+      entregado:        t('estado.entregado'),
+      cancelado:        t('estado.cancelado'),
+      pendiente:   t('estado.verificando_pago'),
+      verificando: t('estado.procesando_pago'),
+      pagado:      t('estado.pendiente_envio'),
+    };
+    return `${iconos[e] || ''} ${mapa[e] || e}`;
   };
 
   return (
     <>
       <Header />
       <main className="pedidos-page">
-        <h1>Mis pedidos</h1>
+        <h1>{t('pedidos.titulo')}</h1>
 
-        {cargando && <p style={{ color: '#666' }}>Cargando pedidos...</p>}
+        {cargando && <Cargando />}
 
         {!cargando && error && (
           <p style={{ color: 'crimson' }}>{error}</p>
@@ -65,15 +78,15 @@ export default function Pedidos() {
 
         {!cargando && !error && pedidos.length === 0 && (
           <div className="pedidos-vacio">
-            <p>Aún no tienes pedidos.</p>
-            <button onClick={() => navigate('/catalogo')}>Ver catálogo</button>
+            <p>{t('pedidos.vacio')}</p>
+            <button onClick={() => navigate('/catalogo')}>{t('pedidos.ver_tienda')}</button>
           </div>
         )}
 
         {!cargando && !error && pedidos.map((p) => (
           <div key={p.id} className="pedido-card">
             <div className="pedido-header">
-              <span className="pedido-id">Pedido #{p.id.slice(0, 8)}</span>
+              <span className="pedido-id">{t('pedidos.pedido')} #{p.id.slice(0, 8)}</span>
               <span className={`pedido-estado estado-${p.estado}`}>{estadoLabel(p.estado)}</span>
             </div>
             <p className="pedido-fecha">{formatoFecha(p.fecha)}</p>
@@ -84,7 +97,7 @@ export default function Pedidos() {
                 </li>
               ))}
             </ul>
-            <div className="pedido-total">Total: <strong>S/{p.total}.00</strong></div>
+            <div className="pedido-total">{t('pedidos.total')}: <strong>S/{p.total}.00</strong></div>
           </div>
         ))}
       </main>

@@ -1,56 +1,72 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../../styles/Products.css';
 import { obtenerProductos } from '../../firebase/productos';
 import { imagen } from '../../firebase/imagenesProductos';
 import { useCart } from '../../context/CartContext';
+import { useIdioma } from '../../context/LanguageContext';
+import { nombreProducto } from '../../i18n/producto';
 
 export default function Products() {
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const { agregar } = useCart();
+  const { t, idioma } = useIdioma();
 
   useEffect(() => {
     obtenerProductos()
       .then((data) => {
-        setProductos(data.filter(p => p.activo !== false));
+        setProductos(data.filter(p => p.activo !== false).slice(0, 4));
         setCargando(false);
       })
-      .catch((e) => {
-        console.error(e);
-        setCargando(false);
-      });
+      .catch(() => setCargando(false));
   }, []);
 
-  if (cargando) {
-    return (
-      <section className="products">
-        <div className="products-container">
-          <p style={{ color: '#666', textAlign: 'center' }}>Cargando productos...</p>
-        </div>
-      </section>
-    );
-  }
+  if (cargando) return (
+    <section className="products-grid-section">
+      <p className="products-cargando">{t('productos.cargando')}</p>
+    </section>
+  );
 
   return (
-    <section className="products">
-      <div className="products-container">
-        {productos.map((producto) => (
-          <div key={producto.id} className="product-row">
-            <div className="product-left">
-              <img src={imagen(producto.imagenMochila)} alt={producto.nombre} className="mochila-img" />
-              <div className="product-info">
-                <h3 className="product-name">{producto.nombre}</h3>
-                <p className="product-price">{producto.moneda}{producto.precio}.00</p>
-                <button className="product-add-btn" onClick={() => agregar(producto)}>
-                  Agregar al carrito
+    <section className="products-grid-section">
+      <div className="products-grid">
+        {productos.map((producto) => {
+          const descuento = producto.precioOriginal
+            ? Math.round((1 - producto.precio / producto.precioOriginal) * 100)
+            : null;
+
+          return (
+            <Link key={producto.id} to={`/producto/${producto.id}`} className="pgrid-card">
+              <div className="pgrid-img-wrap">
+                <img
+                  src={imagen(producto.imagenMochila)}
+                  alt={nombreProducto(producto, idioma)}
+                  className="pgrid-img"
+                />
+                {descuento && <span className="pgrid-badge">-{descuento}%</span>}
+              </div>
+              <div className="pgrid-info">
+                {producto.categoria && (
+                  <span className="pgrid-cat">{producto.categoria}</span>
+                )}
+                <h3 className="pgrid-nombre">{nombreProducto(producto, idioma)}</h3>
+                <div className="pgrid-precios">
+                  <span className="pgrid-precio">{producto.moneda}{producto.precio}.00</span>
+                  {producto.precioOriginal && (
+                    <span className="pgrid-original">{producto.moneda}{producto.precioOriginal}.00</span>
+                  )}
+                </div>
+                <button
+                  className="pgrid-btn"
+                  onClick={(e) => { e.preventDefault(); agregar(producto); }}
+                >
+                  {t('productos.agregar')}
                 </button>
               </div>
-            </div>
-            <div className="product-right">
-              <img src={imagen(producto.imagenContexto)} alt="Foto contexto" className="foto-img" />
-            </div>
-          </div>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

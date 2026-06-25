@@ -234,3 +234,133 @@
   .pago-qr { width: 180px; height: 180px; }
   .btc-address { font-size: 10px; }
 }
+
+/* ── Código de aprobación Yape ── */
+.codigo-yape-box {
+  margin: 24px 0 18px;
+  text-align: left;
+  background: #f5f0fa;
+  border: 1px solid #d6c4ec;
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.codigo-yape-label {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  color: #5f0a87;
+  margin-bottom: 10px;
+}
+
+.obligatorio {
+  color: #c0392b;
+}
+
+.codigo-yape-input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 28px !important;
+  letter-spacing: 8px;
+  text-align: center;
+  border: 2px solid #d6c4ec;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  outline: none;
+  font-weight: 700;
+  font-family: 'DM Sans', monospace, sans-serif !important;
+  transition: border-color 0.2s;
+}
+
+.codigo-yape-input:focus {
+  border-color: #5f0a87;
+}
+
+.codigo-yape-help {
+  font-size: 16px !important;
+  color: #777;
+  margin: 10px 0 0;
+  line-height: 1.4;
+}
+
+.codigo-yape-error {
+  font-size: 16px !important;
+  color: #c0392b;
+  margin: 8px 0 0;
+  font-weight: 600;
+}
+
+/* ── PagoEfectivo ── */
+.efectivo-color { color: #0033A0; }
+.efectivo-bg { background: #0033A0; color: #fff; }
+.efectivo-btn {
+  background: #0033A0 !important;
+  color: #fff !important;
+  border: none !important;
+}
+.efectivo-btn:hover { background: #002280 !important; }
+
+.codigo-cip-box {
+  margin: 28px auto 22px;
+  background: linear-gradient(135deg, #0033A0 0%, #1f4ec4 100%);
+  border-radius: 16px;
+  padding: 26px 22px;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(0, 51, 160, 0.25);
+}
+
+.codigo-cip-label {
+  font-size: 16px !important;
+  color: rgba(255,255,255,0.85) !important;
+  margin: 0 0 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.codigo-cip-numero {
+  font-family: 'DM Sans', monospace, sans-serif !important;
+  font-size: 38px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  letter-spacing: 6px;
+  margin: 10px 0 18px;
+  padding: 14px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 10px;
+  border: 2px dashed rgba(255,255,255,0.35);
+}
+
+.codigo-cip-copiar {
+  background: #E5007E !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 12px 28px;
+  border-radius: 24px;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.codigo-cip-copiar:hover {
+  background: #b8005e !important;
+  transform: translateY(-1px);
+}
+
+.codigo-cip-vence {
+  font-size: 14px !important;
+  color: rgba(255,255,255,0.8) !important;
+  margin: 14px 0 0;
+}
+
+.codigo-cip-error {
+  background: #fff3f3;
+  border: 1px solid #f5c2c7;
+  color: #842029;
+  padding: 16px 18px;
+  border-radius: 10px;
+  margin: 22px 0;
+  font-size: 16px !important;
+}

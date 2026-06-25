@@ -57,12 +57,16 @@
   text-transform: capitalize;
 }
 
+.estado-procesando_pago  { background: #fff3cd; color: #856404; }
+.estado-verificando_pago { background: #e8d5f5; color: #5f0a87; }
+.estado-pendiente_envio  { background: #d4edda; color: #155724; }
+.estado-enviado         { background: #cce5ff; color: #004085; }
+.estado-entregado       { background: #d1e7dd; color: #0f5132; }
+.estado-cancelado       { background: #f8d7da; color: #842029; }
+/* compatibilidad viejos estados */
 .estado-pendiente   { background: #fff3cd; color: #856404; }
-.estado-verificando { background: #e8d5f5; color: #5f0a87; }
-.estado-pagado    { background: #d4edda; color: #155724; }
-.estado-enviado   { background: #cce5ff; color: #004085; }
-.estado-entregado { background: #d1e7dd; color: #0f5132; }
-.estado-cancelado { background: #f8d7da; color: #842029; }
+.estado-verificando { background: #fff3cd; color: #856404; }
+.estado-pagado      { background: #d4edda; color: #155724; }
 
 .pedido-fecha {
   font-size: 13px;

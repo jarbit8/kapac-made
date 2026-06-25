@@ -1,20 +1,401 @@
+/* ════════════════════════════════════════════════════════════════
+   KAPAC MADE — Sistema de diseño
+   Dirección: editorial outdoor refinado / artesanal premium andino
+   Display:  Fraunces (serif con carácter, cálido y hecho a mano)
+   Cuerpo:   Hanken Grotesk (grotesca limpia y legible)
+   Fuentes cargadas vía <link> en public/index.html
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── OVERRIDE GLOBAL: grotesca limpia estilo Sealson en todo el sitio ──
+   (familia forzada; los tamaños los define cada componente) */
+*, *::before, *::after,
+h1, h2, h3, h4, h5, h6,
+p, span, a, li, ul, ol, div, label, small, strong, em, blockquote,
+button, input, textarea, select, [class*="kai-"], [class*="navbar"],
+[class*="product"], [class*="hero"], [class*="footer"], [class*="lm-"], [class*="ls-"] {
+  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif !important;
+  font-style: normal !important;
+}
+
+:root {
+  /* ── Tipografía (grotesca única, estilo Sealson) ── */
+  --font-display: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
+  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* ── Paleta andina premium ── */
+  --cream:      #ffffff;   /* fondo blanco */
+  --cream-deep: #f5f5f5;   /* secciones más profundas */
+  --paper:      #fff;      /* superficies / tarjetas */
+  --ink:        #111111;   /* texto negro */
+  --ink-soft:   #444444;   /* texto secundario */
+  --muted:      #8c8676;   /* etiquetas / terciario */
+  --green:      #1a3a26;   /* verde marca profundo */
+  --green-mid:  #2d5a3d;
+  --green-soft: #e6ece3;   /* verde tintado claro */
+  --clay:       #b0532e;   /* terracota — acento andino */
+  --clay-soft:  #f0e2da;
+  --line:       rgba(29, 27, 21, 0.13);
+  --line-soft:  rgba(29, 27, 21, 0.07);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-body);
+  background-color: var(--cream);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #ffffff;
-  color: #333333;
+  font-size: 14px;
+  line-height: 1.65;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+::selection {
+  background: var(--green);
+  color: #fff;
+}
+
+/* ── Asignación global de fuentes ──
+   El cuerpo usa la grotesca; los títulos y elementos clave usan la serif.
+   !important para sobreescribir las fuentes antiguas (DM Sans / DM Serif) que
+   aún declaran los CSS de componentes. */
+*, input, textarea, select, button,
+p, span, a, li, label, div, small, strong, em, blockquote {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4,
+.hero-title,
+.values-heading,
+.values-heading span,
+.value-num,
+.product-name,
+.producto-page h1,
+.producto-page .precio,
+.alma-hero h1,
+.legal-hero h1,
+.b2b-hero-content h1,
+.b2b-section h2,
+.b2b-cta h2,
+.catalogo-page-title,
+.carrito-total,
+.modal-titulo,
+.contacto-page h1,
+.contacto-page h2,
+.login-logueado h2,
+.perfil-info h1,
+.checkout-page > h1,
+.metodo-page > h1,
+.pago-tarjeta-page > h1 {
+  font-family: var(--font-display) !important;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-style: normal;
+  color: var(--ink);
+}
+
+/* Eyebrows / etiquetas pequeñas usan la grotesca aunque estén en headings */
+.products-label,
+.hero-tagline,
+.footer-col h4,
+.product-categoria,
+.product-category {
+  font-family: var(--font-body) !important;
+}
+
+/* Inputs */
+input, textarea, select {
+  font-size: 15px !important;
+  font-family: var(--font-body) !important;
+}
+
+/* Botones */
+button, .btn, [type="button"], [type="submit"] {
+  font-family: var(--font-body) !important;
+  font-weight: 600;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Scrollbar sutil */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: var(--cream-deep); }
+::-webkit-scrollbar-thumb {
+  background: #c9c0ac;
+  border-radius: 6px;
+  border: 3px solid var(--cream-deep);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--green-mid); }
+
+/* ════════════════════════════════════════════════════════════════
+   Escala tipográfica — refinada para Fraunces + Hanken Grotesk
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Hero ── */
+.hero-tagline {
+  font-size: 12px !important;
+  letter-spacing: 3.5px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  opacity: 0.9 !important;
+}
+
+.hero-btn {
+  font-size: 12px !important;
+  letter-spacing: 2.5px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  padding: 16px 42px !important;
+}
+
+/* ── Header ── */
+.logo-texto {
+  font-size: 14px !important;
+  letter-spacing: 3px !important;
+  font-weight: 700 !important;
+}
+
+/* ── Footer ── */
+.footer-col h4 {
+  font-size: 11px !important;
+  letter-spacing: 2.5px !important;
+  font-weight: 700 !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  text-transform: uppercase;
+}
+
+.footer-col p,
+.footer-col a {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+  line-height: 1.6 !important;
+}
+
+.footer-copy {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.3px !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ── Sección filosofía (Values) ── */
+.values-heading {
+  font-size: clamp(30px, 3.6vw, 50px) !important;
+  font-weight: 500 !important;
+  line-height: 1.08 !important;
+}
+
+.values-heading span {
+  font-size: 12px !important;
+  letter-spacing: 3px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+}
+
+.value-num {
+  font-size: 40px !important;
+  font-weight: 500 !important;
+}
+
+.value-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+
+.value-desc {
+  font-size: 14.5px !important;
+  line-height: 1.7 !important;
+  font-weight: 400 !important;
+}
+
+/* ── Productos (home + catálogo) ── */
+.products-label {
+  font-size: 11px !important;
+  letter-spacing: 4px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+}
+
+.product-name {
+  font-size: 26px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.product-desc,
+.products-intro p {
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  font-weight: 400 !important;
+}
+
+.product-price {
+  font-size: 19px !important;
+  font-weight: 700 !important;
+}
+
+.product-price-original,
+.product-old-price,
+.product-discount,
+.product-descuento,
+.descuento-badge {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.product-categoria,
+.product-category {
+  font-size: 11px !important;
+  letter-spacing: 2.5px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+}
+
+.product-add-btn {
+  font-size: 11px !important;
+  letter-spacing: 2px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+}
+
+/* ── Página de producto ── */
+.producto-page h1 {
+  font-size: clamp(28px, 3.5vw, 42px) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.producto-page h2,
+.producto-page h3 {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+}
+
+.producto-page p,
+.producto-page .descripcion {
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  font-weight: 400 !important;
+}
+
+.producto-page .precio {
+  font-size: 26px !important;
+  font-weight: 600 !important;
+}
+
+/* ── Alma / Contacto / Legal / B2B ── */
+.alma-page p,
+.contacto-page p,
+.legal-section p,
+.b2b-parrafo {
+  font-size: 15.5px !important;
+  line-height: 1.75 !important;
+  font-weight: 400 !important;
+}
+
+.alma-page h2,
+.contacto-page h2,
+.legal-section h2 {
+  font-size: clamp(24px, 2.8vw, 34px) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.015em !important;
+}
+
+/* ── Carrito / checkout / perfil / pedidos ── */
+.carrito-page p,
+.carrito-item,
+.carrito-item *,
+.checkout-form p,
+.checkout-grid label,
+.recibo-detalle,
+.recibo-detalle p,
+.perfil-page p,
+.perfil-grid label,
+.pedidos-page p,
+.pedido-card,
+.pedido-card * {
+  font-size: 14.5px !important;
+  font-weight: 400 !important;
+}
+
+.carrito-total {
+  font-size: 22px !important;
+  font-weight: 600 !important;
+}
+
+/* ── Confirmación / método de pago ── */
+.confirmacion-page p,
+.canal-opcion,
+.canal-opcion *,
+.metodo-page p,
+.metodo-opcion,
+.metodo-opcion *,
+.checkout-opcion,
+.checkout-opcion * {
+  font-size: 14.5px !important;
+  font-weight: 400 !important;
+}
+
+.modal-mensaje {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Móvil
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  body { font-size: 15px; }
+
+  .hero-tagline { font-size: 11px !important; }
+  .hero-btn { font-size: 11px !important; padding: 14px 34px !important; }
+
+  .footer-col p,
+  .footer-col a { font-size: 13px !important; }
+  .footer-col h4 { font-size: 10px !important; }
+  .footer-copy { font-size: 11px !important; }
+
+  .values-heading { font-size: clamp(26px, 8vw, 34px) !important; }
+  .value-num { font-size: 34px !important; }
+  .value-title { font-size: 17px !important; }
+  .value-desc { font-size: 14px !important; }
+
+  .product-name { font-size: 23px !important; }
+  .product-desc { font-size: 14px !important; }
+  .product-price { font-size: 17px !important; }
+  .product-price-original,
+  .product-descuento { font-size: 12px !important; }
+  .product-category { font-size: 10px !important; }
+
+  .producto-page h1 { font-size: 26px !important; }
+  .producto-page p,
+  .producto-page .descripcion { font-size: 14.5px !important; }
+  .producto-page .precio { font-size: 22px !important; }
+
+  .alma-page p,
+  .contacto-page p,
+  .legal-section p,
+  .b2b-parrafo,
+  .carrito-page p,
+  .carrito-item *,
+  .perfil-page p,
+  .pedidos-page p,
+  .confirmacion-page p,
+  .metodo-page p {
+    font-size: 14.5px !important;
+  }
 }
