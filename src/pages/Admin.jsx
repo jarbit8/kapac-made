@@ -18,6 +18,7 @@ import {
   ACENTO_DEFAULT, LOGO_DEFAULT, normalizarMedio, slotMedio,
 } from '../firebase/contenido';
 import { useIdioma } from '../context/LanguageContext';
+import { useTema, LOGO_CACHE_KEY } from '../context/TemaContext';
 import Cargando from '../components/Cargando/Cargando';
 import '../styles/Admin.css';
 
@@ -135,6 +136,7 @@ const ESTADO_COLORES = {
 export default function Admin() {
   const { usuario, cargando } = useAuth();
   const { t } = useIdioma();
+  const { setTema } = useTema();
   const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
   const [pedidos, setPedidos] = useState([]);
@@ -162,6 +164,12 @@ export default function Admin() {
     try {
       await guardarContenido(nuevo);
       try { localStorage.setItem(HERO_CACHE_KEY, JSON.stringify(nuevo.heroVideo || null)); } catch (_) {}
+      try {
+        if (nuevo.logo) {
+          localStorage.setItem(LOGO_CACHE_KEY, nuevo.logo);
+          setTema((prev) => ({ ...prev, logo: nuevo.logo }));
+        }
+      } catch (_) {}
       setMsgContenido('✓ Guardado');
     } catch (e) {
       setMsgContenido('No se pudo guardar: ' + (e?.message || ''));

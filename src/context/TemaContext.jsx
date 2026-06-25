@@ -1,21 +1,31 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { obtenerContenido, ACENTO_DEFAULT, LOGO_DEFAULT } from '../firebase/contenido';
 
-const TemaContext = createContext({ logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT });
+export const LOGO_CACHE_KEY = 'kapac_logo_v1';
+
+const TemaContext = createContext({ logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT, setTema: () => {} });
 
 export function TemaProvider({ children }) {
-  const [tema, setTema] = useState({ logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT });
+  const [tema, setTema] = useState(() => {
+    try {
+      const logo = localStorage.getItem(LOGO_CACHE_KEY) || LOGO_DEFAULT;
+      return { logo, acento: ACENTO_DEFAULT };
+    } catch (_) {
+      return { logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT };
+    }
+  });
 
   useEffect(() => {
     obtenerContenido().then((c) => {
-      const t = { logo: c.logo || LOGO_DEFAULT, acento: c.acento || ACENTO_DEFAULT };
-      setTema(t);
-      // Inyecta el color de acento como variable CSS para todo el sitio.
-      if (t.acento) document.documentElement.style.setProperty('--clay', t.acento);
+      const logo = c.logo || LOGO_DEFAULT;
+      const acento = c.acento || ACENTO_DEFAULT;
+      setTema({ logo, acento });
+      if (acento) document.documentElement.style.setProperty('--clay', acento);
+      try { localStorage.setItem(LOGO_CACHE_KEY, logo); } catch (_) {}
     }).catch(() => {});
   }, []);
 
-  return <TemaContext.Provider value={tema}>{children}</TemaContext.Provider>;
+  return <TemaContext.Provider value={{ ...tema, setTema }}>{children}</TemaContext.Provider>;
 }
 
 export const useTema = () => useContext(TemaContext);
