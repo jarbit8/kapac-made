@@ -142,7 +142,7 @@
   /* el bloque de links se vuelve un cuadrito compacto (abraza las letras) */
   .navbar-left {
     position: fixed;
-    top: 60px;
+    top: 56px;
     left: 14px;
     width: max-content;
     max-width: 70vw;
@@ -150,18 +150,29 @@
     align-items: flex-start;
     gap: 13px;
     background: #ffffff;
-    padding: 16px 20px;
-    border: 1px solid rgba(176, 83, 46, 0.25);
-    border-radius: 14px;
-    box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+    padding: 18px 24px 20px;
+    border: 1px solid rgba(176, 83, 46, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.18s ease;
+    transform: translateY(-6px) scale(0.97);
+    transform-origin: top left;
+    transition: opacity 0.2s ease, transform 0.2s ease;
     z-index: 291;
   }
   .navbar-left.abierto {
     opacity: 1;
     pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  /* La X queda fija arriba-izquierda cuando el menú está abierto */
+  .navbar-burger.abierto {
+    position: fixed;
+    top: 15px;
+    left: 16px;
+    z-index: 293;
   }
 
   .navbar-link { font-size: 13px; letter-spacing: 1.5px; }

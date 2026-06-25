@@ -404,7 +404,7 @@ export default function Admin() {
                   Cambia el terracota de botones, enlaces y detalles en todo el sitio.
                   <br/>
                   <button type="button" onClick={() => { document.documentElement.style.setProperty('--clay', ACENTO_DEFAULT); persistirContenido({ ...contenido, acento: ACENTO_DEFAULT }); }}
-                    style={{ marginTop: 6, background: 'none', border: '1px solid #ddd', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>
+                    style={{ marginTop: 6, background: '#111', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
                     Restaurar terracota original
                   </button>
                 </p>

@@ -145,17 +145,19 @@
 
 .admin-card-btns button {
   padding: 8px 16px;
-  border: 1px solid #ccc;
-  background: #fff;
+  border: none;
+  background: #111;
+  color: #fff;
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
+  font-weight: 600;
 }
 
 .admin-card-btns .del {
-  color: crimson;
-  border-color: #f0c0c0;
+  background: crimson;
+  color: #fff;
 }
 
 /* ====== Pestañas ====== */
