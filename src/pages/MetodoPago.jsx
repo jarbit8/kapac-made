@@ -9,35 +9,11 @@ import { crearPedido } from '../firebase/pedidos';
 import { descontarStock } from '../firebase/productos';
 import { loginAnonimo } from '../firebase/auth';
 import '../styles/MetodoPago.css';
+import imgYape from '../assets/images/yape.avif';
+import imgTarjeta from '../assets/images/tarjeta.jpg';
+import imgEfectivo from '../assets/images/pago efectivo.avif';
 
-// Iconos SVG — badges con look real de las marcas
-const IconoYape = () => (
-  <svg width="72" height="44" viewBox="0 0 72 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="72" height="44" rx="9" fill="#742284"/>
-    <text x="36" y="29" textAnchor="middle" fill="#fff" fontSize="20" fontWeight="800" fontFamily="'Helvetica Neue', Arial, sans-serif" letterSpacing="-0.3">Yape</text>
-  </svg>
-);
-
-const IconoTarjeta = () => (
-  <svg width="72" height="44" viewBox="0 0 64 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Visa + Mastercard combo */}
-    <rect width="64" height="32" rx="7" fill="#fff" stroke="#e3e3e3"/>
-    <text x="20" y="14" textAnchor="middle" fill="#1A1F71" fontSize="8" fontWeight="900" fontStyle="italic" fontFamily="'Helvetica Neue', Arial, sans-serif" letterSpacing="0.5">VISA</text>
-    <circle cx="40" cy="20" r="6" fill="#EB001B"/>
-    <circle cx="48" cy="20" r="6" fill="#F79E1B" fillOpacity="0.92"/>
-    <path d="M44 15.5a6 6 0 0 1 0 9 6 6 0 0 1 0-9z" fill="#FF5F00"/>
-  </svg>
-);
-
-
-const IconoEfectivo = () => (
-  <svg width="72" height="44" viewBox="0 0 72 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="72" height="44" rx="9" fill="#fff" stroke="#e3e3e3"/>
-    <text x="36" y="26" textAnchor="middle" fontSize="11.5" fontWeight="800" fontFamily="'Helvetica Neue', Arial, sans-serif" letterSpacing="-0.2">
-      <tspan fill="#0a1f8f">pago</tspan><tspan fill="#EC008C">efectivo</tspan>
-    </text>
-  </svg>
-);
+const logoStyle = { width: 72, height: 44, objectFit: 'contain', borderRadius: 8 };
 
 export default function MetodoPago() {
   const navigate = useNavigate();
@@ -141,7 +117,7 @@ export default function MetodoPago() {
             className={`metodo-opcion ${metodo === 'yape' ? 'seleccionada' : ''}`}
             onClick={() => setMetodo('yape')}
           >
-            <div className="metodo-icono"><IconoYape /></div>
+            <div className="metodo-icono"><img src={imgYape} alt="Yape" style={logoStyle} /></div>
             <div className="metodo-info">
               <strong>{t('metodo.yape')}</strong>
               <span>{t('metodo.yape_desc')}</span>
@@ -154,7 +130,7 @@ export default function MetodoPago() {
             className={`metodo-opcion ${metodo === 'yape-codigo' ? 'seleccionada' : ''}`}
             onClick={() => setMetodo('yape-codigo')}
           >
-            <div className="metodo-icono"><IconoYape /></div>
+            <div className="metodo-icono"><img src={imgYape} alt="Yape" style={logoStyle} /></div>
             <div className="metodo-info">
               <strong>{t('metodo.yape_codigo')}</strong>
               <span>{t('metodo.yape_codigo_desc')}</span>
@@ -167,7 +143,7 @@ export default function MetodoPago() {
             className={`metodo-opcion ${metodo === 'tarjeta' ? 'seleccionada' : ''}`}
             onClick={() => setMetodo('tarjeta')}
           >
-            <div className="metodo-icono tarjeta-icono"><IconoTarjeta /></div>
+            <div className="metodo-icono"><img src={imgTarjeta} alt="Tarjeta" style={logoStyle} /></div>
             <div className="metodo-info">
               <strong>{t('metodo.tarjeta')}</strong>
               <span>{t('metodo.tarjeta_desc')}</span>
@@ -180,7 +156,7 @@ export default function MetodoPago() {
             className={`metodo-opcion ${metodo === 'efectivo' ? 'seleccionada' : ''}`}
             onClick={() => setMetodo('efectivo')}
           >
-            <div className="metodo-icono"><IconoEfectivo /></div>
+            <div className="metodo-icono"><img src={imgEfectivo} alt="PagoEfectivo" style={logoStyle} /></div>
             <div className="metodo-info">
               <strong>{t('metodo.efectivo')}</strong>
               <span>{t('metodo.efectivo_desc')}</span>
