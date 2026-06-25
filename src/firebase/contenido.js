@@ -33,6 +33,8 @@ export const IN_THE_ZONE_DEFAULT =
 // Identidad visual editable por el admin.
 export const ACENTO_DEFAULT = '#b0532e'; // terracota de la marca
 export const LOGO_DEFAULT = '';          // '' = usa el logo del proyecto
+export const FONDO_DEFAULT = '#ffffff';  // fondo del sitio
+export const TEXTO_DEFAULT = '#111111';  // color del texto principal
 
 // Medio principal (Hero) por dispositivo: { tipo:'imagen'|'video', url }.
 // null = usa los videos por defecto del proyecto.
@@ -83,9 +85,11 @@ export async function obtenerContenido() {
       heroVideo: data.heroVideo || HERO_VIDEO_DEFAULT,
       acento: data.acento || ACENTO_DEFAULT,
       logo: data.logo || LOGO_DEFAULT,
+      fondo: data.fondo || FONDO_DEFAULT,
+      texto: data.texto || TEXTO_DEFAULT,
     };
   } catch (e) {
-    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT };
+    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT };
   }
 }
 

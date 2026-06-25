@@ -15,7 +15,7 @@ import { HERO_CACHE_KEY } from '../components/Hero/Hero';
 import {
   obtenerContenido, guardarContenido,
   HOME_FOTOS_DEFAULT, GALERIA_PRODUCTO_DEFAULT, FOOTER_FONDO_DEFAULT, IN_THE_ZONE_DEFAULT, HERO_VIDEO_DEFAULT,
-  ACENTO_DEFAULT, LOGO_DEFAULT, normalizarMedio, slotMedio,
+  ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT, normalizarMedio, slotMedio,
 } from '../firebase/contenido';
 import { useIdioma } from '../context/LanguageContext';
 import { useTema, LOGO_CACHE_KEY } from '../context/TemaContext';
@@ -148,10 +148,9 @@ export default function Admin() {
   const [msg, setMsg] = useState('');
 
   // Contenido editable (fotos de home + galería de producto)
-  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT });
+  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT });
   const [guardandoContenido, setGuardandoContenido] = useState(false);
   const [msgContenido, setMsgContenido] = useState('');
-  const [bgLogo, setBgLogo] = useState('#111');
 
   const cargarContenido = () => {
     obtenerContenido().then(setContenido).catch(() => {});
@@ -165,10 +164,13 @@ export default function Admin() {
       await guardarContenido(nuevo);
       try { localStorage.setItem(HERO_CACHE_KEY, JSON.stringify(nuevo.heroVideo || null)); } catch (_) {}
       try {
-        if (nuevo.logo) {
-          localStorage.setItem(LOGO_CACHE_KEY, nuevo.logo);
-          setTema((prev) => ({ ...prev, logo: nuevo.logo }));
-        }
+        if (nuevo.logo) localStorage.setItem(LOGO_CACHE_KEY, nuevo.logo);
+        setTema((prev) => ({
+          ...prev,
+          logo: nuevo.logo || prev.logo,
+          fondo: nuevo.fondo || prev.fondo,
+          texto: nuevo.texto || prev.texto,
+        }));
       } catch (_) {}
       setMsgContenido('✓ Guardado');
     } catch (e) {
@@ -359,7 +361,7 @@ export default function Admin() {
                   carpeta="logo"
                   onSubido={(url) => persistirContenido({ ...contenido, logo: url })}
                   prevStyle={{
-                    background: bgLogo,
+                    background: contenido.fondo || FONDO_DEFAULT,
                     objectFit: 'contain',
                     width: '100%',
                     height: '180px',
@@ -369,33 +371,17 @@ export default function Admin() {
                     boxSizing: 'border-box',
                   }}
                   vaciStyle={{
-                    background: bgLogo,
+                    background: contenido.fondo || FONDO_DEFAULT,
                     width: '100%',
                     height: '180px',
                     maxWidth: 'none',
                     aspectRatio: 'unset',
-                    color: bgLogo === '#fff' || bgLogo === '#f0f0f0' ? '#aaa' : '#555',
+                    color: '#999',
                   }}
                 />
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                  <span style={{ fontSize: 11, color: '#888' }}>Fondo:</span>
-                  {[['#111', 'Negro'], ['#fff', 'Blanco'], ['#f0f0f0', 'Gris'], [contenido.acento || '#b0532e', 'Acento']].map(([color, label]) => (
-                    <button
-                      key={label}
-                      type="button"
-                      title={label}
-                      onClick={() => setBgLogo(color)}
-                      style={{
-                        width: 20, height: 20, borderRadius: '50%',
-                        background: color,
-                        border: bgLogo === color ? '2px solid #333' : '1px solid #ccc',
-                        cursor: 'pointer', padding: 0, flexShrink: 0,
-                      }}
-                    />
-                  ))}
-                </div>
                 <p style={{ fontSize: '12px', color: '#888', margin: '6px 0 0' }}>Logo principal (header, carga, loaders). PNG con fondo transparente.</p>
               </div>
+
               <div className="admin-foto-card">
                 <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Color de la marca (acento)</label>
                 <input
@@ -403,17 +389,61 @@ export default function Admin() {
                   value={contenido.acento || ACENTO_DEFAULT}
                   onChange={(e) => {
                     const color = e.target.value;
-                    document.documentElement.style.setProperty('--clay', color); // vista previa al instante
+                    document.documentElement.style.setProperty('--clay', color);
                     persistirContenido({ ...contenido, acento: color });
                   }}
                   style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
                 />
                 <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Cambia el terracota de botones, enlaces y detalles en todo el sitio.
+                  Terracota de botones, enlaces y detalles.
                   <br/>
                   <button type="button" onClick={() => { document.documentElement.style.setProperty('--clay', ACENTO_DEFAULT); persistirContenido({ ...contenido, acento: ACENTO_DEFAULT }); }}
                     style={{ marginTop: 6, background: '#111', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
-                    Restaurar terracota original
+                    Restaurar
+                  </button>
+                </p>
+              </div>
+
+              <div className="admin-foto-card">
+                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Fondo del sitio</label>
+                <input
+                  type="color"
+                  value={contenido.fondo || FONDO_DEFAULT}
+                  onChange={(e) => {
+                    const color = e.target.value;
+                    document.documentElement.style.setProperty('--fondo', color);
+                    persistirContenido({ ...contenido, fondo: color });
+                  }}
+                  style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
+                />
+                <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
+                  Color de fondo de todas las páginas.
+                  <br/>
+                  <button type="button" onClick={() => { document.documentElement.style.setProperty('--fondo', FONDO_DEFAULT); persistirContenido({ ...contenido, fondo: FONDO_DEFAULT }); }}
+                    style={{ marginTop: 6, background: '#111', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                    Restaurar
+                  </button>
+                </p>
+              </div>
+
+              <div className="admin-foto-card">
+                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Color del texto</label>
+                <input
+                  type="color"
+                  value={contenido.texto || TEXTO_DEFAULT}
+                  onChange={(e) => {
+                    const color = e.target.value;
+                    document.documentElement.style.setProperty('--ink', color);
+                    persistirContenido({ ...contenido, texto: color });
+                  }}
+                  style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
+                />
+                <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
+                  Color del texto principal.
+                  <br/>
+                  <button type="button" onClick={() => { document.documentElement.style.setProperty('--ink', TEXTO_DEFAULT); persistirContenido({ ...contenido, texto: TEXTO_DEFAULT }); }}
+                    style={{ marginTop: 6, background: '#111', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                    Restaurar
                   </button>
                 </p>
               </div>

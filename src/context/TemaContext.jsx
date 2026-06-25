@@ -1,17 +1,21 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { obtenerContenido, ACENTO_DEFAULT, LOGO_DEFAULT } from '../firebase/contenido';
+import { obtenerContenido, ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT } from '../firebase/contenido';
 
 export const LOGO_CACHE_KEY = 'kapac_logo_v1';
 
-const TemaContext = createContext({ logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT, setTema: () => {} });
+const TemaContext = createContext({ logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, setTema: () => {} });
 
 export function TemaProvider({ children }) {
   const [tema, setTema] = useState(() => {
     try {
-      const logo = localStorage.getItem(LOGO_CACHE_KEY) || LOGO_DEFAULT;
-      return { logo, acento: ACENTO_DEFAULT };
+      return {
+        logo: localStorage.getItem(LOGO_CACHE_KEY) || LOGO_DEFAULT,
+        acento: ACENTO_DEFAULT,
+        fondo: FONDO_DEFAULT,
+        texto: TEXTO_DEFAULT,
+      };
     } catch (_) {
-      return { logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT };
+      return { logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT };
     }
   });
 
@@ -19,8 +23,12 @@ export function TemaProvider({ children }) {
     obtenerContenido().then((c) => {
       const logo = c.logo || LOGO_DEFAULT;
       const acento = c.acento || ACENTO_DEFAULT;
-      setTema({ logo, acento });
+      const fondo = c.fondo || FONDO_DEFAULT;
+      const texto = c.texto || TEXTO_DEFAULT;
+      setTema({ logo, acento, fondo, texto });
       if (acento) document.documentElement.style.setProperty('--clay', acento);
+      document.documentElement.style.setProperty('--fondo', fondo);
+      document.documentElement.style.setProperty('--ink', texto);
       try { localStorage.setItem(LOGO_CACHE_KEY, logo); } catch (_) {}
     }).catch(() => {});
   }, []);

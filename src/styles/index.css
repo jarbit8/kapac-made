@@ -33,6 +33,7 @@ button, input, textarea, select, [class*="kai-"], [class*="navbar"],
   --green-mid:  #2d5a3d;
   --green-soft: #e6ece3;   /* verde tintado claro */
   --clay:       #b0532e;   /* terracota — acento andino */
+  --fondo:      #ffffff;   /* fondo del sitio (editable desde admin) */
   --clay-soft:  #f0e2da;
   --line:       rgba(29, 27, 21, 0.13);
   --line-soft:  rgba(29, 27, 21, 0.07);
@@ -50,7 +51,7 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--cream);
+  background-color: var(--fondo);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
