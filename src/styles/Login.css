@@ -35,7 +35,7 @@
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #111;
+  color: var(--ink);
 }
 
 .login-email-mostrar {
@@ -78,7 +78,7 @@
 
 .login-acciones .login-btn-secundario {
   background: #f0ede5;
-  color: #111;
+  color: var(--ink);
 }
 
 .login-acciones .login-btn-secundario:hover {
@@ -116,9 +116,9 @@
 }
 
 .login-tabs button.activo {
-  color: #111;
+  color: var(--ink);
   font-weight: 600;
-  border-bottom-color: #111;
+  border-bottom-color: var(--ink);
 }
 
 .login-form {
@@ -138,7 +138,7 @@
 }
 
 .login-form input:focus {
-  border-color: #111;
+  border-color: var(--ink);
 }
 
 .login-error {
@@ -192,7 +192,7 @@
   width: 100%;
   padding: 13px;
   background: #fff;
-  color: #111;
+  color: var(--ink);
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;

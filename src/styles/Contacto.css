@@ -25,7 +25,7 @@
 .info-titulo {
   font-size: clamp(28px, 4vw, 44px) !important;
   font-weight: 500 !important;
-  color: #1d1b15 !important;
+  color: var(--ink) !important;
   letter-spacing: -0.5px !important;
   margin: 0 0 56px;
 }
@@ -59,7 +59,7 @@
   flex-wrap: wrap;
 }
 .info-redes a {
-  color: #1d1b15 !important;
+  color: var(--ink) !important;
   text-decoration: none;
   font-size: 14px !important;
   transition: color 0.2s;

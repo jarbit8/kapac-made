@@ -57,7 +57,7 @@
 }
 
 .header-solido .menu-toggle span {
-  background-color: #111;
+  background-color: var(--ink);
 }
 
 .menu-toggle.active span:nth-child(1) {
@@ -110,7 +110,7 @@
 }
 
 .header-solido .logo-texto {
-  color: #111;
+  color: var(--ink);
 }
 
 /* ── Iconos derecha ── */
@@ -141,7 +141,7 @@
 }
 
 .header-solido .icon-btn {
-  color: #111;
+  color: var(--ink);
 }
 
 .header-solido .icon-btn:hover {
@@ -334,7 +334,7 @@
   outline: none;
   font-size: 15px;
   font-family: 'DM Sans', sans-serif;
-  color: #111;
+  color: var(--ink);
   background: transparent;
 }
 
@@ -412,7 +412,7 @@
 
 .buscador-item strong {
   font-size: 14px;
-  color: #111;
+  color: var(--ink);
   font-weight: 600;
 }
 
@@ -429,7 +429,7 @@
 
 .buscador-item:hover .item-flecha {
   transform: translateX(4px);
-  color: #111;
+  color: var(--ink);
 }
 
 .buscador-ver-todos {
@@ -441,7 +441,7 @@
   cursor: pointer;
   font-family: inherit;
   font-size: 13px;
-  color: #111;
+  color: var(--ink);
   font-weight: 600;
   text-align: left;
   margin-top: 6px;

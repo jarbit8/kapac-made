@@ -197,12 +197,12 @@
 }
 
 .canal-opcion:hover {
-  border-color: #111;
+  border-color: var(--ink);
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .canal-opcion.seleccionado {
-  border-color: #111;
+  border-color: var(--ink);
   background: #fafafa;
 }
 
@@ -220,7 +220,7 @@
 
 .canal-opcion strong {
   font-size: 0.95rem;
-  color: #111;
+  color: var(--ink);
 }
 
 .canal-opcion span {
@@ -245,7 +245,7 @@
 
 .canal-check-box.on {
   background: #111;
-  border-color: #111;
+  border-color: var(--ink);
 }
 
 .canal-btn-confirmar {

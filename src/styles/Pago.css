@@ -26,7 +26,7 @@
 .pago-page h1 {
   font-size: 26px;
   font-weight: 700;
-  color: #111;
+  color: var(--ink);
   margin-bottom: 8px;
 }
 
@@ -47,7 +47,7 @@
 
 .pago-monto {
   font-size: 22px;
-  color: #111;
+  color: var(--ink);
   margin-bottom: 24px;
 }
 
@@ -283,7 +283,7 @@
   border: 2px solid #d6c4ec;
   border-radius: 10px;
   background: #fff;
-  color: #111;
+  color: var(--ink);
   outline: none;
   font-weight: 700;
   font-family: 'DM Sans', monospace, sans-serif !important;

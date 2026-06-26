@@ -86,7 +86,7 @@
   font-size: clamp(30px, 4vw, 46px);
   font-weight: 500;
   margin-bottom: 32px;
-  color: #1d1b15 !important;
+  color: var(--ink) !important;
   letter-spacing: -0.02em;
 }
 
@@ -139,7 +139,7 @@
 .b2b-bloque p {
   font-size: 16px;
   line-height: 1.6;
-  color: #1d1b15 !important;
+  color: var(--ink) !important;
   margin: 0;
   font-weight: 400;
 }
@@ -147,7 +147,7 @@
 /* ── CTA ── */
 .b2b-cta {
   background: var(--fondo);
-  color: #1d1b15;
+  color: var(--ink);
   text-align: center;
   padding: 100px 32px;
 }
@@ -157,7 +157,7 @@
   font-weight: 500;
   margin-bottom: 20px;
   letter-spacing: -0.02em;
-  color: #1d1b15 !important;
+  color: var(--ink) !important;
 }
 
 .b2b-cta p {

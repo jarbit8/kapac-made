@@ -28,7 +28,7 @@
   font-weight: 500 !important;
   line-height: 1.12 !important;
   letter-spacing: -0.5px !important;
-  color: #1d1b15 !important;
+  color: var(--ink) !important;
   margin: 0 0 36px;
   max-width: 760px;
 }

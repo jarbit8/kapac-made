@@ -8,7 +8,7 @@
 .pedidos-page h1 {
   font-size: 28px;
   font-weight: 600;
-  color: #111;
+  color: var(--ink);
   margin-bottom: 40px;
 }
 
@@ -47,7 +47,7 @@
 .pedido-id {
   font-size: 14px;
   font-weight: 600;
-  color: #111;
+  color: var(--ink);
 }
 
 .pedido-estado {
@@ -90,7 +90,7 @@
 
 .pedido-total {
   font-size: 15px;
-  color: #111;
+  color: var(--ink);
   padding-top: 12px;
   border-top: 1px solid #eee;
   text-align: right;
