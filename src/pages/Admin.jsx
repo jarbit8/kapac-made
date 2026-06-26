@@ -435,10 +435,6 @@ export default function Admin() {
 
               <div className="admin-foto-card">
                 <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Color del texto</label>
-                <div style={{ background: contenido.fondo || FONDO_DEFAULT, borderRadius: 6, padding: '10px 14px', marginBottom: 10, border: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ color: contenido.texto || TEXTO_DEFAULT, fontWeight: 500, fontSize: 14 }}>Texto de ejemplo</span>
-                  <span style={{ background: contenido.acento || ACENTO_DEFAULT, color: contenido.texto || TEXTO_DEFAULT, borderRadius: 4, padding: '2px 10px', fontSize: 12, fontWeight: 600 }}>Botón</span>
-                </div>
                 <input
                   type="color"
                   value={contenido.texto || TEXTO_DEFAULT}
