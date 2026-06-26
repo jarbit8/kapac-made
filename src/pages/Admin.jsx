@@ -96,14 +96,29 @@ function SubirMedia({ valor, onSubido }) {
 const CATEGORIAS = ['Climbing', 'Mountaineering', 'Trekking', 'Daypack'];
 const CAT_ES = { Climbing: 'Escalada', Mountaineering: 'Montañismo', Trekking: 'Senderismo', Daypack: 'Mochila de día' };
 
+const FEATURES_DEFAULT = [
+  { titulo: '', desc: '' },
+  { titulo: '', desc: '' },
+  { titulo: '', desc: '' },
+];
+
+const SPECS_DEFAULT = [
+  { label: 'Capacidad', valor: '' },
+  { label: 'Dimensiones', valor: '' },
+  { label: 'Peso', valor: '' },
+  { label: 'Material', valor: '' },
+];
+
 const VACIO = {
   nombre: '', nombreEn: '',
   precio: '', precioOriginal: '', moneda: 'S/',
   imagenMochila: '', imagenContexto: '',
-  fotos: [],     // fotos de la mochila (carrusel de arriba)
+  fotos: [],
   descripcion: '', descripcionEn: '',
   stock: '', activo: true, categoria: 'Climbing',
-  galeria: [],   // fotos extra que se muestran debajo del producto
+  galeria: [],
+  features: FEATURES_DEFAULT,
+  specs: SPECS_DEFAULT,
 };
 
 const ESTADOS_PEDIDO = ['procesando_pago', 'verificando_pago', 'pendiente_envio', 'enviado', 'entregado', 'cancelado'];
@@ -261,6 +276,8 @@ export default function Admin() {
         ? p.fotos
         : [p.imagenMochila, p.imagenContexto].filter(Boolean),
       galeria: Array.isArray(p.galeria) ? p.galeria : [],
+      features: Array.isArray(p.features) && p.features.length ? p.features : FEATURES_DEFAULT,
+      specs: Array.isArray(p.specs) && p.specs.length ? p.specs : SPECS_DEFAULT,
     });
     setEditandoId(p.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -880,6 +897,70 @@ export default function Admin() {
               + Agregar foto
             </button>
           </div>
+          {/* Características destacadas */}
+          <label style={{ marginBottom: 6 }}>Características <span style={{ color: '#999', fontSize: '12px' }}>(las 3 propiedades que se muestran bajo la descripción)</span></label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+            {(form.features || FEATURES_DEFAULT).map((f, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 8 }}>
+                <input
+                  className="admin-foto-input"
+                  placeholder={`Título ${i + 1} (ej. Resistente al agua)`}
+                  value={f.titulo}
+                  onChange={(e) => {
+                    const arr = [...form.features];
+                    arr[i] = { ...arr[i], titulo: e.target.value };
+                    setForm({ ...form, features: arr });
+                  }}
+                />
+                <input
+                  className="admin-foto-input"
+                  placeholder="Descripción corta"
+                  value={f.desc}
+                  onChange={(e) => {
+                    const arr = [...form.features];
+                    arr[i] = { ...arr[i], desc: e.target.value };
+                    setForm({ ...form, features: arr });
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Especificaciones */}
+          <label style={{ marginBottom: 6 }}>Especificaciones <span style={{ color: '#999', fontSize: '12px' }}>(tabla de la ficha técnica)</span></label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+            {(form.specs || SPECS_DEFAULT).map((s, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 28px', gap: 6, alignItems: 'center' }}>
+                <input
+                  className="admin-foto-input"
+                  placeholder="Etiqueta (ej. Peso)"
+                  value={s.label}
+                  onChange={(e) => {
+                    const arr = [...form.specs];
+                    arr[i] = { ...arr[i], label: e.target.value };
+                    setForm({ ...form, specs: arr });
+                  }}
+                />
+                <input
+                  className="admin-foto-input"
+                  placeholder="Valor (ej. 0.9 kg)"
+                  value={s.valor}
+                  onChange={(e) => {
+                    const arr = [...form.specs];
+                    arr[i] = { ...arr[i], valor: e.target.value };
+                    setForm({ ...form, specs: arr });
+                  }}
+                />
+                <button type="button" onClick={() => setForm({ ...form, specs: form.specs.filter((_, j) => j !== i) })}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c00', fontSize: 16, padding: 0 }}>×</button>
+              </div>
+            ))}
+          </div>
+          <button type="button" className="admin-foto-agregar" style={{ marginBottom: 18 }}
+            onClick={() => setForm({ ...form, specs: [...(form.specs || []), { label: '', valor: '' }] })}>
+            + Agregar fila
+          </button>
+
           <label>{t('admin.descripcion_es')} <span style={{ color: '#999', fontSize: '12px' }}>(el inglés se traduce solo)</span>
             <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} rows="3" />
           </label>

@@ -134,38 +134,27 @@ export default function Producto() {
               <p className="producto-descripcion">{descripcionTraducida}</p>
 
               {/* Features */}
-              <div className="producto-features">
-                <div className="producto-feature">
-                  <strong>{idioma === 'en' ? 'Water resistant' : 'Resistente al agua'}</strong>
-                  <span>{idioma === 'en'
-                    ? 'Waxed canvas that protects your gear in any weather.'
-                    : 'Lona encerada que protege tus cosas en cualquier clima.'}</span>
+              {Array.isArray(producto.features) && producto.features.some(f => f.titulo) && (
+                <div className="producto-features">
+                  {producto.features.filter(f => f.titulo).map((f, i) => (
+                    <div key={i} className="producto-feature">
+                      <strong>{f.titulo}</strong>
+                      {f.desc && <span>{f.desc}</span>}
+                    </div>
+                  ))}
                 </div>
-                <div className="producto-feature">
-                  <strong>{idioma === 'en' ? 'Comfort & storage' : 'Comodidad y espacio'}</strong>
-                  <span>{idioma === 'en'
-                    ? 'Padded straps and a dedicated laptop compartment.'
-                    : 'Tirantes acolchados y compartimento para laptop.'}</span>
-                </div>
-                <div className="producto-feature">
-                  <strong>{idioma === 'en' ? 'Handmade in Arequipa' : 'Hecho a mano en Arequipa'}</strong>
-                  <span>{idioma === 'en'
-                    ? 'Crafted one by one with premium materials.'
-                    : 'Cosida una a una con materiales de primera.'}</span>
-                </div>
-              </div>
+              )}
 
               {/* Especificaciones */}
-              <table className="producto-tabla">
-                <tbody>
-                  <tr><td>{idioma === 'en' ? 'Capacity' : 'Capacidad'}</td><td>22 L</td></tr>
-                  <tr><td>{idioma === 'en' ? 'Dimensions' : 'Dimensiones'}</td><td>45 × 30 × 15 cm</td></tr>
-                  <tr><td>{idioma === 'en' ? 'Weight' : 'Peso'}</td><td>0.9 kg</td></tr>
-                  <tr><td>{idioma === 'en' ? 'Laptop' : 'Laptop'}</td><td>{idioma === 'en' ? 'Up to 15"' : 'Hasta 15"'}</td></tr>
-                  <tr><td>{idioma === 'en' ? 'Material' : 'Material'}</td><td>{idioma === 'en' ? 'Waxed canvas + leather' : 'Lona encerada + cuero'}</td></tr>
-                  <tr><td>{idioma === 'en' ? 'Hardware' : 'Herrajes'}</td><td>{idioma === 'en' ? 'Antique brass' : 'Bronce envejecido'}</td></tr>
-                </tbody>
-              </table>
+              {Array.isArray(producto.specs) && producto.specs.some(s => s.label && s.valor) && (
+                <table className="producto-tabla">
+                  <tbody>
+                    {producto.specs.filter(s => s.label && s.valor).map((s, i) => (
+                      <tr key={i}><td>{s.label}</td><td>{s.valor}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
 
               <p className={`producto-stock ${producto.stock > 0 && producto.stock <= 3 ? 'stock-bajo' : ''}`}>
                 {producto.stock <= 0
