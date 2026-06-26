@@ -1,7 +1,7 @@
 /* ── Página B2B ── */
 .b2b-page {
   padding-top: 70px;
-  background: var(--cream);
+  background: var(--fondo);
   min-height: 100vh;
 }
 
@@ -101,7 +101,7 @@
 
 /* ── Grid beneficios ── */
 .b2b-beneficios {
-  background: #ffffff;
+  background: var(--fondo);
   padding: 90px 32px;
   max-width: none;
 }
@@ -146,7 +146,7 @@
 
 /* ── CTA ── */
 .b2b-cta {
-  background: #ffffff;
+  background: var(--fondo);
   color: #1d1b15;
   text-align: center;
   padding: 100px 32px;

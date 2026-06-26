@@ -3,7 +3,7 @@
    ══════════════════════════════════════════════════ */
 
 .lm-section {
-  background: #ffffff;
+  background: var(--fondo);
   padding: 72px 40px 88px;
   max-width: 1080px;
   margin: 0 auto;
@@ -48,7 +48,7 @@
 .lm-item {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: transparent;
 }
 
 /* Imagen */

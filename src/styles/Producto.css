@@ -14,7 +14,7 @@
 }
 
 .producto-page {
-  background: #ffffff !important;
+  background: var(--fondo) !important;
   max-width: none;
   min-height: 100vh;
   padding: 70px 48px 100px;

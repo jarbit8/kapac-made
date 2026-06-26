@@ -3,10 +3,12 @@ import './Lifestyle.css';
 import { obtenerContenido, HOME_FOTOS_DEFAULT } from '../../firebase/contenido';
 
 export default function Lifestyle() {
-  const [imgs, setImgs] = useState(HOME_FOTOS_DEFAULT);
+  const [imgs, setImgs] = useState(null);
 
   useEffect(() => {
-    obtenerContenido().then((c) => setImgs(c.homeFotos)).catch(() => {});
+    obtenerContenido().then((c) => setImgs(c.homeFotos)).catch(() => {
+      setImgs(HOME_FOTOS_DEFAULT);
+    });
   }, []);
 
   return (
@@ -14,7 +16,7 @@ export default function Lifestyle() {
 
       {/* Grid 2×2 */}
       <div className="lm-grid">
-        {imgs.map((img, i) => (
+        {(imgs || []).map((img, i) => (
           <div key={i} className="lm-item">
             <div className="lm-img-wrap">
               <img src={img.url} alt={img.titulo} className="lm-img" />

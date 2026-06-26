@@ -3,7 +3,7 @@
    ══════════════════════════════════════════════════════════ */
 
 .alma-page {
-  background: #ffffff;
+  background: var(--fondo);
   min-height: 100vh;
   padding: 120px 40px 110px;
   max-width: none;

@@ -94,7 +94,7 @@ export default function Footer() {
   const [paso, setPaso] = useState('email'); // 'email' | 'codigo' | 'ok'
   const [cargandoNews, setCargandoNews] = useState(false);
   const [msgNews, setMsgNews] = useState('');
-  const [fondoCfg, setFondoCfg] = useState(FOOTER_FONDO_DEFAULT);
+  const [fondoCfg, setFondoCfg] = useState(null);
   const [videoFallo, setVideoFallo] = useState(false);
   const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
 
@@ -108,7 +108,7 @@ export default function Footer() {
     obtenerContenido().then((c) => c.footerFondo && setFondoCfg(c.footerFondo)).catch(() => {});
   }, []);
 
-  const fondo = medioDispositivo(fondoCfg, esMobile) || FOOTER_FONDO_DEFAULT;
+  const fondo = medioDispositivo(fondoCfg, esMobile);
 
   const handlePedirCodigo = async (e) => {
     e.preventDefault();
@@ -144,12 +144,12 @@ export default function Footer() {
     <footer className="footer">
 
       {/* Fondo: video o imagen (editable desde el admin). Si el video falla, usa la imagen por defecto. */}
-      {fondo.tipo === 'video' && !videoFallo ? (
+      {fondo && fondo.tipo === 'video' && !videoFallo ? (
         <video className="footer-bg" src={fondo.url} autoPlay muted loop playsInline
           onError={() => setVideoFallo(true)} />
-      ) : (
-        <div className="footer-bg" style={{ backgroundImage: `url('${fondo.tipo === 'video' ? FOOTER_FONDO_DEFAULT.url : fondo.url}')` }} />
-      )}
+      ) : fondo ? (
+        <div className="footer-bg" style={{ backgroundImage: `url('${fondo.url}')` }} />
+      ) : null}
       <div className="footer-overlay" />
 
       {/* Instagram centrado */}

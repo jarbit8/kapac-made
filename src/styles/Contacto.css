@@ -3,7 +3,7 @@
    ══════════════════════════════════════════════════════════ */
 
 .info-page {
-  background: #ffffff;
+  background: var(--fondo);
   min-height: 100vh;
   padding: 110px 40px 100px;
 }

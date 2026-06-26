@@ -9,7 +9,7 @@
 }
 
 .catalogo-page {
-  background: #ffffff !important;
+  background: var(--fondo) !important;
   max-width: none;
   min-height: 100vh;
   margin: 0;
