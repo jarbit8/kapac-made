@@ -15,7 +15,7 @@ import { HERO_CACHE_KEY } from '../components/Hero/Hero';
 import {
   obtenerContenido, guardarContenido,
   HOME_FOTOS_DEFAULT, GALERIA_PRODUCTO_DEFAULT, FOOTER_FONDO_DEFAULT, IN_THE_ZONE_DEFAULT, HERO_VIDEO_DEFAULT,
-  ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT, normalizarMedio, slotMedio,
+  ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT, ALMA_FOTOS_DEFAULT, normalizarMedio, slotMedio,
 } from '../firebase/contenido';
 import { useIdioma } from '../context/LanguageContext';
 import { useTema, LOGO_CACHE_KEY } from '../context/TemaContext';
@@ -163,7 +163,7 @@ export default function Admin() {
   const [msg, setMsg] = useState('');
 
   // Contenido editable (fotos de home + galería de producto)
-  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT });
+  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT });
   const [guardandoContenido, setGuardandoContenido] = useState(false);
   const [msgContenido, setMsgContenido] = useState('');
 
@@ -529,6 +529,50 @@ export default function Admin() {
                 <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>📱 Para celular.</p>
               </div>
             </div>
+
+            <h3 className="admin-fotos-titulo">Galería "Kapac Made" — fotos al final de la página</h3>
+            <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>Aparecen en la sección Kapac Made con un efecto épico al hacer scroll.</p>
+            <div className="admin-fotos-grid">
+              {(contenido.almaFotos || []).map((foto, i) => (
+                <div key={i} className="admin-foto-card" style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => {
+                      const nuevas = (contenido.almaFotos || []).filter((_, j) => j !== i);
+                      persistirContenido({ ...contenido, almaFotos: nuevas });
+                    }}
+                    style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', color: '#c00', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, lineHeight: 1 }}
+                    title="Eliminar foto"
+                  >×</button>
+                  <SubirFoto
+                    valor={foto.url}
+                    carpeta="alma"
+                    onSubido={(url) => {
+                      const nuevas = [...(contenido.almaFotos || [])];
+                      nuevas[i] = { ...nuevas[i], url };
+                      persistirContenido({ ...contenido, almaFotos: nuevas });
+                    }}
+                  />
+                  <input
+                    className="admin-foto-input"
+                    placeholder="Caption (opcional)"
+                    value={foto.caption || ''}
+                    onChange={(e) => {
+                      const nuevas = [...(contenido.almaFotos || [])];
+                      nuevas[i] = { ...nuevas[i], caption: e.target.value };
+                      setContenido({ ...contenido, almaFotos: nuevas });
+                    }}
+                    onBlur={() => persistirContenido({ ...contenido, almaFotos: contenido.almaFotos })}
+                  />
+                </div>
+              ))}
+            </div>
+            <button
+              className="admin-foto-agregar"
+              onClick={() => {
+                const nuevas = [...(contenido.almaFotos || []), { url: '', caption: '' }];
+                setContenido({ ...contenido, almaFotos: nuevas });
+              }}
+            >+ Agregar foto</button>
 
             <div className="admin-fotos-guardar">
               <button onClick={guardarFotos} disabled={guardandoContenido}>

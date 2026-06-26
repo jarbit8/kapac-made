@@ -26,6 +26,9 @@ export const FOOTER_FONDO_DEFAULT = {
   url: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1600&q=80&auto=format&fit=crop',
 };
 
+// Galería de fotos al final de la página Kapac Made (Alma).
+export const ALMA_FOTOS_DEFAULT = [];
+
 // Foto épica que abre "in the zone" en una pestaña nueva.
 export const IN_THE_ZONE_DEFAULT =
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=85&auto=format&fit=crop';
@@ -86,6 +89,7 @@ export async function obtenerContenido() {
       galeriaProducto: Array.isArray(data.galeriaProducto) && data.galeriaProducto.length ? data.galeriaProducto : GALERIA_PRODUCTO_DEFAULT,
       footerFondo: data.footerFondo?.url ? data.footerFondo : FOOTER_FONDO_DEFAULT,
       inTheZoneFoto: data.inTheZoneFoto || IN_THE_ZONE_DEFAULT,
+      almaFotos: Array.isArray(data.almaFotos) ? data.almaFotos : ALMA_FOTOS_DEFAULT,
       heroVideo: data.heroVideo || HERO_VIDEO_DEFAULT,
       acento: data.acento || ACENTO_DEFAULT,
       logo: data.logo || LOGO_DEFAULT,
@@ -93,7 +97,7 @@ export async function obtenerContenido() {
       texto: data.texto || TEXTO_DEFAULT,
     };
   } catch (e) {
-    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT };
+    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT };
   }
 }
 

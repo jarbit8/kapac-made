@@ -1,19 +1,37 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { useIdioma } from '../context/LanguageContext';
+import { obtenerContenido } from '../firebase/contenido';
 import '../styles/Alma.css';
 
 export default function Alma() {
   const { idioma } = useIdioma();
   const es = idioma === 'es';
+  const [almaFotos, setAlmaFotos] = useState([]);
+  const fotosRef = useRef([]);
+
+  useEffect(() => {
+    obtenerContenido().then((c) => {
+      if (Array.isArray(c.almaFotos) && c.almaFotos.length) setAlmaFotos(c.almaFotos);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!almaFotos.length) return;
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('alma-foto--visible'); }),
+      { threshold: 0.12 }
+    );
+    fotosRef.current.forEach((el) => el && obs.observe(el));
+    return () => obs.disconnect();
+  }, [almaFotos]);
 
   return (
     <>
       <Header />
       <main className="alma-page">
         <div className="alma-wrap">
-
           <p className="alma-eyebrow">Kapac Made · Arequipa, {es ? 'Perú' : 'Peru'}</p>
 
           <h1 className="alma-manifiesto">
@@ -37,7 +55,6 @@ export default function Alma() {
                   : 'We were born in Arequipa, at the foot of the Misti. Every design draws from the Andean landscapes and the cultural richness of our land.'}
               </p>
             </section>
-
             <section className="alma-bloque">
               <h2>{es ? '02 — Artesanía' : '02 — Craft'}</h2>
               <p>
@@ -46,7 +63,6 @@ export default function Alma() {
                   : 'Each backpack is handcrafted with high-quality materials and unique screen-printing techniques. No fast fashion, no shortcuts.'}
               </p>
             </section>
-
             <section className="alma-bloque">
               <h2>{es ? '03 — Diseño' : '03 — Design'}</h2>
               <p>
@@ -58,8 +74,32 @@ export default function Alma() {
           </div>
 
           <p className="alma-cierre">{es ? 'Explorar sin límites.' : 'Explore without limits.'}</p>
-
         </div>
+
+        {almaFotos.length > 0 && (
+          <section className="alma-galeria-section">
+            <div className="alma-galeria-header">
+              <span className="alma-galeria-titulo">{es ? 'Archivo visual' : 'Visual archive'}</span>
+            </div>
+            <div className="alma-galeria-grid">
+              {almaFotos.map((foto, i) => (
+                <div
+                  key={i}
+                  className={`alma-foto${i === 0 ? ' alma-foto--hero' : ''}`}
+                  style={{ transitionDelay: `${(i % 3) * 0.12}s` }}
+                  ref={(el) => { fotosRef.current[i] = el; }}
+                >
+                  <img src={foto.url} alt={foto.caption || ''} loading="lazy" />
+                  {foto.caption && (
+                    <div className="alma-foto-overlay">
+                      <p className="alma-foto-caption">{foto.caption}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </>
