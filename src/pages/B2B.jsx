@@ -20,12 +20,10 @@ export default function B2B() {
           <img src={coser1} alt={es ? 'Diseño para empresas' : 'Design for companies'} className="b2b-hero-img" />
           <div className="b2b-hero-overlay" />
           <div className="b2b-hero-content">
-            <p className="b2b-tagline">{es ? 'KAPAC MADE · B2B' : 'KAPAC MADE · B2B'}</p>
+            <p className="b2b-tagline">KAPAC MADE · B2B</p>
             <h1>{es ? 'Diseñamos para tu empresa' : 'We design for your company'}</h1>
             <p className="b2b-subtitulo">
-              {es
-                ? 'Productos únicos, hechos a tu medida.'
-                : 'Unique products, made for you.'}
+              {es ? 'Productos únicos, hechos a tu medida.' : 'Unique products, made for you.'}
             </p>
           </div>
         </section>
@@ -40,7 +38,7 @@ export default function B2B() {
           </p>
         </section>
 
-        {/* Beneficios — minimalista, sin cuadros */}
+        {/* Beneficios */}
         <section className="b2b-section b2b-beneficios">
           <h2>{es ? '¿Por qué Kapac Made?' : 'Why Kapac Made?'}</h2>
           <div className="b2b-grid">
@@ -69,10 +67,10 @@ export default function B2B() {
           <p>
             {es
               ? 'Cuéntanos sobre tu proyecto y diseñemos algo único para tu empresa.'
-              : 'Tell us about your project and let\'s design something unique for your company.'}
+              : "Tell us about your project and let's design something unique for your company."}
           </p>
           <Link to="/contacto" className="b2b-btn">
-            {es ? 'Hablemos' : 'Let\'s talk'} →
+            {es ? 'Hablemos' : "Let's talk"} →
           </Link>
         </section>
 

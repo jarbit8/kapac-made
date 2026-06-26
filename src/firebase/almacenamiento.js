@@ -16,7 +16,7 @@ export async function borrarMedia(url) {
 export async function subirImagen(file, carpeta = 'varios') {
   if (!file) throw new Error('Sin archivo');
   if (!file.type.startsWith('image/')) throw new Error('El archivo debe ser una imagen');
-  if (file.size > 8 * 1024 * 1024) throw new Error('La imagen supera los 8 MB');
+  if (file.size > 20 * 1024 * 1024) throw new Error('La imagen supera los 20 MB');
 
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const nombre = `${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;

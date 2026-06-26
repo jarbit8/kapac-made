@@ -213,9 +213,9 @@ export default function Admin() {
     });
   };
 
-  const pedidosVerificando = pedidos.filter(p => ['verificando_pago', 'procesando_pago', 'verificando'].includes(p.estado));
+  const pedidosVerificando = pedidos.filter(p => ['verificando_pago', 'verificando'].includes(p.estado));
 
-  const ESTADOS_PENDIENTE = ['procesando_pago', 'verificando_pago', 'pendiente_envio', 'enviado', 'pendiente', 'verificando', 'pagado'];
+  const ESTADOS_PENDIENTE = ['verificando_pago', 'pendiente_envio', 'enviado', 'pendiente', 'verificando', 'pagado'];
   const pedidosPendientes  = pedidos.filter(p => ESTADOS_PENDIENTE.includes(p.estado));
   const pedidosCompletados = pedidos.filter(p => p.estado === 'entregado');
   const pedidosCancelados  = pedidos.filter(p => p.estado === 'cancelado');
@@ -395,12 +395,7 @@ export default function Admin() {
                   style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
                 />
                 <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Terracota de botones, enlaces y detalles.
-                  <br/>
-                  <button type="button" onClick={() => { document.documentElement.style.setProperty('--clay', ACENTO_DEFAULT); persistirContenido({ ...contenido, acento: ACENTO_DEFAULT }); }}
-                    style={{ marginTop: 6, background: '#111', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
-                    Restaurar
-                  </button>
+                  Color de botones, enlaces y detalles.
                 </p>
               </div>
 
@@ -418,16 +413,15 @@ export default function Admin() {
                 />
                 <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
                   Color de fondo de todas las páginas.
-                  <br/>
-                  <button type="button" onClick={() => { document.documentElement.style.setProperty('--fondo', FONDO_DEFAULT); persistirContenido({ ...contenido, fondo: FONDO_DEFAULT }); }}
-                    style={{ marginTop: 6, background: '#111', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
-                    Restaurar
-                  </button>
                 </p>
               </div>
 
               <div className="admin-foto-card">
                 <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Color del texto</label>
+                <div style={{ background: contenido.fondo || FONDO_DEFAULT, borderRadius: 6, padding: '10px 14px', marginBottom: 10, border: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ color: contenido.texto || TEXTO_DEFAULT, fontWeight: 500, fontSize: 14 }}>Texto de ejemplo</span>
+                  <span style={{ background: contenido.acento || ACENTO_DEFAULT, color: contenido.texto || TEXTO_DEFAULT, borderRadius: 4, padding: '2px 10px', fontSize: 12, fontWeight: 600 }}>Botón</span>
+                </div>
                 <input
                   type="color"
                   value={contenido.texto || TEXTO_DEFAULT}
@@ -439,12 +433,7 @@ export default function Admin() {
                   style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
                 />
                 <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Color del texto principal.
-                  <br/>
-                  <button type="button" onClick={() => { document.documentElement.style.setProperty('--ink', TEXTO_DEFAULT); persistirContenido({ ...contenido, texto: TEXTO_DEFAULT }); }}
-                    style={{ marginTop: 6, background: '#111', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
-                    Restaurar
-                  </button>
+                  Color del texto del sitio y de botones.
                 </p>
               </div>
             </div>
