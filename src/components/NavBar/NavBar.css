@@ -29,9 +29,9 @@
   display: none;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
-  width: 26px;
-  height: 26px;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
   background: none;
   border: none;
   cursor: pointer;
@@ -40,14 +40,14 @@
 }
 .navbar-burger span {
   display: block;
-  width: 22px;
+  width: 28px;
   height: 2px;
   background: var(--clay);
   transition: all 0.25s ease;
 }
-.navbar-burger.abierto span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.navbar-burger.abierto span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .navbar-burger.abierto span:nth-child(2) { opacity: 0; }
-.navbar-burger.abierto span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.navbar-burger.abierto span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 /* ── Links izquierda ── */
 .navbar-left {
