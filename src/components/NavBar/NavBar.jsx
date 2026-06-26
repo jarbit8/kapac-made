@@ -34,17 +34,27 @@ export default function NavBar() {
     <>
     <nav className="navbar-sticky">
 
-      {/* Hamburguesa (solo móvil) */}
-      <button
-        className={`navbar-burger ${menu ? 'abierto' : ''}`}
-        onClick={() => setMenu(!menu)}
-        aria-label="Menú"
-      >
-        <span></span><span></span><span></span>
-      </button>
+      {/* Hamburguesa (solo móvil) — se oculta cuando el menú está abierto */}
+      {!menu && (
+        <button
+          className="navbar-burger"
+          onClick={() => setMenu(true)}
+          aria-label="Menú"
+        >
+          <span></span><span></span><span></span>
+        </button>
+      )}
 
       {/* Links + idioma — inline en desktop, dropdown en móvil */}
       <div className={`navbar-left ${menu ? 'abierto' : ''}`}>
+        {/* X dentro del dropdown, arriba a la derecha */}
+        {menu && (
+          <button className="navbar-cerrar" onClick={cerrar} aria-label="Cerrar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        )}
         {links.map((l) => (
           <Link key={l.to} to={l.to} className="navbar-link" onClick={cerrar}>{l.label}</Link>
         ))}
