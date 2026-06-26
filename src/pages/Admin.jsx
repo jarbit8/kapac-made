@@ -534,15 +534,17 @@ export default function Admin() {
             <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>Aparecen en la sección Kapac Made con un efecto épico al hacer scroll.</p>
             <div className="admin-fotos-grid">
               {(contenido.almaFotos || []).map((foto, i) => (
-                <div key={i} className="admin-foto-card" style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => {
-                      const nuevas = (contenido.almaFotos || []).filter((_, j) => j !== i);
-                      persistirContenido({ ...contenido, almaFotos: nuevas });
-                    }}
-                    style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', color: '#c00', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, lineHeight: 1 }}
-                    title="Eliminar foto"
-                  >×</button>
+                <div key={i} className="admin-foto-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#888' }}>Foto {i + 1}</span>
+                    <button
+                      onClick={() => {
+                        const nuevas = (contenido.almaFotos || []).filter((_, j) => j !== i);
+                        persistirContenido({ ...contenido, almaFotos: nuevas });
+                      }}
+                      style={{ background: 'none', border: '1px solid #ddd', borderRadius: 6, padding: '2px 10px', cursor: 'pointer', color: '#c00', fontSize: 13, fontWeight: 600 }}
+                    >× Eliminar</button>
+                  </div>
                   <SubirFoto
                     valor={foto.url}
                     carpeta="alma"
