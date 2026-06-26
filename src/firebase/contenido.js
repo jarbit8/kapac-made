@@ -60,9 +60,13 @@ export function medioDispositivo(cfg, esMobile) {
 export function urlDispositivo(cfg, esMobile) {
   if (!cfg) return '';
   if (typeof cfg === 'string') return cfg;
+  // Si tiene slots pc/mobile, los usa con preferencia sobre url directo (formato viejo)
+  if (cfg.pc || cfg.mobile) {
+    const pick = esMobile ? (cfg.mobile || cfg.pc) : (cfg.pc || cfg.mobile);
+    return typeof pick === 'string' ? pick : (pick?.url || '');
+  }
   if (cfg.url) return cfg.url;
-  const pick = esMobile ? (cfg.mobile || cfg.pc) : (cfg.pc || cfg.mobile);
-  return typeof pick === 'string' ? pick : (pick?.url || '');
+  return '';
 }
 
 // Lee el slot pc|mobile para el panel admin (maneja formatos viejos).
