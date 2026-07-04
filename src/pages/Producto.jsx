@@ -14,7 +14,34 @@ import { categoriaLabel } from '../i18n/categorias';
 import { useTraducido } from '../i18n/useTraducido';
 import TextoProducto from '../components/TextoProducto';
 import Cargando from '../components/Cargando/Cargando';
+import { asegurarFuente, cssFuente } from '../utils/fuentes';
 import '../styles/Producto.css';
+
+// Dónde aplica cada zona de estilo del producto (definidas al crear/editar en el admin).
+// Selectores con 2+ clases para ganarles a las reglas !important del CSS base.
+const SELECTOR_ZONA = {
+  nombre: '.producto-page .producto-info h1',
+  precio: '.producto-page .producto-precio, .producto-page .producto-precio-original',
+  descripcion: '.producto-page .producto-descripcion',
+  features: '.producto-page .producto-feature strong, .producto-page .producto-feature span',
+  specs: '.producto-page .producto-tabla td, .producto-page .producto-tabla td:first-child',
+  stock: '.producto-page .producto-stock, .producto-page .producto-stock.stock-bajo',
+};
+
+function cssEstilosProducto(estilos) {
+  return Object.entries(estilos || {})
+    .map(([zona, e]) => {
+      const sel = SELECTOR_ZONA[zona];
+      if (!sel || (!e?.color && !e?.fuente)) return '';
+      const reglas = [
+        e.color ? `color: ${e.color} !important;` : '',
+        e.fuente ? `font-family: ${cssFuente(e.fuente)} !important;` : '',
+      ].filter(Boolean).join(' ');
+      return `${sel} { ${reglas} }`;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
 
 export default function Producto() {
   const { id } = useParams();
@@ -32,6 +59,12 @@ export default function Producto() {
   const touchX = useRef(0); // para deslizar (swipe)
   const nombreTraducido = useTraducido(producto?.nombre, idioma);
   const descripcionTraducida = useTraducido(producto?.descripcion, idioma);
+  const cssProducto = cssEstilosProducto(producto?.estilos);
+
+  // Carga las fuentes elegidas para este producto (si hace falta, desde Google Fonts)
+  useEffect(() => {
+    Object.values(producto?.estilos || {}).forEach((e) => { if (e?.fuente) asegurarFuente(e.fuente); });
+  }, [producto]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -68,6 +101,7 @@ export default function Producto() {
     <>
       <Header />
       <main className="producto-page" style={specsColor ? { '--specs-color': specsColor } : undefined}>
+        {cssProducto && <style>{cssProducto}</style>}
         {cargando && <Cargando />}
         {error && <p className="producto-msg">{error}</p>}
 

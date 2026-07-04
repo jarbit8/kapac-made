@@ -105,6 +105,16 @@ const SPECS_DEFAULT = [
   { label: '', valor: '' },
 ];
 
+// Zonas de texto del producto con color y tipografía propios (se guardan con el producto).
+const ESTILO_ZONAS = [
+  ['nombre', 'Nombre'],
+  ['precio', 'Precio'],
+  ['descripcion', 'Descripción'],
+  ['features', 'Características'],
+  ['specs', 'Especificaciones'],
+  ['stock', 'Aviso de stock'],
+];
+
 const VACIO = {
   nombre: '', nombreEn: '',
   precio: '', precioOriginal: '', moneda: 'S/',
@@ -115,6 +125,7 @@ const VACIO = {
   galeria: [],
   features: FEATURES_DEFAULT,
   specs: SPECS_DEFAULT,
+  estilos: {},
 };
 
 const ESTADOS_PEDIDO = ['procesando_pago', 'verificando_pago', 'pendiente_envio', 'enviado', 'entregado', 'cancelado'];
@@ -281,6 +292,7 @@ export default function Admin() {
       galeria: Array.isArray(p.galeria) ? p.galeria : [],
       features: Array.isArray(p.features) && p.features.length ? p.features : FEATURES_DEFAULT,
       specs: Array.isArray(p.specs) && p.specs.length ? p.specs : SPECS_DEFAULT,
+      estilos: p.estilos || {},
     });
     setEditandoId(p.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -373,36 +385,9 @@ export default function Admin() {
               Sube las fotos del sitio. Cada cambio se <b>guarda solo</b> al subir, quitar o salir de un campo de texto.
             </p>
 
-            <h3 className="admin-fotos-titulo">Diseño (logo, fondo, navegación y botones)</h3>
-            <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>El color de cada texto se cambia con la pastilla 🎨 al lado de su lápiz ✏️, directo en la página. El menú y los botones usan un único color, acá abajo.</p>
+            <h3 className="admin-fotos-titulo">Diseño (fondo, navegación y botones)</h3>
+            <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>El color de cada texto se cambia con la pastilla 🎨 al lado de su lápiz ✏️, directo en la página. El logo se cambia pasando el mouse por encima, en la página de inicio. El menú y los botones usan un único color, acá abajo.</p>
             <div className="admin-fotos-grid">
-              <div className="admin-foto-card">
-                <SubirFoto
-                  valor={contenido.logo}
-                  carpeta="logo"
-                  onSubido={(url) => persistirContenido({ ...contenido, logo: url })}
-                  prevStyle={{
-                    background: contenido.fondo || FONDO_DEFAULT,
-                    objectFit: 'contain',
-                    width: '100%',
-                    height: '180px',
-                    maxWidth: 'none',
-                    aspectRatio: 'unset',
-                    padding: '20px',
-                    boxSizing: 'border-box',
-                  }}
-                  vaciStyle={{
-                    background: contenido.fondo || FONDO_DEFAULT,
-                    width: '100%',
-                    height: '180px',
-                    maxWidth: 'none',
-                    aspectRatio: 'unset',
-                    color: '#999',
-                  }}
-                />
-                <p style={{ fontSize: '12px', color: '#888', margin: '6px 0 0' }}>Logo principal (header, carga, loaders). PNG con fondo transparente.</p>
-              </div>
-
               <div className="admin-foto-card">
                 <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Fondo del sitio</label>
                 <input
@@ -935,6 +920,45 @@ export default function Admin() {
           <label>{t('admin.descripcion_es')} <span style={{ color: '#999', fontSize: '12px' }}>(el inglés se traduce solo)</span>
             <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} rows="3" />
           </label>
+
+          {/* Color y tipografía de cada texto del producto */}
+          <label style={{ marginBottom: 6 }}>Color y tipo de letra <span style={{ color: '#999', fontSize: '12px' }}>(cómo se ve cada texto en la página del producto; la fuente se escribe, ej. IBM Plex Mono, Georgia, Roboto)</span></label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18 }}>
+            {ESTILO_ZONAS.map(([zona, nombreZona]) => {
+              const est = (form.estilos || {})[zona] || {};
+              const setEstilo = (campo, valor) => setForm({
+                ...form,
+                estilos: { ...(form.estilos || {}), [zona]: { ...est, [campo]: valor } },
+              });
+              return (
+                <div key={zona} style={{ display: 'grid', gridTemplateColumns: '150px 44px 1fr 28px', gap: 6, alignItems: 'center' }}>
+                  <span style={{ fontSize: 13 }}>{nombreZona}</span>
+                  <input
+                    type="color"
+                    value={est.color || '#111111'}
+                    onChange={(e) => setEstilo('color', e.target.value)}
+                    title={`Color de ${nombreZona}`}
+                    style={{ width: 36, height: 28, border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer', padding: 0, background: 'none' }}
+                  />
+                  <input
+                    className="admin-foto-input"
+                    placeholder="IBM Plex Mono"
+                    value={est.fuente || ''}
+                    onChange={(e) => setEstilo('fuente', e.target.value)}
+                    spellCheck={false}
+                    title={`Tipo de letra de ${nombreZona}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, estilos: { ...(form.estilos || {}), [zona]: {} } })}
+                    title="Volver al estilo por defecto"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c00', fontSize: 16, padding: 0 }}
+                  >×</button>
+                </div>
+              );
+            })}
+          </div>
+
           <label className="admin-check">
             <input type="checkbox" checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />
             {t('admin.activo')}

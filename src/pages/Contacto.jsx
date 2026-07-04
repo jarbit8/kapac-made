@@ -35,7 +35,7 @@ export default function Contacto() {
       <main className="info-page">
         <div className="info-wrap">
 
-          <p className="info-eyebrow">Kapac Made</p>
+          <Editable id="info_eyebrow" as="p" className="info-eyebrow">Kapac Made</Editable>
           <Editable id="info_titulo" as="h1" className="info-titulo">{es ? 'Información' : 'Information'}</Editable>
 
           {/* Contacto */}
@@ -43,11 +43,11 @@ export default function Contacto() {
             <Editable id="info_contacto_titulo" as="h2">{es ? 'Contacto' : 'Contact'}</Editable>
             <Editable id="info_contacto_direccion" as="p">{es ? 'Arequipa, Perú — Tienda Roots (CC Outlet Arauco)' : 'Arequipa, Peru — Tienda Roots (CC Outlet Arauco)'}</Editable>
             <Editable id="info_contacto_telefono" as="p">{es ? 'WhatsApp / Teléfono: +51 997 050 752' : 'WhatsApp / Phone: +51 997 050 752'}</Editable>
-            <p>Email: contacto@qhapaqbrands.com</p>
+            <Editable id="info_contacto_email" as="p">Email: contacto@qhapaqbrands.com</Editable>
             <p className="info-redes">
-              <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer">Instagram</a>
-              <a href="https://www.facebook.com/KapaqMade/reels/" target="_blank" rel="noopener noreferrer">Facebook</a>
-              <a href="https://www.tiktok.com/@kapac.made" target="_blank" rel="noopener noreferrer">TikTok</a>
+              <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer"><Editable id="info_red_instagram" as="span" sinColor>Instagram</Editable></a>
+              <a href="https://www.facebook.com/KapaqMade/reels/" target="_blank" rel="noopener noreferrer"><Editable id="info_red_facebook" as="span" sinColor>Facebook</Editable></a>
+              <a href="https://www.tiktok.com/@kapac.made" target="_blank" rel="noopener noreferrer"><Editable id="info_red_tiktok" as="span" sinColor>TikTok</Editable></a>
             </p>
           </section>
 

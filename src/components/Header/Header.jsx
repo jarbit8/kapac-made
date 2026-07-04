@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/Header.css';
+import '../EditableImage.css';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useIdioma } from '../../context/LanguageContext';
 import { obtenerProductos } from '../../firebase/productos';
 import logoVerde    from '../../assets/images/kapac_made_3.png';
 import logoTerracota from '../../assets/images/kapac_made_1.png';
-import { useTema } from '../../context/TemaContext';
+import { useTema, LOGO_CACHE_KEY } from '../../context/TemaContext';
+import { obtenerContenido, guardarContenido } from '../../firebase/contenido';
+import { subirImagen } from '../../firebase/almacenamiento';
 
 export default function Header({ transparente = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -85,16 +88,47 @@ export default function Header({ transparente = false }) {
 
   const esAdmin = usuario?.email === 'jarb2299@gmail.com';
   const esSolido = !transparente || scrolled;
-  const { logo } = useTema();
+  const { logo, setTema } = useTema();
   const logoSrc  = logo || logoTerracota; // logo del admin o el de la marca
+
+  // El logo se cambia acá mismo (antes vivía en la pestaña Fotos del admin).
+  const [subiendoLogo, setSubiendoLogo] = useState(false);
+  const logoInputRef = useRef(null);
+  const cambiarLogo = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSubiendoLogo(true);
+    try {
+      const url = await subirImagen(file, 'logo');
+      const c = await obtenerContenido();
+      await guardarContenido({ ...c, logo: url });
+      setTema((prev) => ({ ...prev, logo: url }));
+      try { localStorage.setItem(LOGO_CACHE_KEY, url); } catch (_) {}
+    } catch (_) { /* error silencioso */ }
+    setSubiendoLogo(false);
+  };
 
   return (
     <>
       {/* Header — siempre solo el logo centrado, sin hamburger ni carrito */}
       <header className={`header${esSolido ? ' header-solido' : ''}`}>
         <div className="header-container">
-          <Link to="/" className="logo">
-            <img src={logoSrc} alt="Kapac Made" className="logo-simbolo" />
+          <Link to="/" className={`logo${esAdmin ? ' editable-img-wrap' : ''}`}>
+            <img src={logoSrc} alt="Kapac Made" className={`logo-simbolo${esAdmin ? ' editable-img' : ''}`} />
+            {esAdmin && (
+              <>
+                <button
+                  type="button"
+                  className="editable-img-btn"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); logoInputRef.current?.click(); }}
+                  disabled={subiendoLogo}
+                >
+                  {subiendoLogo ? 'Subiendo…' : '🖼️ Cambiar logo'}
+                </button>
+                <input ref={logoInputRef} type="file" accept="image/*" onChange={cambiarLogo} hidden
+                  onClick={(e) => e.stopPropagation()} />
+              </>
+            )}
           </Link>
         </div>
       </header>

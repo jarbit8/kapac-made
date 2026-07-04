@@ -98,6 +98,20 @@
   opacity: 1;
 }
 
+/* Cambio de logo directo en el header (solo admin) — respeta el tamaño del logo */
+.logo.editable-img-wrap { overflow: visible; }
+.logo.editable-img-wrap .logo-simbolo {
+  width: auto;
+  height: 26px;
+  max-height: 45%;
+  object-fit: contain;
+}
+.logo.editable-img-wrap .editable-img-btn {
+  white-space: nowrap;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
 .logo-texto {
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;

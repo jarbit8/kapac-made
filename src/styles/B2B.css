@@ -47,6 +47,17 @@
   max-width: 900px;
 }
 
+/* Cambio de foto del hero (solo admin): botón siempre visible, abajo a la
+   derecha, para que el título del hero no lo tape */
+.b2b-hero .editable-img-wrap .editable-img-btn {
+  opacity: 1;
+  top: auto;
+  left: auto;
+  bottom: 24px;
+  right: 24px;
+  transform: none;
+}
+
 .b2b-tagline {
   font-family: 'DM Sans', sans-serif;
   font-size: 12px;

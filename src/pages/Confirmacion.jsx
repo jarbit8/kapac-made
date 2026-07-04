@@ -231,7 +231,7 @@ export default function Confirmacion() {
             >
               <span className="canal-icono">✈️</span>
               <div>
-                <strong>Telegram</strong>
+                <strong><Editable id="conf_telegram_titulo" as="span" sinColor>Telegram</Editable></strong>
                 <span><Editable id="conf_telegram_desc" as="span">{es ? 'Notificación instantánea · @kapacmade_bot' : 'Instant notification · @kapacmade_bot'}</Editable></span>
               </div>
               <span className={`canal-check-box ${canales.telegram ? 'on' : ''}`}>

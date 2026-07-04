@@ -45,7 +45,11 @@ export default function Carrito() {
                   <div className="carrito-cantidad">
                     <button onClick={() => cambiarCantidad(item.id, item.cantidad - 1)}>−</button>
                     <span>{item.cantidad}</span>
-                    <button onClick={() => cambiarCantidad(item.id, item.cantidad + 1)}>+</button>
+                    <button
+                      onClick={() => cambiarCantidad(item.id, item.cantidad + 1)}
+                      disabled={item.cantidad >= Number(item.stock ?? 99)}
+                      title={item.cantidad >= Number(item.stock ?? 99) ? (idioma === 'en' ? 'No more stock' : 'No hay más stock') : undefined}
+                    >+</button>
                   </div>
                   <p className="carrito-subtotal">
                     {item.moneda}{item.precio * item.cantidad}.00

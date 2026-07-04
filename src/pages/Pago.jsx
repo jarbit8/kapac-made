@@ -144,7 +144,9 @@ export default function Pago() {
         {metodo === 'yape' && (
           <>
             <div style={{ textAlign: 'left' }}>
-              <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
+              <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>
+                <Editable id="pago_volver" as="span" sinColor>{idioma === 'en' ? '← Back' : '← Volver'}</Editable>
+              </button>
             </div>
             <h1><ET k="pago.yape.titulo" /></h1>
             <p className="pago-sub"><ET k="pago.yape.sub" /></p>
@@ -172,7 +174,9 @@ export default function Pago() {
         {metodo === 'efectivo' && (
           <>
             <div style={{ textAlign: 'left' }}>
-              <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
+              <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>
+                <Editable id="pago_volver" as="span" sinColor>{idioma === 'en' ? '← Back' : '← Volver'}</Editable>
+              </button>
             </div>
             <h1><ET k="pago.ef.titulo" /></h1>
             <p className="pago-sub"><ET k="pago.ef.sub" /></p>

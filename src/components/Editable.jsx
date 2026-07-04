@@ -2,23 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTextos } from '../context/TextosContext';
 import { useIdioma } from '../context/LanguageContext';
 import { traducirEsEn } from '../i18n/traducir';
+import { asegurarFuente, cssFuente, nombreFuente } from '../utils/fuentes';
 import './Editable.css';
 
-// Fuentes ya cargadas en el sitio (sin pedir nada nuevo a internet) + websafe.
-export const FUENTES_DISPONIBLES = [
-  { valor: '', nombre: 'Por defecto' },
-  { valor: "'Hanken Grotesk', sans-serif", nombre: 'Hanken Grotesk' },
-  { valor: "'Fraunces', serif", nombre: 'Fraunces' },
-  { valor: "'Inter', sans-serif", nombre: 'Inter' },
-  { valor: "'IBM Plex Mono', monospace", nombre: 'IBM Plex Mono' },
-  { valor: "'Permanent Marker', cursive", nombre: 'Permanent Marker' },
-  { valor: 'Georgia, serif', nombre: 'Georgia' },
-  { valor: 'Arial, sans-serif', nombre: 'Arial' },
-];
+const FUENTE_SITIO = 'IBM Plex Mono';
 
 // Texto editable en la propia página (solo el admin ve el lápiz, la pastilla de color y la fuente).
 // id: clave única · children: texto por defecto · as: etiqueta (p, h2, span...)
-// sinColor: oculta la pastilla de color (para texto dentro de <button>, que sigue el color único de botones)
+// sinColor: oculta pastilla y fuente (para texto dentro de <button>, que sigue el color único de botones)
 export default function Editable({ id, children, as = 'span', className = '', multiline = false, sinColor = false }) {
   const { textos, esAdmin, guardar } = useTextos();
   const { idioma } = useIdioma();
@@ -32,6 +23,7 @@ export default function Editable({ id, children, as = 'span', className = '', mu
 
   const [editando, setEditando] = useState(false);
   const [draft, setDraft] = useState('');
+  const [fuenteDraft, setFuenteDraft] = useState(null); // null = sin tocar
   const [guardando, setGuardando] = useState(false);
   const Tag = as;
   const elRef = useRef(null);
@@ -43,8 +35,12 @@ export default function Editable({ id, children, as = 'span', className = '', mu
     if (!el) return;
     if (!sinColor && colorPropio) el.style.setProperty('color', colorPropio, 'important');
     else el.style.removeProperty('color');
-    if (fuentePropia) el.style.setProperty('font-family', fuentePropia, 'important');
-    else el.style.removeProperty('font-family');
+    if (fuentePropia) {
+      asegurarFuente(fuentePropia);
+      el.style.setProperty('font-family', cssFuente(fuentePropia), 'important');
+    } else {
+      el.style.removeProperty('font-family');
+    }
   }, [colorPropio, fuentePropia, sinColor, editando]);
 
   if (!esAdmin) {
@@ -76,7 +72,15 @@ export default function Editable({ id, children, as = 'span', className = '', mu
   };
 
   const cambiarColor = (e) => guardar(claveColor, e.target.value);
-  const cambiarFuente = (e) => guardar(claveFuente, e.target.value);
+
+  // La fuente se escribe a mano: se guarda al salir del campo o con Enter.
+  // Escribir la fuente del sitio (o dejarlo vacío) vuelve al valor por defecto.
+  const salvarFuente = () => {
+    if (fuenteDraft === null) return;
+    const n = fuenteDraft.trim();
+    guardar(claveFuente, n && n.toLowerCase() !== FUENTE_SITIO.toLowerCase() ? n : '');
+    setFuenteDraft(null);
+  };
 
   if (editando) {
     return (
@@ -107,17 +111,17 @@ export default function Editable({ id, children, as = 'span', className = '', mu
         />
       )}
       {!sinColor && (
-        <select
+        <input
+          type="text"
           className="editable-fuente"
-          value={fuentePropia}
+          value={fuenteDraft !== null ? fuenteDraft : (nombreFuente(fuentePropia) || FUENTE_SITIO)}
           onClick={(e) => e.stopPropagation()}
-          onChange={cambiarFuente}
-          title="Tipografía de este texto"
-        >
-          {FUENTES_DISPONIBLES.map((f) => (
-            <option key={f.valor} value={f.valor}>{f.nombre}</option>
-          ))}
-        </select>
+          onChange={(e) => setFuenteDraft(e.target.value)}
+          onBlur={salvarFuente}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } }}
+          title="Tipografía de este texto: escribe el nombre y Enter"
+          spellCheck={false}
+        />
       )}
     </Tag>
   );

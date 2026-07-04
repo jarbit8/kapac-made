@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import './KapacAI.css';
+import '../EditableImage.css';
 import logoKapacAI from '../../assets/images/kapac_ai.jpeg';
 import ojoVideo from '../../assets/videos/ojo.mp4';
+import { useTextos } from '../../context/TextosContext';
+import { subirImagen } from '../../firebase/almacenamiento';
 
 /* Ícono de mensaje (burbuja con 3 puntos) */
 const IconMensaje = ({ className }) => (
@@ -23,6 +26,22 @@ export default function KapacAI() {
   const enHome = pathname === '/';
   const [visible, setVisible] = useState(!enHome);
   const [abierto, setAbierto] = useState(false);
+
+  // Logo del chat editable directo acá (solo admin)
+  const { textos, esAdmin, guardar } = useTextos();
+  const logoChat = textos['kai_logo'] || logoKapacAI;
+  const [subiendoLogo, setSubiendoLogo] = useState(false);
+  const logoChatRef = useRef(null);
+  const cambiarLogoChat = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSubiendoLogo(true);
+    try {
+      const url = await subirImagen(file, 'sitio');
+      await guardar('kai_logo', url);
+    } catch (_) { /* error silencioso */ }
+    setSubiendoLogo(false);
+  };
 
   // Ocultar sobre el video en home, mostrar al pasar el hero
   useEffect(() => {
@@ -173,7 +192,22 @@ export default function KapacAI() {
           {/* Header — KAPAC AI + ojo (izq) · reset + WhatsApp (der) */}
           <div className="kai-header">
             <div className="kai-logo-group">
-              <img src={logoKapacAI} alt="Kapac AI" className="kai-logo-img" />
+              {esAdmin ? (
+                <span className="editable-img-wrap kai-logo-edit">
+                  <img src={logoChat} alt="Kapac AI" className="kai-logo-img" />
+                  <button
+                    type="button"
+                    className="editable-img-btn"
+                    onClick={() => logoChatRef.current?.click()}
+                    disabled={subiendoLogo}
+                  >
+                    {subiendoLogo ? '…' : '🖼️ Cambiar'}
+                  </button>
+                  <input ref={logoChatRef} type="file" accept="image/*" onChange={cambiarLogoChat} hidden />
+                </span>
+              ) : (
+                <img src={logoChat} alt="Kapac AI" className="kai-logo-img" />
+              )}
               <div className="kai-ojo">
                 <video src={ojoVideo} autoPlay loop muted playsInline className="kai-ojo-vid" />
               </div>

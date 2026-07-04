@@ -109,6 +109,14 @@
   mix-blend-mode: multiply;
 }
 
+/* Overlay para cambiar el logo del chat (solo admin) */
+.kai-logo-edit { display: inline-flex; align-items: center; }
+.kai-logo-edit .editable-img-btn {
+  white-space: nowrap;
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
 .kai-header-der {
   display: flex;
   align-items: center;

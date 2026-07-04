@@ -60,9 +60,12 @@ export default function Products() {
                 </div>
                 <button
                   className="pgrid-btn"
+                  disabled={Number(producto.stock ?? 0) <= 0}
                   onClick={(e) => { e.preventDefault(); agregar(producto); }}
                 >
-                  <ET k="productos.agregar" sinColor />
+                  {Number(producto.stock ?? 0) <= 0
+                    ? <ET k="productos.sin_stock" sinColor />
+                    : <ET k="productos.agregar" sinColor />}
                 </button>
               </div>
             </Link>

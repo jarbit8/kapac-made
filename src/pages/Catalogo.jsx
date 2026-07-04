@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import ET from '../components/ET';
+import Editable from '../components/Editable';
 import { obtenerProductos } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useCart } from '../context/CartContext';
@@ -95,9 +96,9 @@ export default function Catalogo() {
 
         {busqueda && (
           <p className="catalogo-busqueda-info">
-            {idioma === 'en' ? 'Results for:' : 'Resultados para:'} <strong>"{busqueda}"</strong>
+            <Editable id="catalogo_resultados" as="span">{idioma === 'en' ? 'Results for:' : 'Resultados para:'}</Editable> <strong>"{busqueda}"</strong>
             <button onClick={limpiarBusqueda} className="catalogo-limpiar">
-              ✕ {idioma === 'en' ? 'clear' : 'limpiar'}
+              ✕ <Editable id="catalogo_limpiar" as="span" sinColor>{idioma === 'en' ? 'clear' : 'limpiar'}</Editable>
             </button>
           </p>
         )}

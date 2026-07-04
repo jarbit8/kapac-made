@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import ET from '../components/ET';
+import Editable from '../components/Editable';
 import { useIdioma } from '../context/LanguageContext';
 import imgTarjeta from '../assets/images/tarjeta.jpg';
 import '../styles/PagoTarjeta.css';
@@ -12,7 +13,7 @@ const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
 export default function PagoTarjeta() {
   const { pedidoId } = useParams();
   const navigate = useNavigate();
-  const { t } = useIdioma();
+  const { t, idioma } = useIdioma();
   const [listo, setListo] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [pagado, setPagado] = useState(false);
@@ -165,7 +166,9 @@ export default function PagoTarjeta() {
         </div>
 
         <div style={{ textAlign: 'left' }}>
-          <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
+          <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>
+            <Editable id="pago_volver" as="span" sinColor>{idioma === 'en' ? '← Back' : '← Volver'}</Editable>
+          </button>
         </div>
 
         <h1><ET k="pago.tarjeta.titulo" /></h1>

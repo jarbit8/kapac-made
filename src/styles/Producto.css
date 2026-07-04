@@ -9,7 +9,7 @@
 .producto-page h1, .producto-page h2, .producto-page h3,
 .producto-page p, .producto-page span, .producto-page a,
 .producto-page button, .producto-page div, .producto-page li {
-  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif !important;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace !important;
   letter-spacing: normal !important;
 }
 

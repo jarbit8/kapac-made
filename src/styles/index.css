@@ -1,26 +1,25 @@
 /* ════════════════════════════════════════════════════════════════
    KAPAC MADE — Sistema de diseño
    Dirección: editorial outdoor refinado / artesanal premium andino
-   Display:  Fraunces (serif con carácter, cálido y hecho a mano)
-   Cuerpo:   Hanken Grotesk (grotesca limpia y legible)
+   Tipografía única: IBM Plex Mono (mono técnica, estilo Sealson)
    Fuentes cargadas vía <link> en public/index.html
    ════════════════════════════════════════════════════════════════ */
 
-/* ── OVERRIDE GLOBAL: grotesca limpia estilo Sealson en todo el sitio ──
+/* ── OVERRIDE GLOBAL: mono técnica estilo Sealson en todo el sitio ──
    (familia forzada; los tamaños los define cada componente) */
 *, *::before, *::after,
 h1, h2, h3, h4, h5, h6,
 p, span, a, li, ul, ol, div, label, small, strong, em, blockquote,
 button, input, textarea, select, [class*="kai-"], [class*="navbar"],
 [class*="product"], [class*="hero"], [class*="footer"], [class*="lm-"], [class*="ls-"] {
-  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif !important;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace !important;
   font-style: normal !important;
 }
 
 :root {
-  /* ── Tipografía (grotesca única, estilo Sealson) ── */
-  --font-display: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
-  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* ── Tipografía (mono única, estilo Sealson) ── */
+  --font-display: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-body: 'IBM Plex Mono', 'Courier New', monospace;
 
   /* ── Paleta andina premium ── */
   --cream:      #ffffff;   /* fondo blanco */
@@ -141,7 +140,7 @@ code {
 ::-webkit-scrollbar-thumb:hover { background: #000000; }
 
 /* ════════════════════════════════════════════════════════════════
-   Escala tipográfica — refinada para Fraunces + Hanken Grotesk
+   Escala tipográfica
    ════════════════════════════════════════════════════════════════ */
 
 /* ── Hero ── */

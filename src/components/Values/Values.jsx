@@ -3,14 +3,11 @@ import '../../styles/Values.css';
 import ojoVideo from '../../assets/videos/ojo.mp4';
 import { useIdioma } from '../../context/LanguageContext';
 import Editable from '../Editable';
+import ET from '../ET';
 
 export default function Values() {
-  const { t, idioma } = useIdioma();
-  const values = [
-    { num: '01', title: t('values.01_titulo'), desc: t('values.01_desc') },
-    { num: '02', title: t('values.02_titulo'), desc: t('values.02_desc') },
-    { num: '03', title: t('values.03_titulo'), desc: t('values.03_desc') },
-  ];
+  const { idioma } = useIdioma();
+  const values = ['01', '02', '03'];
 
   return (
     <section className="values">
@@ -20,20 +17,18 @@ export default function Values() {
         </div>
         <h2 className="values-heading">
           <Editable id="values_eyebrow" as="span">{idioma === 'es' ? 'Nuestra filosofía' : 'Our philosophy'}</Editable>
-          {idioma === 'es' ? (
-            <>Mochilas para<br />la vida real</>
-          ) : (
-            <>Backpacks for<br />real life</>
-          )}
+          <Editable id="values_titulo" as="span">
+            {idioma === 'es' ? 'Mochilas para la vida real' : 'Backpacks for real life'}
+          </Editable>
         </h2>
       </div>
 
       <div className="values-grid">
-        {values.map((v, i) => (
-          <div key={i} className="value-item">
-            <span className="value-num">{v.num}</span>
-            <h3 className="value-title">{v.title}</h3>
-            <p className="value-desc">{v.desc}</p>
+        {values.map((num) => (
+          <div key={num} className="value-item">
+            <span className="value-num">{num}</span>
+            <h3 className="value-title"><ET k={`values.${num}_titulo`} /></h3>
+            <p className="value-desc"><ET k={`values.${num}_desc`} multiline /></p>
           </div>
         ))}
       </div>
