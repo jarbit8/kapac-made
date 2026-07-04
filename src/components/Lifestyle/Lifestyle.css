@@ -51,10 +51,14 @@
   background: transparent;
 }
 
-/* Imagen */
+/* Imagen — puede ser el div contenedor (vista admin) o la <img> directa
+   (visitantes): width 100% + object-fit cubren los dos casos */
 .lm-img-wrap {
+  width: 100%;
+  display: block;
   overflow: hidden;
   aspect-ratio: 4 / 3;
+  object-fit: cover;
   background: #e8e2d8;
 }
 
