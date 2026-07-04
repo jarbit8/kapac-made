@@ -4,6 +4,7 @@ import Editable from '../Editable';
 import EditableImage from '../EditableImage';
 import { useIdioma } from '../../context/LanguageContext';
 import { useTextos } from '../../context/TextosContext';
+import { useTraducido } from '../../i18n/useTraducido';
 import { obtenerContenido, guardarContenido, HOME_FOTOS_DEFAULT } from '../../firebase/contenido';
 
 // Texto/imagen por defecto de las 4 fotos originales (las nuevas arrancan vacías).
@@ -13,6 +14,13 @@ const DEFAULTS_FOTO = {
   foto3: { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&q=80&fit=crop', t: ['Naturaleza', 'Nature'], d: ['Cada diseño nace de un paisaje real.\nNinguna mochila es igual a otra.', 'Every design is born from a real landscape.\nNo two backpacks are alike.'] },
   foto4: { url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80&fit=crop', t: ['Artesanía', 'Craft'], d: ['Hecho a mano, uno a uno.', 'Handmade, one by one.'] },
 };
+
+// Texto de las fotos en formato viejo ({url,titulo,desc}, un solo idioma):
+// se traduce solo al inglés mientras el admin no lo pise con el lápiz.
+function EditableTraducido({ id, as = 'span', className = '', multiline = false, texto, idioma }) {
+  const traducido = useTraducido(texto, idioma);
+  return <Editable id={id} as={as} className={className} multiline={multiline}>{traducido}</Editable>;
+}
 
 export default function Lifestyle() {
   const { idioma } = useIdioma();
@@ -58,8 +66,17 @@ export default function Lifestyle() {
             <div key={key} className="lm-item">
               <EditableImage id={`home_${key}_img`} srcDefault={urlDefault} alt={tituloDefault} className="lm-img-wrap" carpeta="home" />
               <div className="lm-caption">
-                <Editable id={`home_${key}_titulo`} as="span" className="lm-caption-title">{tituloDefault}</Editable>
-                <Editable id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline>{descDefault}</Editable>
+                {esViejo && !defReal ? (
+                  <>
+                    <EditableTraducido id={`home_${key}_titulo`} as="span" className="lm-caption-title" texto={tituloDefault} idioma={idioma} />
+                    <EditableTraducido id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline texto={descDefault} idioma={idioma} />
+                  </>
+                ) : (
+                  <>
+                    <Editable id={`home_${key}_titulo`} as="span" className="lm-caption-title">{tituloDefault}</Editable>
+                    <Editable id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline>{descDefault}</Editable>
+                  </>
+                )}
                 {esAdmin && (
                   <button type="button" className="lm-quitar" onClick={() => quitarFoto(key)} title="Quitar foto">× Quitar</button>
                 )}
