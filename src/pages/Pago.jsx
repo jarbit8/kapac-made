@@ -25,6 +25,8 @@ export default function Pago() {
   const [total, setTotal] = useState(null);
   const [codigoCIP, setCodigoCIP] = useState(null);
   const [vencimientoCIP, setVencimientoCIP] = useState(null);
+  const [qrCIP, setQrCIP] = useState('');
+  const [urlPe, setUrlPe] = useState('');
   const [errorCIP, setErrorCIP] = useState('');
   const [copiadoCIP, setCopiadoCIP] = useState(false);
 
@@ -54,6 +56,8 @@ export default function Pago() {
         if (data.ok) {
           setCodigoCIP(data.codigoPago);
           setVencimientoCIP(data.expiration);
+          setQrCIP(data.qr || '');
+          setUrlPe(data.urlPe || '');
         } else {
           setErrorCIP(data.mensaje || 'No se pudo generar el código.');
         }
@@ -210,6 +214,21 @@ export default function Pago() {
                       </p>
                     )}
                   </div>
+
+                  {qrCIP && (
+                    <div style={{ textAlign: 'center', margin: '14px 0' }}>
+                      <img src={qrCIP} alt="QR PagoEfectivo" style={{ width: 150, height: 150, objectFit: 'contain' }} />
+                      <p style={{ fontSize: 12, color: '#666', margin: '4px 0 0' }}>
+                        <Editable id="pago_ef_qr_nota" as="span">{idioma === 'en' ? 'Or scan the QR from your banking app' : 'O escanea el QR desde tu app bancaria'}</Editable>
+                      </p>
+                    </div>
+                  )}
+
+                  {urlPe && (
+                    <a href={urlPe} target="_blank" rel="noopener noreferrer" className="pago-btn-pague efectivo-btn" style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: 10 }}>
+                      <Editable id="pago_ef_pagar_online" as="span" sinColor>{idioma === 'en' ? 'Pay online (banking / agents)' : 'Pagar en línea (banca / agentes)'}</Editable>
+                    </a>
+                  )}
 
                   <div className="pago-pasos">
                     {['pago.ef.paso1', 'pago.ef.paso2', 'pago.ef.paso3', 'pago.ef.paso4', 'pago.ef.paso5'].map((k, i) => (
