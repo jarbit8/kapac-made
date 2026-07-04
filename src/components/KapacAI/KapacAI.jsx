@@ -27,11 +27,16 @@ export default function KapacAI() {
   const [visible, setVisible] = useState(!enHome);
   const [abierto, setAbierto] = useState(false);
 
-  // Logo del chat editable directo acá (solo admin)
+  // Logo y ojo del chat editables directo acá (solo admin).
+  // El ojo se puede cambiar por otra foto o quitar (queda solo el logo).
   const { textos, esAdmin, guardar } = useTextos();
   const logoChat = textos['kai_logo'] || logoKapacAI;
+  const ojoUrl = textos['kai_ojo'] || '';
+  const ojoOculto = textos['kai_ojo_oculto'] === '1';
   const [subiendoLogo, setSubiendoLogo] = useState(false);
+  const [subiendoOjo, setSubiendoOjo] = useState(false);
   const logoChatRef = useRef(null);
+  const ojoChatRef = useRef(null);
   const cambiarLogoChat = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -41,6 +46,16 @@ export default function KapacAI() {
       await guardar('kai_logo', url);
     } catch (_) { /* error silencioso */ }
     setSubiendoLogo(false);
+  };
+  const cambiarOjoChat = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSubiendoOjo(true);
+    try {
+      const url = await subirImagen(file, 'sitio');
+      await guardar('kai_ojo', url);
+    } catch (_) { /* error silencioso */ }
+    setSubiendoOjo(false);
   };
 
   // Ocultar sobre el video en home, mostrar al pasar el hero
@@ -208,9 +223,39 @@ export default function KapacAI() {
               ) : (
                 <img src={logoChat} alt="Kapac AI" className="kai-logo-img" />
               )}
-              <div className="kai-ojo">
-                <video src={ojoVideo} autoPlay loop muted playsInline className="kai-ojo-vid" />
-              </div>
+              {!ojoOculto && (
+                <span className="kai-ojo-wrap">
+                  <div
+                    className={`kai-ojo${esAdmin ? ' kai-ojo-admin' : ''}`}
+                    onClick={esAdmin ? () => ojoChatRef.current?.click() : undefined}
+                    title={esAdmin ? 'Cambiar la foto del ojo' : undefined}
+                    style={subiendoOjo ? { opacity: 0.4 } : undefined}
+                  >
+                    {ojoUrl
+                      ? <img src={ojoUrl} alt="" className="kai-ojo-vid" />
+                      : <video src={ojoVideo} autoPlay loop muted playsInline className="kai-ojo-vid" />}
+                  </div>
+                  {esAdmin && (
+                    <button
+                      type="button"
+                      className="kai-ojo-quitar"
+                      onClick={() => guardar('kai_ojo_oculto', '1')}
+                      title="Quitar el ojo (queda solo el logo)"
+                    >×</button>
+                  )}
+                </span>
+              )}
+              {esAdmin && ojoOculto && (
+                <button
+                  type="button"
+                  className="kai-ojo-agregar"
+                  onClick={() => guardar('kai_ojo_oculto', '')}
+                  title="Volver a mostrar el ojo"
+                >+</button>
+              )}
+              {esAdmin && (
+                <input ref={ojoChatRef} type="file" accept="image/*" onChange={cambiarOjoChat} hidden />
+              )}
             </div>
 
             <div className="kai-header-der">

@@ -117,6 +117,46 @@
   font-size: 10px;
 }
 
+/* Ojo editable (solo admin): clic para cambiar la foto, × para quitarlo */
+.kai-ojo-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
+.kai-ojo-admin { cursor: pointer; }
+.kai-ojo-admin:hover { box-shadow: 0 0 0 2px rgba(176, 83, 46, 0.45); }
+.kai-ojo-quitar {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 15px;
+  height: 15px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.kai-ojo-quitar:hover { background: #c0392b; }
+.kai-ojo-agregar {
+  width: 30px;
+  height: 30px;
+  border: 1.5px dashed rgba(176, 83, 46, 0.55);
+  border-radius: 50%;
+  background: none;
+  color: var(--clay);
+  font-size: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.kai-ojo-agregar:hover { background: rgba(176, 83, 46, 0.12); }
+
 .kai-header-der {
   display: flex;
   align-items: center;
