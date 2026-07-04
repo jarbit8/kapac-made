@@ -9,7 +9,7 @@ export function useTraducido(textoEs, idioma) {
   useEffect(() => {
     let activo = true;
     if (idioma === 'en' && textoEs) {
-      traducirEsEn(textoEs).then((t) => { if (activo) setTexto(t); });
+      traducirEsEn(textoEs).then((t) => { if (activo) setTexto(t || textoEs); });
     } else {
       setTexto(textoEs || '');
     }

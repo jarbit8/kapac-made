@@ -33,6 +33,17 @@ function detectarNavegador(ua = navigator.userAgent) {
   return 'Otro';
 }
 
+// Id de sesión: 1 por pestaña/sesión de navegador. Sirve para saber cuántas
+// veces entraron realmente al sitio, sin que cada página que recorren cuente aparte.
+// esNueva = true solo la primera vez (recién entró), false en el resto de páginas que recorra.
+function obtenerSesionId() {
+  let id = sessionStorage.getItem('kapac_sesion_id');
+  if (id) return { id, esNueva: false };
+  id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  sessionStorage.setItem('kapac_sesion_id', id);
+  return { id, esNueva: true };
+}
+
 // Obtener ubicación vía servicios externos gratuitos (NO guardamos IP cruda).
 // Intentamos varios en cascada por si uno falla / rate-limita / CORS.
 async function obtenerUbicacion() {
@@ -98,12 +109,16 @@ export async function registrarVisita(ruta = '/', usuario = null) {
     if (sessionStorage.getItem(clave)) return;
     sessionStorage.setItem(clave, '1');
 
+    const { id: sesionId, esNueva } = obtenerSesionId();
+
     const { pais, ciudad } = await obtenerUbicacion();
 
     const visitaDoc = {
       fecha: serverTimestamp(),
       dia:   new Date().toISOString().slice(0, 10),
       ruta:  segmento,
+      sesionId,
+      entrada: esNueva, // true solo la primera página de la sesión (recién entró al sitio)
       // Identidad
       email: usuario?.email || null,
       uid:   usuario?.uid || null,
@@ -121,16 +136,17 @@ export async function registrarVisita(ruta = '/', usuario = null) {
   }
 }
 
-/** Obtener las últimas N visitas individuales (para tabla en admin) */
-export async function obtenerVisitasRecientes(n = 50) {
+/** Obtener las últimas N entradas al sitio (no cada página que recorren) para la lista del admin */
+export async function obtenerVisitasRecientes(n = 10) {
   try {
-    // Traemos más para luego filtrar al admin sin perder cantidad
+    // Traemos más para luego filtrar al admin y quedarnos solo con entradas, sin perder cantidad
     const snap = await getDocs(
-      query(collection(db, COLECCION), orderBy('fecha', 'desc'), limit(n * 3))
+      query(collection(db, COLECCION), orderBy('fecha', 'desc'), limit(Math.max(n * 6, 120)))
     );
     return snap.docs
       .map((d) => ({ id: d.id, ...d.data() }))
       .filter((v) => v.email !== EMAIL_ADMIN)
+      .filter((v) => v.entrada)
       .slice(0, n);
   } catch (e) {
     console.error('Error obteniendo visitas recientes:', e);
@@ -155,34 +171,39 @@ export async function obtenerEstadisticas(diasAtras = 30) {
       .filter((v) => v.email !== EMAIL_ADMIN); // excluir admin
 
     const porRuta = {};
-    const porDia = {};
     const porPais = {};
     const porDispositivo = {};
     const visitantesUnicos = new Set();
-    let total = 0;
+    const sesionesPorDia = {}; // dia -> Set(sesionId): cuenta accesos reales, no cada página vista
+    const sesionesTotal = new Set();
     let logueados = 0;
 
-    // Hoy
     const hoy = new Date().toISOString().slice(0, 10);
-    let visitasHoy = 0;
 
     visitas.forEach((v) => {
       porRuta[v.ruta]  = (porRuta[v.ruta]  || 0) + 1;
-      porDia[v.dia]    = (porDia[v.dia]    || 0) + 1;
       porPais[v.pais || 'Desconocido'] = (porPais[v.pais || 'Desconocido'] || 0) + 1;
       porDispositivo[v.dispositivo || 'Otro'] = (porDispositivo[v.dispositivo || 'Otro'] || 0) + 1;
-      total++;
       if (v.email) logueados++;
-      if (v.dia === hoy) visitasHoy++;
-      // Identificador único: email si está logueado, sino combinación de país+ciudad+dispositivo+navegador
-      const id = v.email || `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`;
-      visitantesUnicos.add(id);
+
+      // Sesión = 1 entrada real al sitio. Las visitas viejas (sin sesionId) se agrupan
+      // por persona+día como aproximación, para no contar cada página que recorrieron.
+      const identidad = v.email || `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`;
+      const sid = v.sesionId || `${v.dia}_${identidad}`;
+      sesionesTotal.add(sid);
+      if (!sesionesPorDia[v.dia]) sesionesPorDia[v.dia] = new Set();
+      sesionesPorDia[v.dia].add(sid);
+
+      visitantesUnicos.add(identidad);
     });
 
+    const porDia = {};
+    Object.entries(sesionesPorDia).forEach(([dia, set]) => { porDia[dia] = set.size; });
+
     return {
-      total,
+      total: sesionesTotal.size,
       logueados,
-      visitasHoy,
+      visitasHoy: sesionesPorDia[hoy] ? sesionesPorDia[hoy].size : 0,
       visitantesUnicos: visitantesUnicos.size,
       porRuta,
       porDia,

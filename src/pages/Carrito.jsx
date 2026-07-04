@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
@@ -24,12 +25,12 @@ export default function Carrito() {
     <>
       <Header />
       <main className="carrito-page">
-        <h1>{t('carrito.titulo')}</h1>
+        <h1><ET k="carrito.titulo" /></h1>
 
         {items.length === 0 ? (
           <div className="carrito-vacio">
-            <p>{t('carrito.vacio')}</p>
-            <button onClick={() => navigate('/catalogo')}>{t('carrito.ver_catalogo')}</button>
+            <p><ET k="carrito.vacio" /></p>
+            <button onClick={() => navigate('/catalogo')}><ET k="carrito.ver_catalogo" sinColor /></button>
           </div>
         ) : (
           <>
@@ -56,13 +57,13 @@ export default function Carrito() {
 
             <div className="carrito-resumen">
               <div className="carrito-total">
-                <span>{t('carrito.total')}:</span>
+                <span><ET k="carrito.total" />:</span>
                 <strong>S/{totalPrecio}.00</strong>
               </div>
               <button className="carrito-finalizar" onClick={finalizar}>
-                {t('carrito.ir_pagar')}
+                <ET k="carrito.ir_pagar" sinColor />
               </button>
-              <button className="carrito-vaciar" onClick={vaciar}>{t('carrito.continuar')}</button>
+              <button className="carrito-vaciar" onClick={vaciar}><ET k="carrito.continuar" sinColor /></button>
             </div>
           </>
         )}

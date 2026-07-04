@@ -25,7 +25,7 @@
 .confirmacion-header h1 {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--ink);
   margin: 0 0 0.5rem;
 }
 
@@ -121,7 +121,7 @@
 
 .recibo-total strong {
   font-size: 1.3rem;
-  color: #1a1a1a;
+  color: var(--ink);
 }
 
 .recibo-detalles {
@@ -158,7 +158,7 @@
 .confirmacion-canal h2 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--ink);
   margin: 0 0 0.4rem;
 }
 
@@ -339,7 +339,7 @@
   flex: 1;
   padding: 0.85rem;
   background: #fff;
-  color: #1a1a1a;
+  color: var(--ink);
   border: 1.5px solid #ddd;
   border-radius: 12px;
   font-size: 0.95rem;

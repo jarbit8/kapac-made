@@ -2,6 +2,7 @@ import React from 'react';
 import '../../styles/Values.css';
 import ojoVideo from '../../assets/videos/ojo.mp4';
 import { useIdioma } from '../../context/LanguageContext';
+import Editable from '../Editable';
 
 export default function Values() {
   const { t, idioma } = useIdioma();
@@ -18,7 +19,7 @@ export default function Values() {
           <video src={ojoVideo} autoPlay loop muted playsInline />
         </div>
         <h2 className="values-heading">
-          <span>{idioma === 'es' ? 'Nuestra filosofía' : 'Our philosophy'}</span>
+          <Editable id="values_eyebrow" as="span">{idioma === 'es' ? 'Nuestra filosofía' : 'Our philosophy'}</Editable>
           {idioma === 'es' ? (
             <>Mochilas para<br />la vida real</>
           ) : (

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/Products.css';
+import ET from '../ET';
 import { obtenerProductos } from '../../firebase/productos';
 import { imagen } from '../../firebase/imagenesProductos';
 import { useCart } from '../../context/CartContext';
@@ -24,7 +25,7 @@ export default function Products() {
 
   if (cargando) return (
     <section className="products-grid-section">
-      <p className="products-cargando">{t('productos.cargando')}</p>
+      <p className="products-cargando"><ET k="productos.cargando" /></p>
     </section>
   );
 
@@ -61,7 +62,7 @@ export default function Products() {
                   className="pgrid-btn"
                   onClick={(e) => { e.preventDefault(); agregar(producto); }}
                 >
-                  {t('productos.agregar')}
+                  <ET k="productos.agregar" sinColor />
                 </button>
               </div>
             </Link>

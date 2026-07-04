@@ -15,9 +15,10 @@ import { HERO_CACHE_KEY } from '../components/Hero/Hero';
 import {
   obtenerContenido, guardarContenido,
   HOME_FOTOS_DEFAULT, GALERIA_PRODUCTO_DEFAULT, FOOTER_FONDO_DEFAULT, IN_THE_ZONE_DEFAULT, HERO_VIDEO_DEFAULT,
-  ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT, ALMA_FOTOS_DEFAULT, normalizarMedio, slotMedio,
+  ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT, ALMA_FOTOS_DEFAULT, B2B_BENEFICIOS_DEFAULT, normalizarMedio, slotMedio,
 } from '../firebase/contenido';
 import { useIdioma } from '../context/LanguageContext';
+import { useTextos } from '../context/TextosContext';
 import { useTema, LOGO_CACHE_KEY } from '../context/TemaContext';
 import Cargando from '../components/Cargando/Cargando';
 import '../styles/Admin.css';
@@ -98,15 +99,10 @@ const CAT_ES = { Climbing: 'Escalada', Mountaineering: 'Montañismo', Trekking: 
 
 const FEATURES_DEFAULT = [
   { titulo: '', desc: '' },
-  { titulo: '', desc: '' },
-  { titulo: '', desc: '' },
 ];
 
 const SPECS_DEFAULT = [
-  { label: 'Capacidad', valor: '' },
-  { label: 'Dimensiones', valor: '' },
-  { label: 'Peso', valor: '' },
-  { label: 'Material', valor: '' },
+  { label: '', valor: '' },
 ];
 
 const VACIO = {
@@ -152,18 +148,20 @@ export default function Admin() {
   const { usuario, cargando } = useAuth();
   const { t } = useIdioma();
   const { setTema } = useTema();
+  const { textos, guardar: guardarTextoGlobal } = useTextos();
   const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
   const [pedidos, setPedidos] = useState([]);
   const [stats, setStats] = useState({ total: 0, logueados: 0, porRuta: {}, porDia: {}, porPais: {} });
   const [visitasRecientes, setVisitasRecientes] = useState([]);
+  const [visitasLimite, setVisitasLimite] = useState(10);
   const [pestana, setPestana] = useState('productos'); // 'productos' | 'pedidos' | 'visitas'
   const [form, setForm] = useState(VACIO);
   const [editandoId, setEditandoId] = useState(null);
   const [msg, setMsg] = useState('');
 
   // Contenido editable (fotos de home + galería de producto)
-  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT });
+  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT });
   const [guardandoContenido, setGuardandoContenido] = useState(false);
   const [msgContenido, setMsgContenido] = useState('');
 
@@ -196,8 +194,6 @@ export default function Admin() {
     }
   };
 
-  // Guarda el estado actual (para los textos, al salir del campo).
-  const guardarFotos = () => persistirContenido(contenido);
 
   const cargar = async () => {
     setProductos(await obtenerProductos());
@@ -209,7 +205,14 @@ export default function Admin() {
 
   const cargarStats = async () => {
     setStats(await obtenerEstadisticas(30));
-    setVisitasRecientes(await obtenerVisitasRecientes(50));
+    setVisitasLimite(10);
+    setVisitasRecientes(await obtenerVisitasRecientes(10));
+  };
+
+  const verMasVisitas = async () => {
+    const nuevoLimite = visitasLimite + 10;
+    setVisitasLimite(nuevoLimite);
+    setVisitasRecientes(await obtenerVisitasRecientes(nuevoLimite));
   };
 
   useEffect(() => { cargar(); cargarPedidos(); cargarStats(); }, []);
@@ -350,16 +353,16 @@ export default function Admin() {
             )}
           </button>
           <button
-            className={pestana === 'visitas' ? 'activa' : ''}
-            onClick={() => { setPestana('visitas'); cargarStats(); }}
-          >
-            {t('admin.tab_visitas')}
-          </button>
-          <button
             className={pestana === 'fotos' ? 'activa' : ''}
             onClick={() => { setPestana('fotos'); cargarContenido(); }}
           >
             📸 Fotos
+          </button>
+          <button
+            className={pestana === 'visitas' ? 'activa' : ''}
+            onClick={() => { setPestana('visitas'); cargarStats(); }}
+          >
+            {t('admin.tab_visitas')}
           </button>
         </div>
 
@@ -370,7 +373,8 @@ export default function Admin() {
               Sube las fotos del sitio. Cada cambio se <b>guarda solo</b> al subir, quitar o salir de un campo de texto.
             </p>
 
-            <h3 className="admin-fotos-titulo">Diseño (logo y color de la marca)</h3>
+            <h3 className="admin-fotos-titulo">Diseño (logo, fondo, navegación y botones)</h3>
+            <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>El color de cada texto se cambia con la pastilla 🎨 al lado de su lápiz ✏️, directo en la página. El menú y los botones usan un único color, acá abajo.</p>
             <div className="admin-fotos-grid">
               <div className="admin-foto-card">
                 <SubirFoto
@@ -400,23 +404,6 @@ export default function Admin() {
               </div>
 
               <div className="admin-foto-card">
-                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Color de la marca (acento)</label>
-                <input
-                  type="color"
-                  value={contenido.acento || ACENTO_DEFAULT}
-                  onChange={(e) => {
-                    const color = e.target.value;
-                    document.documentElement.style.setProperty('--clay', color);
-                    persistirContenido({ ...contenido, acento: color });
-                  }}
-                  style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
-                />
-                <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Color de botones, enlaces y detalles.
-                </p>
-              </div>
-
-              <div className="admin-foto-card">
                 <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Fondo del sitio</label>
                 <input
                   type="color"
@@ -434,19 +421,19 @@ export default function Admin() {
               </div>
 
               <div className="admin-foto-card">
-                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Color del texto</label>
+                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Navegación y botones</label>
                 <input
                   type="color"
-                  value={contenido.texto || TEXTO_DEFAULT}
+                  value={contenido.acento || ACENTO_DEFAULT}
                   onChange={(e) => {
                     const color = e.target.value;
-                    document.documentElement.style.setProperty('--ink', color);
-                    persistirContenido({ ...contenido, texto: color });
+                    document.documentElement.style.setProperty('--clay', color);
+                    persistirContenido({ ...contenido, acento: color });
                   }}
                   style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
                 />
                 <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Color del texto del sitio y de botones.
+                  Un solo color para el menú (Shop, Kapac Made, B2B, Info, Admin) y todos los botones del sitio.
                 </p>
               </div>
             </div>
@@ -467,51 +454,18 @@ export default function Admin() {
               </div>
             </div>
 
-            <h3 className="admin-fotos-titulo">Página principal — galería de estilo de vida</h3>
-            <div className="admin-fotos-grid">
-              {contenido.homeFotos.map((f, i) => (
-                <div key={i} className="admin-foto-card">
-                  <SubirFoto valor={f.url} carpeta="home"
-                    onSubido={(url) => {
-                      const nuevas = [...contenido.homeFotos];
-                      nuevas[i] = { ...nuevas[i], url };
-                      persistirContenido({ ...contenido, homeFotos: nuevas });
-                    }} />
-                  <input
-                    className="admin-foto-input"
-                    placeholder="Título (ej. Explorar)"
-                    value={f.titulo || ''}
-                    onChange={(e) => {
-                      const nuevas = [...contenido.homeFotos];
-                      nuevas[i] = { ...nuevas[i], titulo: e.target.value };
-                      setContenido({ ...contenido, homeFotos: nuevas });
-                    }}
-                    onBlur={guardarFotos} />
-                  <textarea
-                    className="admin-foto-input"
-                    rows="2"
-                    placeholder="Descripción"
-                    value={f.desc || ''}
-                    onChange={(e) => {
-                      const nuevas = [...contenido.homeFotos];
-                      nuevas[i] = { ...nuevas[i], desc: e.target.value };
-                      setContenido({ ...contenido, homeFotos: nuevas });
-                    }}
-                    onBlur={guardarFotos} />
-                </div>
-              ))}
-            </div>
+            <p style={{ fontSize: 12, color: '#888', marginTop: -8, marginBottom: 16 }}>Las fotos, títulos y descripciones de "estilo de vida" del home se editan directo en la página de inicio (imagen, lápiz ✏️ y +/− ahí mismo).</p>
 
             <h3 className="admin-fotos-titulo">Foto épica de "in the zone" (se abre en pestaña nueva)</h3>
             <div className="admin-fotos-grid">
               <div className="admin-foto-card">
                 <SubirFoto valor={slotMedio(contenido.inTheZoneFoto, 'pc')?.url || ''} carpeta="zone"
-                  onSubido={(url) => persistirContenido({ ...contenido, inTheZoneFoto: { ...(typeof contenido.inTheZoneFoto === 'object' && !contenido.inTheZoneFoto?.url ? contenido.inTheZoneFoto : {}), pc: { tipo: 'imagen', url } } })} />
+                  onSubido={(url) => persistirContenido({ ...contenido, inTheZoneFoto: { ...(typeof contenido.inTheZoneFoto === 'object' && (contenido.inTheZoneFoto?.pc || contenido.inTheZoneFoto?.mobile) ? contenido.inTheZoneFoto : {}), pc: { tipo: 'imagen', url } } })} />
                 <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>🖥️ Para computadora.</p>
               </div>
               <div className="admin-foto-card">
                 <SubirFoto valor={slotMedio(contenido.inTheZoneFoto, 'mobile')?.url || ''} carpeta="zone"
-                  onSubido={(url) => persistirContenido({ ...contenido, inTheZoneFoto: { ...(typeof contenido.inTheZoneFoto === 'object' && !contenido.inTheZoneFoto?.url ? contenido.inTheZoneFoto : {}), mobile: { tipo: 'imagen', url } } })} />
+                  onSubido={(url) => persistirContenido({ ...contenido, inTheZoneFoto: { ...(typeof contenido.inTheZoneFoto === 'object' && (contenido.inTheZoneFoto?.pc || contenido.inTheZoneFoto?.mobile) ? contenido.inTheZoneFoto : {}), mobile: { tipo: 'imagen', url } } })} />
                 <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>📱 Para celular (vertical).</p>
               </div>
             </div>
@@ -520,68 +474,16 @@ export default function Admin() {
             <div className="admin-fotos-grid">
               <div className="admin-foto-card">
                 <SubirMedia valor={slotMedio(contenido.footerFondo, 'pc')}
-                  onSubido={(media) => persistirContenido({ ...contenido, footerFondo: { ...(typeof contenido.footerFondo === 'object' && !contenido.footerFondo?.url ? contenido.footerFondo : {}), pc: media } })} />
+                  onSubido={(media) => persistirContenido({ ...contenido, footerFondo: { ...(typeof contenido.footerFondo === 'object' && (contenido.footerFondo?.pc || contenido.footerFondo?.mobile) ? contenido.footerFondo : {}), pc: media } })} />
                 <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>🖥️ Para computadora. Se ve al fondo del pie de página.</p>
               </div>
               <div className="admin-foto-card">
                 <SubirMedia valor={slotMedio(contenido.footerFondo, 'mobile')}
-                  onSubido={(media) => persistirContenido({ ...contenido, footerFondo: { ...(typeof contenido.footerFondo === 'object' && !contenido.footerFondo?.url ? contenido.footerFondo : {}), mobile: media } })} />
+                  onSubido={(media) => persistirContenido({ ...contenido, footerFondo: { ...(typeof contenido.footerFondo === 'object' && (contenido.footerFondo?.pc || contenido.footerFondo?.mobile) ? contenido.footerFondo : {}), mobile: media } })} />
                 <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>📱 Para celular.</p>
               </div>
             </div>
 
-            <h3 className="admin-fotos-titulo">Galería "Kapac Made" — fotos al final de la página</h3>
-            <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>Aparecen en la sección Kapac Made con un efecto épico al hacer scroll.</p>
-            <div className="admin-fotos-grid">
-              {(contenido.almaFotos || []).map((foto, i) => (
-                <div key={i} className="admin-foto-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#888' }}>Foto {i + 1}</span>
-                    <button
-                      onClick={() => {
-                        const nuevas = (contenido.almaFotos || []).filter((_, j) => j !== i);
-                        persistirContenido({ ...contenido, almaFotos: nuevas });
-                      }}
-                      style={{ background: 'none', border: '1px solid #ddd', borderRadius: 6, padding: '2px 10px', cursor: 'pointer', color: '#c00', fontSize: 13, fontWeight: 600 }}
-                    >× Eliminar</button>
-                  </div>
-                  <SubirFoto
-                    valor={foto.url}
-                    carpeta="alma"
-                    onSubido={(url) => {
-                      const nuevas = [...(contenido.almaFotos || [])];
-                      nuevas[i] = { ...nuevas[i], url };
-                      persistirContenido({ ...contenido, almaFotos: nuevas });
-                    }}
-                  />
-                  <input
-                    className="admin-foto-input"
-                    placeholder="Caption (opcional)"
-                    value={foto.caption || ''}
-                    onChange={(e) => {
-                      const nuevas = [...(contenido.almaFotos || [])];
-                      nuevas[i] = { ...nuevas[i], caption: e.target.value };
-                      setContenido({ ...contenido, almaFotos: nuevas });
-                    }}
-                    onBlur={() => persistirContenido({ ...contenido, almaFotos: contenido.almaFotos })}
-                  />
-                </div>
-              ))}
-            </div>
-            <button
-              className="admin-foto-agregar"
-              onClick={() => {
-                const nuevas = [...(contenido.almaFotos || []), { url: '', caption: '' }];
-                setContenido({ ...contenido, almaFotos: nuevas });
-              }}
-            >+ Agregar foto</button>
-
-            <div className="admin-fotos-guardar">
-              <button onClick={guardarFotos} disabled={guardandoContenido}>
-                {guardandoContenido ? 'Guardando…' : 'Guardar cambios'}
-              </button>
-              {msgContenido && <span className="admin-fotos-msg">{msgContenido}</span>}
-            </div>
           </div>
         )}
 
@@ -592,18 +494,22 @@ export default function Admin() {
               <div className="contador-card" style={{ borderTop: '4px solid #ff6b35' }}>
                 <span className="contador-num">{stats.visitasHoy || 0}</span>
                 <span className="contador-label">Hoy</span>
+                <span className="contador-sub">veces que entraron al sitio hoy</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #5f0a87' }}>
                 <span className="contador-num">{stats.total}</span>
                 <span className="contador-label">Últimos 30 días</span>
+                <span className="contador-sub">veces que entraron en el mes</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #2196f3' }}>
                 <span className="contador-num">{stats.visitantesUnicos || 0}</span>
                 <span className="contador-label">Visitantes únicos</span>
+                <span className="contador-sub">personas distintas (una que vuelve no se cuenta 2 veces)</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #4caf50' }}>
                 <span className="contador-num">{stats.logueados}</span>
                 <span className="contador-label">Identificados</span>
+                <span className="contador-sub">entraron con su cuenta</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #f57c00' }}>
                 <span className="contador-num">{Object.keys(stats.porPais).length}</span>
@@ -611,7 +517,8 @@ export default function Admin() {
               </div>
             </div>
 
-            <h3 style={{ marginTop: 32, marginBottom: 16 }}>🕐 Actividad reciente</h3>
+            <h3 style={{ marginTop: 32, marginBottom: 4 }}>🕐 Actividad reciente</h3>
+            <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Cada vez que alguien entró al sitio (no cada página que recorrió después).</p>
             <div className="admin-visitas-lista">
               {visitasRecientes.length === 0 && (
                 <p style={{ color: '#999', textAlign: 'center', padding: 30 }}>
@@ -657,8 +564,14 @@ export default function Admin() {
                 );
               })}
             </div>
+            {visitasRecientes.length >= visitasLimite && (
+              <button type="button" className="admin-fila-agregar" style={{ marginTop: 12 }} onClick={verMasVisitas}>
+                Ver más
+              </button>
+            )}
 
-            <h3 style={{ marginTop: 32, marginBottom: 16 }}>📅 Visitas por día</h3>
+            <h3 style={{ marginTop: 32, marginBottom: 4 }}>📅 Visitas por día</h3>
+            <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Cuántas veces entraron al sitio cada día.</p>
             <div className="admin-tabla-stats">
               {Object.entries(stats.porDia)
                 .sort((a, b) => b[0].localeCompare(a[0]))
@@ -683,7 +596,8 @@ export default function Admin() {
               )}
             </div>
 
-            <h3 style={{ marginTop: 32, marginBottom: 16 }}>📄 Páginas más visitadas</h3>
+            <h3 style={{ marginTop: 32, marginBottom: 4 }}>📄 A dónde navegan (rutas)</h3>
+            <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Qué páginas recorren dentro de una misma visita.</p>
             <div className="admin-tabla-stats">
               {Object.entries(stats.porRuta)
                 .sort((a, b) => b[1] - a[1])
@@ -940,13 +854,22 @@ export default function Admin() {
             </button>
           </div>
           {/* Características destacadas */}
-          <label style={{ marginBottom: 6 }}>Características <span style={{ color: '#999', fontSize: '12px' }}>(las 3 propiedades que se muestran bajo la descripción)</span></label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
-            {(form.features || FEATURES_DEFAULT).map((f, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 8 }}>
+          <label style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+            Características <span style={{ color: '#999', fontSize: '12px' }}>(propiedades que se muestran bajo la descripción)</span>
+            <input
+              type="color"
+              value={textos['producto_specs_color'] || '#1d1b15'}
+              onChange={(e) => guardarTextoGlobal('producto_specs_color', e.target.value)}
+              title="Color de Características y Especificaciones en TODOS los productos"
+              style={{ width: 26, height: 26, border: '1px solid #ddd', borderRadius: '50%', cursor: 'pointer', padding: 0, background: 'none' }}
+            />
+          </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+            {(form.features || []).map((f, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 28px', gap: 6, alignItems: 'center' }}>
                 <input
                   className="admin-foto-input"
-                  placeholder={`Título ${i + 1} (ej. Resistente al agua)`}
+                  placeholder={`Título ${i + 1}`}
                   value={f.titulo}
                   onChange={(e) => {
                     const arr = [...form.features];
@@ -964,18 +887,24 @@ export default function Admin() {
                     setForm({ ...form, features: arr });
                   }}
                 />
+                <button type="button" onClick={() => setForm({ ...form, features: form.features.filter((_, j) => j !== i) })}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c00', fontSize: 16, padding: 0 }}>×</button>
               </div>
             ))}
           </div>
+          <button type="button" className="admin-fila-agregar" style={{ marginBottom: 18 }}
+            onClick={() => setForm({ ...form, features: [...(form.features || []), { titulo: '', desc: '' }] })}>
+            + Agregar fila
+          </button>
 
           {/* Especificaciones */}
-          <label style={{ marginBottom: 6 }}>Especificaciones <span style={{ color: '#999', fontSize: '12px' }}>(tabla de la ficha técnica)</span></label>
+          <label style={{ marginBottom: 6 }}>Especificaciones <span style={{ color: '#999', fontSize: '12px' }}>(tabla de la ficha técnica — usa el mismo color de arriba)</span></label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
             {(form.specs || SPECS_DEFAULT).map((s, i) => (
               <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 28px', gap: 6, alignItems: 'center' }}>
                 <input
                   className="admin-foto-input"
-                  placeholder="Etiqueta (ej. Peso)"
+                  placeholder={`Título ${i + 1}`}
                   value={s.label}
                   onChange={(e) => {
                     const arr = [...form.specs];
@@ -985,7 +914,7 @@ export default function Admin() {
                 />
                 <input
                   className="admin-foto-input"
-                  placeholder="Valor (ej. 0.9 kg)"
+                  placeholder="Descripción corta"
                   value={s.valor}
                   onChange={(e) => {
                     const arr = [...form.specs];
@@ -998,7 +927,7 @@ export default function Admin() {
               </div>
             ))}
           </div>
-          <button type="button" className="admin-foto-agregar" style={{ marginBottom: 18 }}
+          <button type="button" className="admin-fila-agregar" style={{ marginBottom: 18 }}
             onClick={() => setForm({ ...form, specs: [...(form.specs || []), { label: '', valor: '' }] })}>
             + Agregar fila
           </button>

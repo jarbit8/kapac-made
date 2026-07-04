@@ -125,7 +125,7 @@
   align-self: flex-start;
   background: none !important;
   border: none;
-  color: #999 !important;
+  color: var(--clay) !important;
   font-size: 12px !important;
   font-weight: 500 !important;
   cursor: pointer;
@@ -134,7 +134,7 @@
   text-transform: uppercase;
   letter-spacing: 1px !important;
 }
-.producto-volver:hover { color: var(--ink) !important; }
+.producto-volver:hover { opacity: 0.7; }
 
 .producto-categoria {
   align-self: flex-start;
@@ -151,7 +151,7 @@
 .producto-info h1 {
   font-size: 34px !important;
   font-weight: 700 !important;
-  color: var(--ink) !important;
+  color: #1d1b15 !important;
   line-height: 1.1;
   margin: 0 0 18px;
   text-transform: uppercase;
@@ -168,7 +168,7 @@
 .producto-precio {
   font-size: 22px !important;
   font-weight: 600 !important;
-  color: var(--ink) !important;
+  color: #1d1b15 !important;
 }
 
 .producto-precio-original {
@@ -197,13 +197,13 @@
 .producto-feature strong {
   font-size: 13px !important;
   font-weight: 700 !important;
-  color: var(--ink) !important;
+  color: var(--specs-color, #1d1b15) !important;
   text-transform: uppercase;
   letter-spacing: 1px !important;
 }
 .producto-feature span {
   font-size: 14px !important;
-  color: #555 !important;
+  color: var(--specs-color, #1d1b15) !important;
   line-height: 1.6;
 }
 
@@ -217,12 +217,12 @@
   padding: 11px 0;
   border-bottom: 1px solid #eee;
   font-size: 13.5px !important;
-  color: #444 !important;
+  color: var(--specs-color, #1d1b15) !important;
   vertical-align: top;
 }
 .producto-tabla td:first-child {
   font-weight: 600 !important;
-  color: var(--ink) !important;
+  color: var(--specs-color, #1d1b15) !important;
   text-transform: uppercase;
   letter-spacing: 0.5px !important;
   font-size: 12px !important;
@@ -261,7 +261,7 @@
   width: 100%;
   padding: 16px !important;
   background: #fff !important;
-  color: var(--ink) !important;
+  color: var(--clay) !important;
   border: 1px solid #ddd !important;
   border-radius: 0;
   font-size: 12px !important;
@@ -271,10 +271,10 @@
   cursor: pointer;
   transition: border-color 0.2s;
 }
-.producto-ir-carrito:hover { border-color: var(--ink) !important; }
+.producto-ir-carrito:hover { border-color: var(--clay) !important; }
 
 /* ── Stock bajo (urgencia) ── */
-.producto-stock.stock-bajo { color: var(--clay) !important; }
+.producto-stock.stock-bajo { color: #1d1b15 !important; }
 
 /* ── Galería editorial (filas escalonadas) ── */
 .producto-galeria-edit {
@@ -292,7 +292,7 @@
   font-weight: 700 !important;
   letter-spacing: 3px !important;
   text-transform: uppercase;
-  color: var(--clay) !important;
+  color: var(--ink) !important;
   margin-bottom: 12px;
 }
 
@@ -356,7 +356,7 @@
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 2.5px !important;
-  color: var(--ink) !important;
+  color: var(--specs-color, #1d1b15) !important;
   margin-bottom: 36px;
   text-align: center;
 }
@@ -392,7 +392,7 @@
   font-weight: 600 !important;
   text-transform: uppercase;
   letter-spacing: 0.5px !important;
-  color: var(--ink) !important;
+  color: var(--specs-color, #1d1b15) !important;
   margin-bottom: 4px;
 }
 .relacionado-precio {

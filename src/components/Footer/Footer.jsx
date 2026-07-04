@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { cerrarSesion } from '../../firebase/auth';
 import { pedirCodigo, confirmarCodigo } from '../../firebase/newsletter';
 import { obtenerContenido, FOOTER_FONDO_DEFAULT, medioDispositivo } from '../../firebase/contenido';
+import Editable from '../Editable';
 
 /* ─── Iconos SVG (sociales) ─────────────────────────────────────────────── */
 const IconInstagram = () => (
@@ -161,10 +162,10 @@ export default function Footer() {
 
       {/* Newsletter — sin caja, directo sobre el fondo */}
       <div className="footer-news-wrap">
-        <p className="footer-news-titulo">NEWS LETTER</p>
+        <Editable id="footer_news_titulo" as="p" className="footer-news-titulo">NEWS LETTER</Editable>
         {paso === 'ok' ? (
           <p className="footer-news-ok-mini">
-            {es ? '¡Listo! Ya eres parte de la tribu 🎒' : 'Done! You\'re in the tribe 🎒'}
+            <Editable id="footer_news_ok" as="span">{es ? '¡Listo! Ya eres parte de la tribu 🎒' : 'Done! You\'re in the tribe 🎒'}</Editable>
           </p>
         ) : paso === 'codigo' ? (
           <>
@@ -178,7 +179,7 @@ export default function Footer() {
                 onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ''))}
               />
               <button type="submit" disabled={cargandoNews}>
-                {cargandoNews ? '...' : (es ? 'Confirmar' : 'Confirm')}
+                {cargandoNews ? '...' : <Editable id="footer_news_confirmar" as="span" sinColor>{es ? 'Confirmar' : 'Confirm'}</Editable>}
               </button>
             </form>
             <p className="footer-news-hint-mini">{es ? `Código enviado a ${correo}` : `Code sent to ${correo}`}</p>
@@ -193,7 +194,7 @@ export default function Footer() {
               onChange={(e) => setCorreo(e.target.value)}
             />
             <button type="submit" disabled={cargandoNews}>
-              {cargandoNews ? '...' : (es ? 'Suscribirme' : 'Subscribe')}
+              {cargandoNews ? '...' : <Editable id="footer_news_suscribirme" as="span" sinColor>{es ? 'Suscribirme' : 'Subscribe'}</Editable>}
             </button>
           </form>
         )}

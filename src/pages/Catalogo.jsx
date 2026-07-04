@@ -2,10 +2,12 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
 import { obtenerProductos } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
+import { useTextos } from '../context/TextosContext';
 import TextoProducto from '../components/TextoProducto';
 import Cargando from '../components/Cargando/Cargando';
 import '../styles/Catalogo.css';
@@ -17,6 +19,8 @@ export default function Catalogo() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { agregar } = useCart();
   const { t, idioma } = useIdioma();
+  const { textos, esAdmin, guardar } = useTextos();
+  const colorProductos = textos['catalogo_color'] || '';
 
   const busqueda = searchParams.get('q') || '';
   const [catSel, setCatSel] = useState('__todas__');
@@ -74,8 +78,20 @@ export default function Catalogo() {
   return (
     <>
       <Header />
-      <main className="catalogo-page">
-        <h1 className="catalogo-page-title">{t('catalogo.titulo')}</h1>
+      <main className="catalogo-page" style={colorProductos ? { '--catalogo-texto': colorProductos } : undefined}>
+        <h1 className="catalogo-page-title">
+          <ET k="catalogo.titulo" />
+          {esAdmin && (
+            <input
+              type="color"
+              className="editable-color"
+              value={colorProductos || '#1d1b15'}
+              onChange={(e) => guardar('catalogo_color', e.target.value)}
+              title="Color del nombre y precio de TODOS los productos"
+              style={{ marginLeft: 10, verticalAlign: 'middle' }}
+            />
+          )}
+        </h1>
 
         {busqueda && (
           <p className="catalogo-busqueda-info">
@@ -90,7 +106,7 @@ export default function Catalogo() {
         {error && <p style={{ color: 'crimson' }}>{error}</p>}
 
         {!cargando && !error && filtrados.length === 0 && (
-          <p style={{ color: '#666', padding: '40px 0' }}>{t('catalogo.vacio')}</p>
+          <p style={{ color: '#666', padding: '40px 0' }}><ET k="catalogo.vacio" /></p>
         )}
 
         {!cargando && !error && filtrados.length > 0 && (

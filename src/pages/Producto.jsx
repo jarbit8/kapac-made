@@ -2,10 +2,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
+import Editable from '../components/Editable';
 import { obtenerProducto, obtenerProductos } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
+import { useTextos } from '../context/TextosContext';
 import { nombreProducto } from '../i18n/producto';
 import { categoriaLabel } from '../i18n/categorias';
 import { useTraducido } from '../i18n/useTraducido';
@@ -18,6 +21,8 @@ export default function Producto() {
   const navigate = useNavigate();
   const { agregar } = useCart();
   const { t, idioma } = useIdioma();
+  const { textos } = useTextos();
+  const specsColor = textos['producto_specs_color'] || '';
   const [producto, setProducto] = useState(null);
   const [relacionados, setRelacionados] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -62,7 +67,7 @@ export default function Producto() {
   return (
     <>
       <Header />
-      <main className="producto-page">
+      <main className="producto-page" style={specsColor ? { '--specs-color': specsColor } : undefined}>
         {cargando && <Cargando />}
         {error && <p className="producto-msg">{error}</p>}
 
@@ -115,7 +120,7 @@ export default function Producto() {
 
             <div className="producto-info">
               <button className="producto-volver" onClick={() => navigate(-1)}>
-                {idioma === 'en' ? '← Back' : '← Volver'}
+                <Editable id="producto_volver" as="span" sinColor>{idioma === 'en' ? '← Back' : '← Volver'}</Editable>
               </button>
 
               {producto.categoria && (
@@ -137,10 +142,7 @@ export default function Producto() {
               {Array.isArray(producto.features) && producto.features.some(f => f.titulo) && (
                 <div className="producto-features">
                   {producto.features.filter(f => f.titulo).map((f, i) => (
-                    <div key={i} className="producto-feature">
-                      <strong>{f.titulo}</strong>
-                      {f.desc && <span>{f.desc}</span>}
-                    </div>
+                    <FeatureFila key={i} titulo={f.titulo} desc={f.desc} idioma={idioma} />
                   ))}
                 </div>
               )}
@@ -150,7 +152,7 @@ export default function Producto() {
                 <table className="producto-tabla">
                   <tbody>
                     {producto.specs.filter(s => s.label && s.valor).map((s, i) => (
-                      <tr key={i}><td>{s.label}</td><td>{s.valor}</td></tr>
+                      <SpecFila key={i} label={s.label} valor={s.valor} idioma={idioma} />
                     ))}
                   </tbody>
                 </table>
@@ -171,11 +173,11 @@ export default function Producto() {
                 onClick={handleAgregar}
                 disabled={producto.stock <= 0}
               >
-                {agregado ? t('producto.agregado') : t('producto.agregar')}
+                {agregado ? <ET k="producto.agregado" sinColor /> : <ET k="producto.agregar" sinColor />}
               </button>
 
               <button className="producto-ir-carrito" onClick={() => navigate('/carrito')}>
-                {idioma === 'en' ? 'Go to cart' : 'Ir al carrito'}
+                <Editable id="producto_ir_carrito" as="span" sinColor>{idioma === 'en' ? 'Go to cart' : 'Ir al carrito'}</Editable>
               </button>
             </div>
           </div>
@@ -201,7 +203,7 @@ export default function Producto() {
         {/* También te puede gustar */}
         {producto && relacionados.length > 0 && (
           <section className="producto-relacionados">
-            <h2>{idioma === 'en' ? 'You may also like' : 'También te puede gustar'}</h2>
+            <Editable id="producto_relacionados_titulo" as="h2">{idioma === 'en' ? 'You may also like' : 'También te puede gustar'}</Editable>
             <div className="relacionados-grid">
               {relacionados.map((p) => (
                 <Link key={p.id} to={`/producto/${p.id}`} className="relacionado-card">
@@ -219,4 +221,23 @@ export default function Producto() {
       <Footer />
     </>
   );
+}
+
+// Fila de "Características" — traduce título y descripción automáticamente al inglés.
+function FeatureFila({ titulo, desc, idioma }) {
+  const tituloT = useTraducido(titulo, idioma);
+  const descT = useTraducido(desc, idioma);
+  return (
+    <div className="producto-feature">
+      <strong>{tituloT}</strong>
+      {desc && <span>{descT}</span>}
+    </div>
+  );
+}
+
+// Fila de "Especificaciones" — traduce etiqueta y valor automáticamente al inglés.
+function SpecFila({ label, valor, idioma }) {
+  const labelT = useTraducido(label, idioma);
+  const valorT = useTraducido(valor, idioma);
+  return <tr><td>{labelT}</td><td>{valorT}</td></tr>;
 }

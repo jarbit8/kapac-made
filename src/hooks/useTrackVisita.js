@@ -17,8 +17,11 @@ export default function useTrackVisita() {
   useEffect(() => {
     // Esperar a que termine de cargar el estado de auth
     if (cargando) return;
-    // No registrar visitas del propio admin
+    // No registrar visitas del propio admin (ni de su navegador, aunque no esté logueado)
     if (usuario?.email === EMAIL_ADMIN) return;
+    try {
+      if (localStorage.getItem('kapac_dispositivo_admin') === '1') return;
+    } catch (_) {}
     registrarVisita(location.pathname, usuario || null);
   }, [location.pathname, usuario, cargando]);
 }

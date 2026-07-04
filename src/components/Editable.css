@@ -19,6 +19,45 @@
 }
 .editable-lapiz:hover { opacity: 1; background: rgba(176, 83, 46, 0.25); }
 
+.editable-color {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-block;
+  margin-left: 4px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  vertical-align: middle;
+  opacity: 0.6;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.15);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.editable-color:hover { opacity: 1; transform: scale(1.1); }
+.editable-color::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+.editable-color::-webkit-color-swatch { border: none; border-radius: 50%; }
+.editable-color::-moz-color-swatch { border: none; border-radius: 50%; }
+
+.editable-fuente {
+  display: inline-block;
+  margin-left: 4px;
+  height: 22px;
+  max-width: 100px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(176, 83, 46, 0.12);
+  color: #6b4a3a;
+  font-size: 10px;
+  cursor: pointer;
+  vertical-align: middle;
+  opacity: 0.7;
+  transition: opacity 0.15s, background 0.15s;
+}
+.editable-fuente:hover { opacity: 1; background: rgba(176, 83, 46, 0.25); }
+
 .editable-edit {
   display: inline-flex;
   flex-direction: column;

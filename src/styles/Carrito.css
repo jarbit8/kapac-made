@@ -62,7 +62,7 @@
 
 .carrito-precio {
   font-size: 14px;
-  color: #666;
+  color: var(--ink);
 }
 
 .carrito-cantidad {

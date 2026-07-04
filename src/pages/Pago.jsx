@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
+import Editable from '../components/Editable';
 import { actualizarEstadoPedido } from '../firebase/pedidos';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
@@ -105,18 +107,18 @@ export default function Pago() {
         <main className="pago-page">
           <div className="pago-confirmado">
             <div className="pago-check">✅</div>
-            <h1>{t('conf.titulo')}</h1>
+            <h1><ET k="conf.titulo" /></h1>
             <p>
-              {idioma === 'en'
+              <Editable id="pago_verificando_1" as="span">{idioma === 'en'
                 ? 'Your payment is being verified by the Kapac Made team.'
-                : 'Tu pago está siendo verificado por el equipo de Kapac Made.'}<br />
-              {idioma === 'en'
+                : 'Tu pago está siendo verificado por el equipo de Kapac Made.'}</Editable><br />
+              <Editable id="pago_verificando_2" as="span">{idioma === 'en'
                 ? 'We\'ll notify you once it\'s confirmed.'
-                : 'Te avisaremos cuando sea confirmado.'}
+                : 'Te avisaremos cuando sea confirmado.'}</Editable>
             </p>
-            <p className="pago-pedido-id">{t('conf.pedido')} <strong>#{pedidoId.slice(0, 8)}</strong></p>
+            <p className="pago-pedido-id"><ET k="conf.pedido" /> <strong>#{pedidoId.slice(0, 8)}</strong></p>
             <button onClick={() => navigate('/pedidos')} className="pago-btn-pedidos">
-              {t('conf.ver_pedidos')}
+              <ET k="conf.ver_pedidos" sinColor />
             </button>
           </div>
         </main>
@@ -131,11 +133,11 @@ export default function Pago() {
       <main className="pago-page">
         {/* Indicador de pasos */}
         <div className="checkout-steps">
-          <div className="step completado"><span className="step-num">✓</span><span className="step-label">{t('steps.entrega')}</span></div>
+          <div className="step completado"><span className="step-num">✓</span><span className="step-label"><ET k="steps.entrega" /></span></div>
           <div className="step-linea completada" />
-          <div className="step completado"><span className="step-num">✓</span><span className="step-label">{t('steps.pago')}</span></div>
+          <div className="step completado"><span className="step-num">✓</span><span className="step-label"><ET k="steps.pago" /></span></div>
           <div className="step-linea completada" />
-          <div className="step activo"><span className="step-num">3</span><span className="step-label">{t('steps.confirmacion')}</span></div>
+          <div className="step activo"><span className="step-num">3</span><span className="step-label"><ET k="steps.confirmacion" /></span></div>
         </div>
 
         {/* ===== YAPE — solo QR (rápido, sin código) ===== */}
@@ -144,29 +146,24 @@ export default function Pago() {
             <div style={{ textAlign: 'left' }}>
               <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
             </div>
-            <h1>{t('pago.yape.titulo')}</h1>
-            <p className="pago-sub">{t('pago.yape.sub')}</p>
+            <h1><ET k="pago.yape.titulo" /></h1>
+            <p className="pago-sub"><ET k="pago.yape.sub" /></p>
             <div className="pago-card">
-              {total && <div className="pago-monto">{t('pago.yape.monto')} <strong className="yape-color">S/{total}.00</strong></div>}
+              {total && <div className="pago-monto"><ET k="pago.yape.monto" /> <strong className="yape-color">S/{total}.00</strong></div>}
               <img src={imgYape} alt="Yape" style={{ height: 48, objectFit: 'contain', marginBottom: 16, display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
               <img src={qrImg} alt="QR Yape Kapac Made" className="pago-qr" />
               <div className="pago-pasos">
-                {[
-                  t('pago.yape.paso1'),
-                  t('pago.yape.paso2'),
-                  t('pago.yape.paso3'),
-                  t('pago.yape.paso4'),
-                ].map((p, i) => (
+                {['pago.yape.paso1', 'pago.yape.paso2', 'pago.yape.paso3', 'pago.yape.paso4'].map((k, i) => (
                   <div className="pago-paso" key={i}>
                     <span className="paso-num yape-bg">{i + 1}</span>
-                    <span>{p}</span>
+                    <span><ET k={k} /></span>
                   </div>
                 ))}
               </div>
               <button className="pago-btn-pague yape-btn" onClick={yaPague} disabled={cargando}>
-                {cargando ? t('pago.yape.enviando') : t('pago.yape.boton')}
+                {cargando ? <ET k="pago.yape.enviando" sinColor /> : <ET k="pago.yape.boton" sinColor />}
               </button>
-              <p className="pago-aviso">{t('pago.yape.aviso')}</p>
+              <p className="pago-aviso"><ET k="pago.yape.aviso" /></p>
             </div>
           </>
         )}
@@ -177,65 +174,59 @@ export default function Pago() {
             <div style={{ textAlign: 'left' }}>
               <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
             </div>
-            <h1>{t('pago.ef.titulo')}</h1>
-            <p className="pago-sub">{t('pago.ef.sub')}</p>
+            <h1><ET k="pago.ef.titulo" /></h1>
+            <p className="pago-sub"><ET k="pago.ef.sub" /></p>
             <div className="pago-card">
-              {total && <div className="pago-monto">{t('pago.yape.monto')} <strong className="efectivo-color">S/{total}.00</strong></div>}
+              {total && <div className="pago-monto"><ET k="pago.yape.monto" /> <strong className="efectivo-color">S/{total}.00</strong></div>}
               <img src={imgEfectivo} alt="PagoEfectivo" style={{ height: 40, objectFit: 'contain', marginBottom: 16, display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
 
               {cargando && !codigoCIP && (
-                <p style={{ padding: '40px 0', color: '#666' }}>{t('pago.ef.generando')}</p>
+                <p style={{ padding: '40px 0', color: '#666' }}><ET k="pago.ef.generando" /></p>
               )}
 
               {errorCIP && (
                 <div className="codigo-cip-error">
                   ⚠️ {errorCIP}
                   <br />
-                  <small>{t('pago.ef.error_falla')}</small>
+                  <small><ET k="pago.ef.error_falla" /></small>
                 </div>
               )}
 
               {codigoCIP && (
                 <>
                   <div className="codigo-cip-box">
-                    <p className="codigo-cip-label">{t('pago.ef.codigo_label')}</p>
+                    <p className="codigo-cip-label"><ET k="pago.ef.codigo_label" /></p>
                     <div className="codigo-cip-numero">{codigoCIP}</div>
                     <button className="codigo-cip-copiar" onClick={copiarCIP}>
-                      {copiadoCIP ? t('pago.ef.copiado') : t('pago.ef.copiar')}
+                      {copiadoCIP ? <ET k="pago.ef.copiado" sinColor /> : <ET k="pago.ef.copiar" sinColor />}
                     </button>
                     {vencimientoCIP && (
                       <p className="codigo-cip-vence">
-                        {t('pago.ef.vence')} {new Date(vencimientoCIP * 1000).toLocaleString(idioma === 'en' ? 'en-US' : 'es-PE', { dateStyle: 'medium', timeStyle: 'short' })}
+                        <ET k="pago.ef.vence" /> {new Date(vencimientoCIP * 1000).toLocaleString(idioma === 'en' ? 'en-US' : 'es-PE', { dateStyle: 'medium', timeStyle: 'short' })}
                       </p>
                     )}
                   </div>
 
                   <div className="pago-pasos">
-                    {[
-                      t('pago.ef.paso1'),
-                      t('pago.ef.paso2'),
-                      t('pago.ef.paso3'),
-                      t('pago.ef.paso4'),
-                      t('pago.ef.paso5'),
-                    ].map((p, i) => (
+                    {['pago.ef.paso1', 'pago.ef.paso2', 'pago.ef.paso3', 'pago.ef.paso4', 'pago.ef.paso5'].map((k, i) => (
                       <div className="pago-paso" key={i}>
                         <span className="paso-num efectivo-bg">{i + 1}</span>
-                        <span>{p}</span>
+                        <span><ET k={k} /></span>
                       </div>
                     ))}
                   </div>
 
                   <button className="pago-btn-pague efectivo-btn" onClick={yaGenereCIP} disabled={cargando}>
-                    {cargando ? t('pago.yape.enviando') : t('pago.ef.boton')}
+                    {cargando ? <ET k="pago.yape.enviando" sinColor /> : <ET k="pago.ef.boton" sinColor />}
                   </button>
-                  <p className="pago-aviso">{t('pago.ef.aviso')}</p>
+                  <p className="pago-aviso"><ET k="pago.ef.aviso" /></p>
                 </>
               )}
             </div>
           </>
         )}
 
-        <p className="pago-id-ref">{t('pago.referencia')} <code>#{pedidoId.slice(0, 8)}</code></p>
+        <p className="pago-id-ref"><ET k="pago.referencia" /> <code>#{pedidoId.slice(0, 8)}</code></p>
       </main>
       <Footer />
     </>

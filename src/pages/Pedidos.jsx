@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { obtenerPedidosUsuario } from '../firebase/pedidos';
@@ -68,7 +69,7 @@ export default function Pedidos() {
     <>
       <Header />
       <main className="pedidos-page">
-        <h1>{t('pedidos.titulo')}</h1>
+        <h1><ET k="pedidos.titulo" /></h1>
 
         {cargando && <Cargando />}
 
@@ -78,15 +79,15 @@ export default function Pedidos() {
 
         {!cargando && !error && pedidos.length === 0 && (
           <div className="pedidos-vacio">
-            <p>{t('pedidos.vacio')}</p>
-            <button onClick={() => navigate('/catalogo')}>{t('pedidos.ver_tienda')}</button>
+            <p><ET k="pedidos.vacio" /></p>
+            <button onClick={() => navigate('/catalogo')}><ET k="pedidos.ver_tienda" sinColor /></button>
           </div>
         )}
 
         {!cargando && !error && pedidos.map((p) => (
           <div key={p.id} className="pedido-card">
             <div className="pedido-header">
-              <span className="pedido-id">{t('pedidos.pedido')} #{p.id.slice(0, 8)}</span>
+              <span className="pedido-id"><ET k="pedidos.pedido" /> #{p.id.slice(0, 8)}</span>
               <span className={`pedido-estado estado-${p.estado}`}>{estadoLabel(p.estado)}</span>
             </div>
             <p className="pedido-fecha">{formatoFecha(p.fecha)}</p>
@@ -97,7 +98,7 @@ export default function Pedidos() {
                 </li>
               ))}
             </ul>
-            <div className="pedido-total">{t('pedidos.total')}: <strong>S/{p.total}.00</strong></div>
+            <div className="pedido-total"><ET k="pedidos.total" />: <strong>S/{p.total}.00</strong></div>
           </div>
         ))}
       </main>

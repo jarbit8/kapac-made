@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
+import Editable from '../components/Editable';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { obtenerPerfil } from '../firebase/perfil';
@@ -119,29 +121,29 @@ export default function Checkout() {
         <div className="checkout-steps">
           <div className="step activo">
             <span className="step-num">1</span>
-            <span className="step-label">{t('steps.entrega')}</span>
+            <span className="step-label"><ET k="steps.entrega" /></span>
           </div>
           <div className="step-linea" />
           <div className="step">
             <span className="step-num">2</span>
-            <span className="step-label">{t('steps.pago')}</span>
+            <span className="step-label"><ET k="steps.pago" /></span>
           </div>
           <div className="step-linea" />
           <div className="step">
             <span className="step-num">3</span>
-            <span className="step-label">{t('steps.confirmacion')}</span>
+            <span className="step-label"><ET k="steps.confirmacion" /></span>
           </div>
         </div>
 
-        <h1>{t('checkout.tipo_envio')}</h1>
+        <h1><ET k="checkout.tipo_envio" /></h1>
 
         {/* Email para invitados */}
         {!usuario && (
           <div className="checkout-form" style={{ marginBottom: '12px' }}>
-            <h2>{idioma === 'en' ? 'Your email' : 'Tu correo'}</h2>
+            <h2><Editable id="checkout_email_titulo" as="span">{idioma === 'en' ? 'Your email' : 'Tu correo'}</Editable></h2>
             <div className="checkout-grid">
               <label className="full">
-                Email <span className="req">*</span>
+                <Editable id="checkout_email_label" as="span">Email</Editable> <span className="req">*</span>
                 <input
                   type="email"
                   placeholder="tucorreo@email.com"
@@ -151,9 +153,9 @@ export default function Checkout() {
               </label>
             </div>
             <p style={{ fontSize: '12px', color: '#888', marginTop: '6px' }}>
-              {idioma === 'en'
+              <Editable id="checkout_email_hint" as="span" multiline>{idioma === 'en'
                 ? 'We\'ll send your order confirmation here.'
-                : 'Te enviaremos la confirmación de tu pedido aquí.'}
+                : 'Te enviaremos la confirmación de tu pedido aquí.'}</Editable>
             </p>
           </div>
         )}
@@ -166,8 +168,8 @@ export default function Checkout() {
           >
             <div className="opcion-icono"><IconoCasa /></div>
             <div className="opcion-info">
-              <strong>{t('checkout.envio_dom')}</strong>
-              <span>{t('checkout.envio_dom_sub')}</span>
+              <strong><ET k="checkout.envio_dom" /></strong>
+              <span><ET k="checkout.envio_dom_sub" /></span>
             </div>
             <div className={`opcion-radio ${modo === 'envio' ? 'on' : ''}`} />
           </button>
@@ -178,8 +180,8 @@ export default function Checkout() {
           >
             <div className="opcion-icono"><IconoTienda /></div>
             <div className="opcion-info">
-              <strong>{t('checkout.recojo')}</strong>
-              <span>{t('checkout.recojo_sub')}</span>
+              <strong><ET k="checkout.recojo" /></strong>
+              <span><ET k="checkout.recojo_sub" /></span>
             </div>
             <div className={`opcion-radio ${modo === 'recojo' ? 'on' : ''}`} />
           </button>
@@ -188,17 +190,17 @@ export default function Checkout() {
         {/* Formulario envío a domicilio */}
         {modo === 'envio' && (
           <div className="checkout-form">
-            <h2>{idioma === 'en' ? 'Shipping details' : 'Datos de envío'}</h2>
+            <h2><Editable id="checkout_envio_titulo" as="span">{idioma === 'en' ? 'Shipping details' : 'Datos de envío'}</Editable></h2>
             <div className="checkout-grid">
               <label>
-                {t('checkout.nombre')} <span className="req">*</span>
+                <ET k="checkout.nombre" /> <span className="req">*</span>
                 <input
                   value={form.nombre}
                   onChange={e => setForm({ ...form, nombre: e.target.value })}
                 />
               </label>
               <label>
-                {t('checkout.telefono')} <span className="req">*</span>
+                <ET k="checkout.telefono" /> <span className="req">*</span>
                 <input
                   placeholder="987 654 321"
                   value={form.telefono}
@@ -206,21 +208,21 @@ export default function Checkout() {
                 />
               </label>
               <label className="full">
-                {t('checkout.direccion')} <span className="req">*</span>
+                <ET k="checkout.direccion" /> <span className="req">*</span>
                 <input
                   value={form.direccion}
                   onChange={e => setForm({ ...form, direccion: e.target.value })}
                 />
               </label>
               <label>
-                {t('checkout.distrito')} <span className="req">*</span>
+                <ET k="checkout.distrito" /> <span className="req">*</span>
                 <input
                   value={form.distrito}
                   onChange={e => setForm({ ...form, distrito: e.target.value })}
                 />
               </label>
               <label>
-                {t('checkout.referencia')}
+                <ET k="checkout.referencia" />
                 <input
                   value={form.referencia}
                   onChange={e => setForm({ ...form, referencia: e.target.value })}
@@ -236,26 +238,26 @@ export default function Checkout() {
             <div className="recojo-info-box">
               <div className="recojo-pin">📍</div>
               <div>
-                <strong>{t('checkout.recojo_sub')}</strong>
+                <strong><ET k="checkout.recojo_sub" /></strong>
                 <p>Arequipa, {idioma === 'en' ? 'Peru' : 'Perú'}</p>
                 <p className="recojo-nota">
-                  {idioma === 'en'
+                  <Editable id="checkout_recojo_nota" as="span" multiline>{idioma === 'en'
                     ? 'We\'ll contact you by WhatsApp to arrange a pickup time.'
-                    : 'Te contactaremos por WhatsApp para coordinar el horario de recojo.'}
+                    : 'Te contactaremos por WhatsApp para coordinar el horario de recojo.'}</Editable>
                 </p>
               </div>
             </div>
-            <h2>{idioma === 'en' ? 'Your contact info' : 'Tus datos de contacto'}</h2>
+            <h2><Editable id="checkout_recojo_titulo" as="span">{idioma === 'en' ? 'Your contact info' : 'Tus datos de contacto'}</Editable></h2>
             <div className="checkout-grid">
               <label>
-                {t('checkout.nombre')} <span className="req">*</span>
+                <ET k="checkout.nombre" /> <span className="req">*</span>
                 <input
                   value={formRecojo.nombre}
                   onChange={e => setFormRecojo({ ...formRecojo, nombre: e.target.value })}
                 />
               </label>
               <label>
-                {t('checkout.telefono')} <span className="req">*</span>
+                <ET k="checkout.telefono" /> <span className="req">*</span>
                 <input
                   placeholder="987 654 321"
                   value={formRecojo.telefono}
@@ -269,7 +271,7 @@ export default function Checkout() {
         {error && <p className="checkout-error">{error}</p>}
 
         <button className="checkout-btn-continuar" onClick={continuar}>
-          {t('checkout.continuar')} →
+          <ET k="checkout.continuar" sinColor /> →
         </button>
       </main>
       <Footer />

@@ -16,7 +16,7 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   font-weight: 600;
-  color: var(--clay);
+  color: var(--ink);
   margin-bottom: 18px;
 }
 
@@ -63,7 +63,7 @@
 .legal-subtitulo {
   font-size: 26px !important;
   font-weight: 700 !important;
-  color: #111;
+  color: var(--ink);
   margin: 28px 0 14px !important;
   letter-spacing: 0.3px;
 }

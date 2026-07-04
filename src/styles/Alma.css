@@ -19,7 +19,7 @@
   font-weight: 600 !important;
   letter-spacing: 3px !important;
   text-transform: uppercase;
-  color: var(--clay) !important;
+  color: var(--ink) !important;
   margin-bottom: 28px;
 }
 
@@ -36,7 +36,7 @@
 .alma-intro {
   font-size: 16px !important;
   line-height: 1.75 !important;
-  color: #4a463c !important;
+  color: var(--ink) !important;
   max-width: 640px;
   margin: 0 0 80px;
   font-weight: 400 !important;
@@ -51,40 +51,75 @@
   padding-top: 48px;
 }
 
+.alma-bloque {
+  position: relative;
+}
+
 .alma-bloque h2 {
   font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 2px !important;
   text-transform: uppercase;
-  color: var(--clay) !important;
+  color: var(--ink) !important;
   margin: 0 0 14px;
 }
 
 .alma-bloque p {
   font-size: 14px !important;
   line-height: 1.7 !important;
-  color: #4a463c !important;
+  color: var(--ink) !important;
   margin: 0;
   font-weight: 400 !important;
 }
+
+.alma-bloque-quitar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  color: #c0392b;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.15s;
+}
+.alma-bloque-quitar:hover { opacity: 1; }
+
+.alma-agregar-bloque {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  padding: 16px;
+  border: 1px dashed rgba(176, 83, 46, 0.4);
+  background: none;
+  color: var(--clay);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+}
+.alma-agregar-bloque:hover { background: rgba(176, 83, 46, 0.06); }
 
 .alma-cierre {
   margin-top: 80px;
   text-align: center;
   font-size: 15px !important;
   letter-spacing: 2px !important;
-  color: var(--clay) !important;
+  color: var(--ink) !important;
   text-transform: lowercase;
 }
 
-/* ── Galería de archivo visual ── */
-.alma-page {
-  padding-bottom: 0;
-}
+/* ── Archivo visual: galería editable ── */
+.alma-page { padding-bottom: 0; }
 
 .alma-galeria-section {
   width: 100%;
   margin-top: 80px;
+  padding-bottom: 60px;
 }
 
 .alma-galeria-header {
@@ -107,7 +142,7 @@
   font-weight: 700 !important;
   letter-spacing: 5px !important;
   text-transform: uppercase;
-  color: var(--clay) !important;
+  color: var(--ink) !important;
   white-space: nowrap;
 }
 
@@ -115,90 +150,96 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3px;
+  padding: 0 40px;
 }
 
-/* Foto base */
 .alma-foto {
   position: relative;
   overflow: hidden;
   background: #e8e2d8;
-  cursor: pointer;
-  opacity: 0;
-  transform: translateY(36px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  aspect-ratio: 3 / 4;
 }
 
-.alma-foto--visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Hero: primera foto, full-width cinemático */
 .alma-foto--hero {
   grid-column: 1 / -1;
   aspect-ratio: 21 / 9;
 }
 
-/* Fotos normales: portrait */
-.alma-foto:not(.alma-foto--hero) {
-  aspect-ratio: 3 / 4;
-}
-
-/* Cada grupo de 3 (pos 4, 7, 10...): acento wide */
-.alma-foto:not(.alma-foto--hero):nth-child(3n + 1) {
-  grid-column: 1 / -1;
-  aspect-ratio: 16 / 9;
-}
-
-.alma-foto img {
+.alma-foto-img-wrap {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
-  transition: transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  object-fit: cover;
 }
 
-.alma-foto:hover img {
-  transform: scale(1.05);
-}
-
-/* Overlay con caption */
 .alma-foto-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(transparent 50%, rgba(176, 83, 46, 0.82));
+  background: linear-gradient(transparent 55%, rgba(176, 83, 46, 0.82));
   opacity: 0;
   display: flex;
   align-items: flex-end;
-  padding: 28px 28px 24px;
-  transition: opacity 0.45s ease;
+  padding: 24px;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
 }
-
-.alma-foto:hover .alma-foto-overlay {
-  opacity: 1;
-}
+.alma-foto:hover .alma-foto-overlay { opacity: 1; }
 
 .alma-foto-caption {
   color: #fff !important;
   font-size: 13px !important;
-  letter-spacing: 0.4px !important;
   font-weight: 500 !important;
-  line-height: 1.4 !important;
   margin: 0;
-  transform: translateY(10px);
-  transition: transform 0.45s ease;
 }
 
-.alma-foto:hover .alma-foto-caption {
-  transform: translateY(0);
+.alma-foto-admin {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 6;
 }
+
+.alma-foto-tamano,
+.alma-foto-quitar-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.alma-foto-tamano { background: rgba(0,0,0,0.6); color: #fff; }
+.alma-foto-tamano:hover { background: rgba(0,0,0,0.8); }
+.alma-foto-quitar-btn { background: rgba(192,57,43,0.85); color: #fff; }
+.alma-foto-quitar-btn:hover { background: #c0392b; }
+
+.alma-agregar-foto {
+  display: block;
+  margin: 20px 40px 0;
+  padding: 16px;
+  border: 1px dashed rgba(176, 83, 46, 0.4);
+  background: none;
+  color: var(--clay);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  width: calc(100% - 80px);
+}
+.alma-agregar-foto:hover { background: rgba(176, 83, 46, 0.06); }
 
 @media (max-width: 768px) {
   .alma-page { padding: 90px 24px 0; }
   .alma-bloques { grid-template-columns: 1fr; gap: 32px; }
   .alma-intro { margin-bottom: 56px; }
   .alma-galeria-header { padding: 0 20px 32px; }
-  .alma-galeria-grid { gap: 2px; }
+  .alma-galeria-grid { gap: 2px; padding: 0 20px; }
   .alma-foto--hero { aspect-ratio: 16 / 9; }
-  .alma-foto:not(.alma-foto--hero) { aspect-ratio: 4 / 5; }
+  .alma-agregar-foto { margin: 20px 20px 0; width: calc(100% - 40px); }
 }

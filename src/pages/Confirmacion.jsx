@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
+import Editable from '../components/Editable';
 import { db } from '../firebase/config';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useIdioma } from '../context/LanguageContext';
@@ -126,28 +128,28 @@ export default function Confirmacion() {
         {/* Encabezado */}
         <div className="confirmacion-header">
           <div className="confirmacion-icono">🎉</div>
-          <h1>{es ? '¡Pedido confirmado!' : 'Order confirmed!'}</h1>
+          <h1><Editable id="conf_titulo" as="span">{es ? '¡Pedido confirmado!' : 'Order confirmed!'}</Editable></h1>
           <p className="confirmacion-sub">
-            {es ? 'Gracias por tu compra en' : 'Thanks for your purchase at'} <strong>Kapac Made</strong>.<br />
-            {es ? 'Hecho en Arequipa, para explorar sin límites.' : 'Made in Arequipa, to explore without limits.'}
+            <Editable id="conf_gracias" as="span">{es ? 'Gracias por tu compra en' : 'Thanks for your purchase at'}</Editable> <strong>Kapac Made</strong>.<br />
+            <Editable id="conf_hecho_arequipa" as="span">{es ? 'Hecho en Arequipa, para explorar sin límites.' : 'Made in Arequipa, to explore without limits.'}</Editable>
           </p>
         </div>
 
         {/* Recibo */}
         <div className="confirmacion-recibo">
           <div className="recibo-header">
-            <span className="recibo-titulo">{es ? 'RECIBO DE PEDIDO' : 'ORDER RECEIPT'}</span>
+            <span className="recibo-titulo"><Editable id="conf_recibo_titulo" as="span">{es ? 'RECIBO DE PEDIDO' : 'ORDER RECEIPT'}</Editable></span>
             <span className="recibo-fecha">{formatoFecha()}</span>
           </div>
 
           <div className="recibo-id">
-            {es ? 'Nº de pedido:' : 'Order #:'} <strong>#{pedidoId.slice(0, 8).toUpperCase()}</strong>
+            <Editable id="conf_num_pedido" as="span">{es ? 'Nº de pedido:' : 'Order #:'}</Editable> <strong>#{pedidoId.slice(0, 8).toUpperCase()}</strong>
           </div>
 
           {/* Productos */}
           {pedido?.items?.length > 0 && (
             <div className="recibo-items">
-              <div className="recibo-seccion-titulo">{t('pedidos.productos')}</div>
+              <div className="recibo-seccion-titulo"><ET k="pedidos.productos" /></div>
               {pedido.items.map((item, i) => (
                 <div className="recibo-item" key={i}>
                   <span className="recibo-item-nombre">{item.nombre}</span>
@@ -160,30 +162,30 @@ export default function Confirmacion() {
 
           {/* Total */}
           <div className="recibo-total">
-            <span>{es ? 'Total pagado' : 'Total paid'}</span>
+            <span><Editable id="conf_total_pagado" as="span">{es ? 'Total pagado' : 'Total paid'}</Editable></span>
             <strong>S/{pedido?.total || '—'}.00</strong>
           </div>
 
           {/* Método y estado */}
           <div className="recibo-detalles">
             <div className="recibo-detalle">
-              <span className="recibo-detalle-label">{t('metodo.titulo')}</span>
+              <span className="recibo-detalle-label"><ET k="metodo.titulo" /></span>
               <span>{metodoPagoLabel[pedido?.metodoPago] || pedido?.metodoPago || '—'}</span>
             </div>
             <div className="recibo-detalle">
-              <span className="recibo-detalle-label">{t('pedidos.estado')}</span>
+              <span className="recibo-detalle-label"><ET k="pedidos.estado" /></span>
               <span>{estadoLabel[pedido?.estado] || pedido?.estado || '—'}</span>
             </div>
             {pedido?.envio?.tipo === 'envio' && (
               <div className="recibo-detalle">
-                <span className="recibo-detalle-label">{es ? 'Dirección de envío' : 'Shipping address'}</span>
+                <span className="recibo-detalle-label"><Editable id="conf_dir_envio" as="span">{es ? 'Dirección de envío' : 'Shipping address'}</Editable></span>
                 <span>{pedido.envio.direccion}, {pedido.envio.distrito}</span>
               </div>
             )}
             {pedido?.envio?.tipo === 'recojo' && (
               <div className="recibo-detalle">
-                <span className="recibo-detalle-label">{es ? 'Entrega' : 'Delivery'}</span>
-                <span>{es ? 'Recojo en tienda — Arequipa' : 'Store pickup — Arequipa'}</span>
+                <span className="recibo-detalle-label"><Editable id="conf_entrega" as="span">{es ? 'Entrega' : 'Delivery'}</Editable></span>
+                <span><Editable id="conf_recojo_tienda" as="span">{es ? 'Recojo en tienda — Arequipa' : 'Store pickup — Arequipa'}</Editable></span>
               </div>
             )}
           </div>
@@ -191,8 +193,8 @@ export default function Confirmacion() {
 
         {/* Canal de notificaciones */}
         <div className="confirmacion-canal">
-          <h2>{es ? '¿Cómo quieres seguir tu pedido?' : 'How do you want to track your order?'}</h2>
-          <p>{es ? 'Puedes elegir uno o ambos. Te avisamos cada vez que cambie el estado.' : 'You can choose one or both. We\'ll notify you every time the status changes.'}</p>
+          <h2><Editable id="conf_canal_titulo" as="span">{es ? '¿Cómo quieres seguir tu pedido?' : 'How do you want to track your order?'}</Editable></h2>
+          <p><Editable id="conf_canal_sub" as="span" multiline>{es ? 'Puedes elegir uno o ambos. Te avisamos cada vez que cambie el estado.' : 'You can choose one or both. We\'ll notify you every time the status changes.'}</Editable></p>
 
           <div className="canal-opciones">
             {/* Email */}
@@ -202,7 +204,7 @@ export default function Confirmacion() {
             >
               <span className="canal-icono">📧</span>
               <div>
-                <strong>{t('conf.canal_email')}</strong>
+                <strong><ET k="conf.canal_email" /></strong>
                 <span>{pedido?.email}</span>
               </div>
               <span className={`canal-check-box ${canales.email ? 'on' : ''}`}>
@@ -213,12 +215,12 @@ export default function Confirmacion() {
             {/* Sub-bloque: confirmar correo */}
             {canales.email && !emailConfirmado && (
               <button className="canal-btn-confirmar" onClick={confirmarEmail}>
-                {es ? 'Confirmar correo →' : 'Confirm email →'}
+                <Editable id="conf_confirmar_correo" as="span" sinColor>{es ? 'Confirmar correo →' : 'Confirm email →'}</Editable>
               </button>
             )}
             {canales.email && emailConfirmado && (
               <div className="canal-guardado">
-                <span>✓</span> {es ? 'Te avisaremos a' : 'We\'ll notify you at'} <strong>{pedido?.email}</strong>
+                <span>✓</span> <Editable id="conf_te_avisaremos" as="span">{es ? 'Te avisaremos a' : 'We\'ll notify you at'}</Editable> <strong>{pedido?.email}</strong>
               </div>
             )}
 
@@ -230,7 +232,7 @@ export default function Confirmacion() {
               <span className="canal-icono">✈️</span>
               <div>
                 <strong>Telegram</strong>
-                <span>{es ? 'Notificación instantánea · @kapacmade_bot' : 'Instant notification · @kapacmade_bot'}</span>
+                <span><Editable id="conf_telegram_desc" as="span">{es ? 'Notificación instantánea · @kapacmade_bot' : 'Instant notification · @kapacmade_bot'}</Editable></span>
               </div>
               <span className={`canal-check-box ${canales.telegram ? 'on' : ''}`}>
                 {canales.telegram ? '✓' : ''}
@@ -241,10 +243,10 @@ export default function Confirmacion() {
             {canales.telegram && (
               <div className="canal-telegram-info">
                 <a href={TELEGRAM_BOT} target="_blank" rel="noopener noreferrer" className="telegram-btn">
-                  {es ? 'Abrir' : 'Open'} @kapacmade_bot
+                  <Editable id="conf_abrir_telegram" as="span">{es ? 'Abrir' : 'Open'}</Editable> @kapacmade_bot
                 </a>
                 <p className="telegram-hint">
-                  {es ? 'Envía' : 'Send'} <code>/start</code> {es ? 'y escribe:' : 'and type:'} <strong>#{pedidoId.slice(0, 8).toUpperCase()}</strong>
+                  <Editable id="conf_envia" as="span">{es ? 'Envía' : 'Send'}</Editable> <code>/start</code> <Editable id="conf_y_escribe" as="span">{es ? 'y escribe:' : 'and type:'}</Editable> <strong>#{pedidoId.slice(0, 8).toUpperCase()}</strong>
                 </p>
               </div>
             )}
@@ -254,10 +256,10 @@ export default function Confirmacion() {
         {/* Botones */}
         <div className="confirmacion-acciones">
           <button onClick={() => navigate('/pedidos')} className="conf-btn-pedidos">
-            {t('conf.ver_pedidos')}
+            <ET k="conf.ver_pedidos" sinColor />
           </button>
           <button onClick={() => navigate('/')} className="conf-btn-inicio">
-            {t('conf.volver_tienda')}
+            <ET k="conf.volver_tienda" sinColor />
           </button>
         </div>
 

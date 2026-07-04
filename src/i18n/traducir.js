@@ -17,11 +17,12 @@ export async function traducirEsEn(texto) {
     );
     const data = await res.json();
     const out = data?.responseData?.translatedText;
-    if (out && typeof out === 'string') {
+    const fallo = !out || typeof out !== 'string' || data?.responseStatus !== 200 || /MYMEMORY WARNING/i.test(out);
+    if (!fallo) {
       memoria[t] = out;
       try { localStorage.setItem('tr:' + t, out); } catch (e) {}
       return out;
     }
   } catch (e) { /* offline o límite alcanzado */ }
-  return t;
+  return null;
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
 import { useIdioma } from '../context/LanguageContext';
 import imgYape from '../assets/images/yape.avif';
 import '../styles/PagoTarjeta.css';
@@ -133,23 +134,23 @@ export default function PagoYapeCulqi() {
       <main className="pago-tarjeta-page">
         {/* Indicador de pasos */}
         <div className="checkout-steps">
-          <div className="step completado"><span className="step-num">✓</span><span className="step-label">{t('steps.entrega')}</span></div>
+          <div className="step completado"><span className="step-num">✓</span><span className="step-label"><ET k="steps.entrega" /></span></div>
           <div className="step-linea completada" />
-          <div className="step completado"><span className="step-num">✓</span><span className="step-label">{t('steps.pago')}</span></div>
+          <div className="step completado"><span className="step-num">✓</span><span className="step-label"><ET k="steps.pago" /></span></div>
           <div className="step-linea completada" />
-          <div className="step activo"><span className="step-num">3</span><span className="step-label">{t('steps.confirmacion')}</span></div>
+          <div className="step activo"><span className="step-num">3</span><span className="step-label"><ET k="steps.confirmacion" /></span></div>
         </div>
 
         <div style={{ textAlign: 'left' }}>
           <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>← Volver</button>
         </div>
 
-        <h1>{t('pago.yapeculqi.titulo')}</h1>
-        <p className="tarjeta-sub">{t('pago.tarjeta.sub')} <strong>Culqi</strong> 🔒</p>
+        <h1><ET k="pago.yapeculqi.titulo" /></h1>
+        <p className="tarjeta-sub"><ET k="pago.tarjeta.sub" /> <strong>Culqi</strong> 🔒</p>
 
         <div className="tarjeta-card">
           <div className="tarjeta-monto">
-            {t('pago.tarjeta.total')} <strong>S/{total}.00</strong>
+            <ET k="pago.tarjeta.total" /> <strong>S/{total}.00</strong>
           </div>
 
           <div className="tarjeta-marcas" style={{ justifyContent: 'center' }}>
@@ -158,7 +159,7 @@ export default function PagoYapeCulqi() {
 
           <div className="tarjeta-seguro">
             <span>🔒</span>
-            <span>{t('pago.yapeculqi.seguro')}</span>
+            <span><ET k="pago.yapeculqi.seguro" /></span>
           </div>
 
           {error && <p className="tarjeta-error">{error}</p>}
@@ -169,13 +170,13 @@ export default function PagoYapeCulqi() {
             disabled={!listo || procesando}
             style={{ background: '#142F8F' }}
           >
-            {!listo ? t('pago.tarjeta.cargando') : procesando ? t('pago.tarjeta.procesando') : t('pago.yapeculqi.boton')}
+            {!listo ? <ET k="pago.tarjeta.cargando" sinColor /> : procesando ? <ET k="pago.tarjeta.procesando" sinColor /> : <ET k="pago.yapeculqi.boton" sinColor />}
           </button>
 
-          <p className="tarjeta-aviso">{t('pago.yapeculqi.aviso')}</p>
+          <p className="tarjeta-aviso"><ET k="pago.yapeculqi.aviso" /></p>
         </div>
 
-        <p className="pago-id-ref">{t('pago.referencia')} <code>#{pedidoId.slice(0, 8)}</code></p>
+        <p className="pago-id-ref"><ET k="pago.referencia" /> <code>#{pedidoId.slice(0, 8)}</code></p>
       </main>
       <Footer />
     </>

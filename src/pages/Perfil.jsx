@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
 import Modal from '../components/Modal/Modal';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
@@ -82,9 +83,9 @@ export default function Perfil() {
       <>
         <Header />
         <main className="perfil-page" style={{ textAlign: 'center', padding: 60 }}>
-          <h2>{t('perfil.iniciar_msg')}</h2>
+          <h2><ET k="perfil.iniciar_msg" /></h2>
           <button className="perfil-btn-principal" onClick={() => navigate('/login')}>
-            {t('perfil.iniciar')}
+            <ET k="perfil.iniciar" sinColor />
           </button>
         </main>
         <Footer />
@@ -103,26 +104,26 @@ export default function Perfil() {
         <div className="perfil-header">
           <div className="perfil-avatar">{inicial}</div>
           <div className="perfil-info">
-            <h1>{form.nombre || t('perfil.sin_nombre')}</h1>
+            <h1>{form.nombre || <ET k="perfil.sin_nombre" />}</h1>
             <p>{usuario.email}</p>
           </div>
         </div>
 
         {/* Formulario */}
         <form className="perfil-form" onSubmit={guardar}>
-          <h2>{t('perfil.info')}</h2>
-          <p className="perfil-sub">{t('perfil.info_sub')}</p>
+          <h2><ET k="perfil.info" /></h2>
+          <p className="perfil-sub"><ET k="perfil.info_sub" /></p>
 
           <div className="perfil-grid">
             <label className="full">
-              {t('perfil.nombre')}
+              <ET k="perfil.nombre" />
               <input
                 value={form.nombre}
                 onChange={e => setForm({ ...form, nombre: e.target.value })}
               />
             </label>
             <label>
-              {t('perfil.telefono')}
+              <ET k="perfil.telefono" />
               <input
                 value={form.telefono}
                 onChange={e => setForm({ ...form, telefono: e.target.value })}
@@ -130,21 +131,21 @@ export default function Perfil() {
               />
             </label>
             <label>
-              {t('perfil.distrito')}
+              <ET k="perfil.distrito" />
               <input
                 value={form.distrito}
                 onChange={e => setForm({ ...form, distrito: e.target.value })}
               />
             </label>
             <label className="full">
-              {t('perfil.direccion')}
+              <ET k="perfil.direccion" />
               <input
                 value={form.direccion}
                 onChange={e => setForm({ ...form, direccion: e.target.value })}
               />
             </label>
             <label className="full">
-              {t('perfil.referencia')}
+              <ET k="perfil.referencia" />
               <input
                 value={form.referencia}
                 onChange={e => setForm({ ...form, referencia: e.target.value })}
@@ -156,7 +157,7 @@ export default function Perfil() {
 
           <div className="perfil-acciones">
             <button type="submit" className="perfil-btn-principal" disabled={guardando}>
-              {guardando ? t('perfil.guardando') : t('perfil.guardar')}
+              {guardando ? <ET k="perfil.guardando" sinColor /> : <ET k="perfil.guardar" sinColor />}
             </button>
           </div>
         </form>
@@ -166,8 +167,8 @@ export default function Perfil() {
           <button onClick={() => navigate('/pedidos')} className="perfil-acceso-btn">
             <span className="acceso-icono">📦</span>
             <div>
-              <strong>{t('perfil.mis_pedidos')}</strong>
-              <span>{t('perfil.mis_pedidos_sub')}</span>
+              <strong><ET k="perfil.mis_pedidos" sinColor /></strong>
+              <span><ET k="perfil.mis_pedidos_sub" sinColor /></span>
             </div>
             <span className="acceso-flecha">→</span>
           </button>
@@ -175,7 +176,7 @@ export default function Perfil() {
           <button onClick={() => setModalCerrarSesion(true)} className="perfil-acceso-btn cerrar-sesion">
             <span className="acceso-icono">🚪</span>
             <div>
-              <strong>{t('menu.cerrar_sesion')}</strong>
+              <strong><ET k="menu.cerrar_sesion" sinColor /></strong>
               <span>{usuario.email}</span>
             </div>
             <span className="acceso-flecha">→</span>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ET from '../components/ET';
+import Editable from '../components/Editable';
 import { registrar, iniciarSesion, iniciarSesionGoogle, cerrarSesion } from '../firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
@@ -86,23 +88,23 @@ export default function Login() {
             <div className="login-avatar-grande">
               {(usuario.displayName || usuario.email || '?').charAt(0).toUpperCase()}
             </div>
-            <h2>{idioma === 'es' ? '¡Ya estás dentro!' : 'You\'re signed in!'}</h2>
+            <h2><Editable id="login_ya_dentro" as="span">{idioma === 'es' ? '¡Ya estás dentro!' : 'You\'re signed in!'}</Editable></h2>
             <p className="login-email-mostrar">{usuario.email}</p>
             <p className="login-nota">
-              {idioma === 'es'
+              <Editable id="login_nota_sesion" as="span">{idioma === 'es'
                 ? 'Tienes sesión iniciada con esta cuenta.'
-                : 'You\'re signed in with this account.'}
+                : 'You\'re signed in with this account.'}</Editable>
             </p>
 
             <div className="login-acciones">
               <Link to="/perfil" className="login-btn">
-                {idioma === 'es' ? 'Mi cuenta' : 'My account'}
+                <Editable id="login_mi_cuenta" as="span" sinColor>{idioma === 'es' ? 'Mi cuenta' : 'My account'}</Editable>
               </Link>
               <Link to="/pedidos" className="login-btn login-btn-secundario">
-                {idioma === 'es' ? 'Mis pedidos' : 'My orders'}
+                <Editable id="login_mis_pedidos" as="span" sinColor>{idioma === 'es' ? 'Mis pedidos' : 'My orders'}</Editable>
               </Link>
               <button onClick={handleLogout} className="login-btn login-btn-cerrar">
-                {idioma === 'es' ? 'Cerrar sesión' : 'Sign out'}
+                <Editable id="login_cerrar_sesion" as="span" sinColor>{idioma === 'es' ? 'Cerrar sesión' : 'Sign out'}</Editable>
               </button>
             </div>
           </div>
@@ -122,13 +124,13 @@ export default function Login() {
               className={modo === 'login' ? 'activo' : ''}
               onClick={() => { setModo('login'); setError(''); }}
             >
-              {t('menu.iniciar_sesion')}
+              <ET k="menu.iniciar_sesion" sinColor />
             </button>
             <button
               className={modo === 'registro' ? 'activo' : ''}
               onClick={() => { setModo('registro'); setError(''); }}
             >
-              {t('login.crear_cuenta')}
+              <ET k="login.crear_cuenta" sinColor />
             </button>
           </div>
 
@@ -149,11 +151,11 @@ export default function Login() {
             />
             {error && <p className="login-error">{error}</p>}
             <button type="submit" className="login-btn" disabled={cargando}>
-              {cargando ? (idioma === 'en' ? 'Loading...' : 'Cargando...') : (modo === 'login' ? t('login.entrar') : t('login.crear_cuenta'))}
+              {cargando ? <Editable id="login_cargando" as="span" sinColor>{idioma === 'en' ? 'Loading...' : 'Cargando...'}</Editable> : (modo === 'login' ? <ET k="login.entrar" sinColor /> : <ET k="login.crear_cuenta" sinColor />)}
             </button>
           </form>
 
-          <div className="login-divider"><span>{t('login.o')}</span></div>
+          <div className="login-divider"><span><ET k="login.o" /></span></div>
 
           <button className="login-google" onClick={handleGoogle} disabled={cargando}>
             <svg className="google-icon" viewBox="0 0 48 48" width="20" height="20">
@@ -162,7 +164,7 @@ export default function Login() {
               <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
               <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C40.9 36.1 44 30.5 44 24c0-1.34-.14-2.65-.4-3.5z"/>
             </svg>
-            <span>{t('login.google')}</span>
+            <span><ET k="login.google" sinColor /></span>
           </button>
         </div>
       </main>

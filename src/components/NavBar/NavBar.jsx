@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useIdioma } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import Editable from '../Editable';
 import './NavBar.css';
 
 const IconIg = () => (
@@ -22,10 +23,10 @@ export default function NavBar() {
   const [menu, setMenu] = useState(false);
 
   const links = [
-    { label: 'Shop',       to: '/catalogo' },
-    { label: 'Kapac Made', to: '/alma'     },
-    { label: 'B2B',        to: '/b2b'      },
-    { label: 'Info', to: '/contacto' },
+    { id: 'nav_shop',       label: 'Shop',       to: '/catalogo' },
+    { id: 'nav_kapac_made', label: 'Kapac Made', to: '/alma'     },
+    { id: 'nav_b2b',        label: 'B2B',        to: '/b2b'      },
+    { id: 'nav_info',       label: 'Info',       to: '/contacto' },
   ];
 
   const cerrar = () => setMenu(false);
@@ -56,7 +57,9 @@ export default function NavBar() {
           </button>
         )}
         {links.map((l) => (
-          <Link key={l.to} to={l.to} className="navbar-link" onClick={cerrar}>{l.label}</Link>
+          <Link key={l.to} to={l.to} className="navbar-link" onClick={cerrar}>
+            <Editable id={l.id} as="span" sinColor>{l.label}</Editable>
+          </Link>
         ))}
 
         {/* Idioma — después de Contacto */}

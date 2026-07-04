@@ -19,7 +19,7 @@
   background-position: center;
   background-repeat: no-repeat;
   z-index: 0;
-  opacity: 0.05;
+  opacity: 0.30;
 }
 
 /* Sin overlay oscuro — foto se ve directamente */
@@ -41,7 +41,7 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  color: var(--ink);
+  color: var(--clay);
   transition: opacity 0.2s;
 }
 

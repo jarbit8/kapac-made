@@ -5,7 +5,7 @@
 .lm-section {
   background: var(--fondo);
   padding: 72px 40px 88px;
-  max-width: 1080px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -25,7 +25,7 @@
   font-weight: 700;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--clay);
+  color: var(--ink);
 }
 
 .lm-frase {
@@ -72,6 +72,55 @@
   filter: saturate(1);
 }
 
+/* Misma foto pero renderizada por EditableImage (vista admin) */
+.lm-img-wrap .editable-img {
+  filter: saturate(0.88);
+  transition: transform 0.55s ease, filter 0.55s ease;
+}
+.lm-item:hover .editable-img {
+  transform: scale(1.03);
+  filter: saturate(1);
+}
+
+/* Botón "× Quitar" bajo cada foto (solo admin) */
+.lm-quitar {
+  align-self: flex-start;
+  margin-top: 4px;
+  background: none;
+  border: 1px solid #e0a0a0;
+  color: #c0392b;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lm-quitar:hover { background: #fdf0f0; }
+
+/* Tile "+ Agregar foto" (solo admin) */
+.lm-agregar {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.lm-agregar-caja {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(176, 83, 46, 0.4);
+  color: var(--clay);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: none;
+}
+.lm-agregar:hover .lm-agregar-caja { background: rgba(176, 83, 46, 0.06); }
+
 /* Caption */
 .lm-caption {
   display: flex;
@@ -85,14 +134,15 @@
   font-weight: 700;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: #1d1b15;
+  color: var(--ink);
 }
 
 .lm-caption-desc {
-  color: #6b6256;          /* gris oscuro, legible sobre el fondo crema */
+  color: var(--ink);
   line-height: 1.65;
   margin: 0;
   max-width: 340px;
+  white-space: pre-line;
 }
 
 /* ── Footer ── */
@@ -105,7 +155,7 @@
 
 .lm-footer .lm-footer-txt {
   font-size: 16px !important;
-  color: var(--clay);
+  color: var(--ink);
   letter-spacing: 2px;
   text-transform: lowercase;
   text-decoration: none;

@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import Editable from '../components/Editable';
 import { useIdioma } from '../context/LanguageContext';
 import '../styles/Legal.css';
 
@@ -14,11 +15,11 @@ export default function Legal() {
       <main className="legal-page">
         <div className="legal-hero">
           <p className="legal-origen">Arequipa · {es ? 'Perú' : 'Peru'}</p>
-          <h1>{es ? 'Información Legal' : 'Legal Information'}</h1>
+          <h1><Editable id="legal_titulo" as="span">{es ? 'Información Legal' : 'Legal Information'}</Editable></h1>
           <p className="legal-sub">
-            {es
+            <Editable id="legal_sub" as="span" multiline>{es
               ? 'Todo lo que necesitas saber sobre tus derechos y nuestras políticas como marca.'
-              : 'Everything you need to know about your rights and our brand policies.'}
+              : 'Everything you need to know about your rights and our brand policies.'}</Editable>
           </p>
         </div>
 
@@ -26,7 +27,7 @@ export default function Legal() {
 
           {/* ── Términos y Condiciones ── */}
           <section className="legal-section">
-            <h2>{es ? 'Términos y Condiciones' : 'Terms & Conditions'}</h2>
+            <h2><Editable id="legal_terminos_titulo" as="span">{es ? 'Términos y Condiciones' : 'Terms & Conditions'}</Editable></h2>
 
             {es ? (
               <>
@@ -47,7 +48,7 @@ export default function Legal() {
 
           {/* ── Política de Devoluciones ── */}
           <section className="legal-section">
-            <h2>{es ? 'Política de Devoluciones' : 'Return Policy'}</h2>
+            <h2><Editable id="legal_devoluciones_titulo" as="span">{es ? 'Política de Devoluciones' : 'Return Policy'}</Editable></h2>
             {es ? (
               <>
                 <p>Aceptamos devoluciones dentro de los <strong>14 días calendario</strong> posteriores a la recepción del producto, siempre que esté en su estado original, sin uso y con todos sus accesorios.</p>
@@ -65,7 +66,7 @@ export default function Legal() {
 
           {/* ── Política de Envíos ── */}
           <section className="legal-section">
-            <h2>{es ? 'Política de Envíos' : 'Shipping Policy'}</h2>
+            <h2><Editable id="legal_envios_titulo" as="span">{es ? 'Política de Envíos' : 'Shipping Policy'}</Editable></h2>
             {es ? (
               <>
                 <p>Realizamos envíos a todo el Perú a través de servicios de courier. Los tiempos estimados de entrega son:</p>
@@ -93,7 +94,7 @@ export default function Legal() {
 
           {/* ── Política de Privacidad ── */}
           <section className="legal-section">
-            <h2>{es ? 'Política de Privacidad' : 'Privacy Policy'}</h2>
+            <h2><Editable id="legal_privacidad_titulo" as="span">{es ? 'Política de Privacidad' : 'Privacy Policy'}</Editable></h2>
             {es ? (
               <>
                 <p>En Kapac Made respetamos tu privacidad y cumplimos con la <strong>Ley N° 29733 de Protección de Datos Personales del Perú</strong>. Los datos personales que recopilamos (nombre, correo electrónico, dirección, teléfono) se utilizan exclusivamente para:</p>
@@ -163,7 +164,7 @@ export default function Legal() {
 
           {/* ── Medios de pago ── */}
           <section className="legal-section">
-            <h2>{es ? 'Medios de Pago' : 'Payment Methods'}</h2>
+            <h2><Editable id="legal_pagos_titulo" as="span">{es ? 'Medios de Pago' : 'Payment Methods'}</Editable></h2>
             {es ? (
               <>
                 <p>Aceptamos los siguientes métodos de pago:</p>
@@ -191,48 +192,48 @@ export default function Legal() {
 
           {/* ── Propiedad intelectual ── */}
           <section className="legal-section">
-            <h2>{es ? 'Propiedad Intelectual' : 'Intellectual Property'}</h2>
+            <h2><Editable id="legal_propiedad_titulo" as="span">{es ? 'Propiedad Intelectual' : 'Intellectual Property'}</Editable></h2>
             <p>
-              {es
+              <Editable id="legal_propiedad_texto1" as="span" multiline>{es
                 ? 'Todos los diseños, ilustraciones, logotipos, textos, fotografías y contenidos de este sitio son propiedad exclusiva de Kapac Made. Está prohibida su reproducción, distribución o uso comercial sin autorización expresa por escrito.'
-                : 'All designs, illustrations, logos, texts, photographs and content on this site are the exclusive property of Kapac Made. Reproduction, distribution or commercial use without express written authorization is prohibited.'}
+                : 'All designs, illustrations, logos, texts, photographs and content on this site are the exclusive property of Kapac Made. Reproduction, distribution or commercial use without express written authorization is prohibited.'}</Editable>
             </p>
             <p>
-              {es
+              <Editable id="legal_propiedad_texto2" as="span" multiline>{es
                 ? 'El nombre "Kapac Made" y su logotipo son marcas registradas. Cualquier uso no autorizado será perseguido conforme a la ley peruana.'
-                : 'The name "Kapac Made" and its logo are registered trademarks. Any unauthorized use will be prosecuted under Peruvian law.'}
+                : 'The name "Kapac Made" and its logo are registered trademarks. Any unauthorized use will be prosecuted under Peruvian law.'}</Editable>
             </p>
           </section>
 
           {/* ── Limitación de responsabilidad ── */}
           <section className="legal-section">
-            <h2>{es ? 'Limitación de Responsabilidad' : 'Liability Limitation'}</h2>
+            <h2><Editable id="legal_limitacion_titulo" as="span">{es ? 'Limitación de Responsabilidad' : 'Liability Limitation'}</Editable></h2>
             <p>
-              {es
+              <Editable id="legal_limitacion_texto1" as="span" multiline>{es
                 ? 'Kapac Made no se hace responsable por daños indirectos, incidentales o consecuentes derivados del uso o imposibilidad de uso de los productos. Nuestra responsabilidad máxima se limita al monto pagado por el producto en cuestión.'
-                : 'Kapac Made is not liable for indirect, incidental or consequential damages arising from the use or inability to use the products. Our maximum liability is limited to the amount paid for the product in question.'}
+                : 'Kapac Made is not liable for indirect, incidental or consequential damages arising from the use or inability to use the products. Our maximum liability is limited to the amount paid for the product in question.'}</Editable>
             </p>
             <p>
-              {es
+              <Editable id="legal_limitacion_texto2" as="span" multiline>{es
                 ? 'No nos hacemos responsables por retrasos en la entrega causados por el servicio de courier, condiciones climáticas, problemas aduaneros u otros factores fuera de nuestro control.'
-                : 'We are not responsible for delivery delays caused by courier services, weather conditions, customs issues or other factors beyond our control.'}
+                : 'We are not responsible for delivery delays caused by courier services, weather conditions, customs issues or other factors beyond our control.'}</Editable>
             </p>
           </section>
 
           {/* ── Ley aplicable ── */}
           <section className="legal-section">
-            <h2>{es ? 'Ley Aplicable y Jurisdicción' : 'Applicable Law & Jurisdiction'}</h2>
+            <h2><Editable id="legal_ley_titulo" as="span">{es ? 'Ley Aplicable y Jurisdicción' : 'Applicable Law & Jurisdiction'}</Editable></h2>
             <p>
-              {es
+              <Editable id="legal_ley_texto" as="span" multiline>{es
                 ? 'Este sitio web se rige por las leyes de la República del Perú. Cualquier controversia relacionada con el uso de este sitio o las compras realizadas se someterá a los tribunales competentes de Arequipa, Perú.'
-                : 'This website is governed by the laws of the Republic of Peru. Any dispute related to the use of this site or purchases made shall be submitted to the competent courts of Arequipa, Peru.'}
+                : 'This website is governed by the laws of the Republic of Peru. Any dispute related to the use of this site or purchases made shall be submitted to the competent courts of Arequipa, Peru.'}</Editable>
             </p>
           </section>
 
           {/* ── Contacto ── */}
           <section className="legal-section legal-contacto">
-            <h2>{es ? 'Contacto' : 'Contact'}</h2>
-            <p>{es ? 'Para consultas, reclamos o cualquier duda:' : 'For inquiries, complaints or any questions:'}</p>
+            <h2><Editable id="legal_contacto_titulo" as="span">{es ? 'Contacto' : 'Contact'}</Editable></h2>
+            <p><Editable id="legal_contacto_intro" as="span">{es ? 'Para consultas, reclamos o cualquier duda:' : 'For inquiries, complaints or any questions:'}</Editable></p>
             <p>📞 <strong>+51 997 050 752</strong> (WhatsApp)</p>
             <p>📍 Arequipa, {es ? 'Perú' : 'Peru'}</p>
             <p>🤖 <strong>@kapacmade_bot</strong> {es ? 'en Telegram para seguimiento de pedidos' : 'on Telegram for order tracking'}</p>

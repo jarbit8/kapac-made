@@ -494,6 +494,14 @@
   font-weight: 600;
 }
 
+.contador-sub {
+  font-size: 12px;
+  color: #aaa;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 @media (max-width: 768px) {
   .admin-contadores { grid-template-columns: 1fr; }
   .stat-fecha { flex: 0 0 100px; font-size: 12px; }
@@ -814,6 +822,11 @@
   font-size: 14px; cursor: pointer; min-height: 120px; padding: 14px;
 }
 .admin-foto-agregar:hover { background: #f0f0f0; color: #111; }
+.admin-fila-agregar {
+  border: 1px dashed #bbb; background: #fafafa; color: #555; border-radius: 6px;
+  font-size: 13px; line-height: 1.3; cursor: pointer; padding: 8px 16px; display: inline-block;
+}
+.admin-fila-agregar:hover { background: #f0f0f0; color: #111; }
 .admin-fotos-guardar { margin-top: 26px; display: flex; align-items: center; gap: 16px; }
 .admin-fotos-guardar button {
   background: var(--clay); color: #fff; border: none; border-radius: 8px;
@@ -821,3 +834,17 @@
 }
 .admin-fotos-guardar button:disabled { opacity: 0.6; cursor: default; }
 .admin-fotos-msg { font-size: 14px; color: #155724; font-weight: 600; }
+
+/* ── Pestañas: en dos filas en móvil (evita que "Fotos" se corte) ── */
+@media (max-width: 768px) {
+  .admin-pestanas {
+    flex-wrap: wrap;
+    row-gap: 10px;
+    column-gap: 8px;
+    margin-bottom: 24px;
+  }
+  .admin-pestanas button {
+    padding: 9px 16px !important;
+    font-size: 13.5px !important;
+  }
+}

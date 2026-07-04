@@ -5,13 +5,9 @@ import { db } from './config';
 
 const REF = () => doc(db, 'contenido', 'sitio');
 
-// Defaults = lo que estaba hardcodeado, para que el sitio se vea bien sin tocar nada.
-export const HOME_FOTOS_DEFAULT = [
-  { url: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&q=80&fit=crop', titulo: 'Explorar',   desc: 'Desde la ciudad hasta los 5,000 metros.\nDiseñada para no detenerte.' },
-  { url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80&fit=crop', titulo: 'Los Andes',  desc: 'Arequipa, Perú.' },
-  { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&q=80&fit=crop', titulo: 'Naturaleza', desc: 'Cada diseño nace de un paisaje real.\nNinguna mochila es igual a otra.' },
-  { url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80&fit=crop', titulo: 'Artesanía',  desc: 'Hecho a mano, uno a uno.' },
-];
+// Claves de las fotos de "estilo de vida" del home (el texto y la imagen viven en
+// contenido/textos vía Editable/EditableImage, editable directo en la página).
+export const HOME_FOTOS_DEFAULT = ['foto1', 'foto2', 'foto3', 'foto4'];
 
 export const GALERIA_PRODUCTO_DEFAULT = [
   'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=900&q=80&auto=format&fit=crop',
@@ -32,6 +28,15 @@ export const ALMA_FOTOS_DEFAULT = [];
 // Foto épica que abre "in the zone" en una pestaña nueva.
 export const IN_THE_ZONE_DEFAULT =
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=85&auto=format&fit=crop';
+
+// Claves de las tarjetas de "beneficios" en B2B (el texto vive en contenido/textos vía Editable).
+export const B2B_BENEFICIOS_DEFAULT = ['beneficio1', 'beneficio2', 'beneficio3', 'beneficio4'];
+
+// Claves de los bloques de filosofía en Kapac Made / Alma (texto vía Editable).
+export const ALMA_BLOQUES_DEFAULT = ['bloque1', 'bloque2', 'bloque3'];
+
+// Claves de "Info" adicional al final de Contacto (bloques extra que agregue el admin).
+export const INFO_EXTRA_DEFAULT = [];
 
 // Identidad visual editable por el admin.
 export const ACENTO_DEFAULT = '#b0532e'; // terracota de la marca
@@ -54,9 +59,14 @@ export function normalizarMedio(v) {
 // Soporta: formato viejo único ({tipo,url} o string) y nuevo ({ pc, mobile }).
 export function medioDispositivo(cfg, esMobile) {
   if (!cfg) return null;
-  if (typeof cfg === 'string' || cfg.url) return normalizarMedio(cfg);
-  const pick = esMobile ? (cfg.mobile || cfg.pc) : (cfg.pc || cfg.mobile);
-  return normalizarMedio(pick);
+  if (typeof cfg === 'string') return normalizarMedio(cfg);
+  // Slots pc/mobile tienen prioridad sobre url directo (formato viejo, puede quedar pegado por el merge)
+  if (cfg.pc || cfg.mobile) {
+    const pick = esMobile ? (cfg.mobile || cfg.pc) : (cfg.pc || cfg.mobile);
+    return normalizarMedio(pick);
+  }
+  if (cfg.url) return normalizarMedio(cfg);
+  return null;
 }
 
 // Igual pero solo devuelve la URL (para cosas que siempre son imagen, como "in the zone").
@@ -76,8 +86,9 @@ export function urlDispositivo(cfg, esMobile) {
 export function slotMedio(cfg, slot) {
   if (!cfg) return null;
   if (typeof cfg === 'string') return slot === 'pc' ? { tipo: 'imagen', url: cfg } : null;
+  if (cfg.pc || cfg.mobile) return normalizarMedio(cfg[slot]);
   if (cfg.url) return slot === 'pc' ? normalizarMedio(cfg) : null;
-  return normalizarMedio(cfg[slot]);
+  return null;
 }
 
 export async function obtenerContenido() {
@@ -87,7 +98,7 @@ export async function obtenerContenido() {
     return {
       homeFotos: Array.isArray(data.homeFotos) && data.homeFotos.length ? data.homeFotos : HOME_FOTOS_DEFAULT,
       galeriaProducto: Array.isArray(data.galeriaProducto) && data.galeriaProducto.length ? data.galeriaProducto : GALERIA_PRODUCTO_DEFAULT,
-      footerFondo: data.footerFondo?.url ? data.footerFondo : FOOTER_FONDO_DEFAULT,
+      footerFondo: (data.footerFondo?.pc || data.footerFondo?.mobile || data.footerFondo?.url) ? data.footerFondo : FOOTER_FONDO_DEFAULT,
       inTheZoneFoto: data.inTheZoneFoto || IN_THE_ZONE_DEFAULT,
       almaFotos: Array.isArray(data.almaFotos) ? data.almaFotos : ALMA_FOTOS_DEFAULT,
       heroVideo: data.heroVideo || HERO_VIDEO_DEFAULT,
@@ -95,12 +106,17 @@ export async function obtenerContenido() {
       logo: data.logo || LOGO_DEFAULT,
       fondo: data.fondo || FONDO_DEFAULT,
       texto: data.texto || TEXTO_DEFAULT,
+      b2bBeneficios: Array.isArray(data.b2bBeneficios) && data.b2bBeneficios.length ? data.b2bBeneficios : B2B_BENEFICIOS_DEFAULT,
+      almaBloques: Array.isArray(data.almaBloques) && data.almaBloques.length ? data.almaBloques : ALMA_BLOQUES_DEFAULT,
+      infoExtra: Array.isArray(data.infoExtra) ? data.infoExtra : INFO_EXTRA_DEFAULT,
     };
   } catch (e) {
-    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT };
+    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT, almaBloques: ALMA_BLOQUES_DEFAULT, infoExtra: INFO_EXTRA_DEFAULT };
   }
 }
 
 export async function guardarContenido(datos) {
-  await setDoc(REF(), datos, { merge: true });
+  // Sin merge: "datos" siempre trae el objeto completo, y así no quedan
+  // campos viejos (como el "url" legado de footerFondo) pegados para siempre.
+  await setDoc(REF(), datos);
 }
