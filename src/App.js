@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { TextosProvider } from './context/TextosContext';
-import { TemaProvider } from './context/TemaContext';
+import { TemaProvider, useTema } from './context/TemaContext';
+import SitioCerrado from './components/SitioCerrado/SitioCerrado';
 import Header from './components/Header/Header';
 import Hero from './components/Hero/Hero';
 import Products from './components/Products/Products';
@@ -77,6 +78,17 @@ function AppRoutes() {
   );
 }
 
+// Tienda cerrada al público: todos ven "Próximamente" salvo el admin.
+// El /login queda accesible para que el admin pueda entrar desde cualquier lado.
+function CierreGate({ children }) {
+  const { cerrado } = useTema();
+  const { usuario, cargando } = useAuth();
+  const { pathname } = useLocation();
+  const esAdmin = usuario?.email === 'jarb2299@gmail.com';
+  if (cerrado && !cargando && !esAdmin && pathname !== '/login') return <SitioCerrado />;
+  return children;
+}
+
 function App() {
   const [fase, setFase] = useState('cargando'); // 'cargando' | 'saliendo' | 'listo'
 
@@ -95,8 +107,10 @@ function App() {
               {fase !== 'listo' && <LoadingScreen saliendo={fase === 'saliendo'} />}
               <HashRouter>
                 <ScrollToTop />
-                <AppRoutes />
-                <KapacAI />
+                <CierreGate>
+                  <AppRoutes />
+                  <KapacAI />
+                </CierreGate>
               </HashRouter>
             </TemaProvider>
           </TextosProvider>

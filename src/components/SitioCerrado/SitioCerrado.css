@@ -1,0 +1,43 @@
+.cerrado-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: var(--fondo, #fff);
+  text-align: center;
+  padding: 24px;
+}
+
+.cerrado-logo {
+  width: 240px;
+  max-width: 70vw;
+  object-fit: contain;
+  transition: opacity 0.3s ease;
+}
+
+.cerrado-txt {
+  font-size: 13px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--ink, #111);
+}
+
+.cerrado-ig {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--clay, #b0532e);
+  text-decoration: none;
+}
+.cerrado-ig:hover { opacity: 0.7; }
+
+/* Entrada discreta al login del admin */
+.cerrado-admin {
+  position: fixed;
+  bottom: 10px;
+  right: 16px;
+  color: #d5d5d5;
+  text-decoration: none;
+  font-size: 20px;
+}

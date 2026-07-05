@@ -158,7 +158,7 @@ const ESTADO_COLORES = {
 export default function Admin() {
   const { usuario, cargando } = useAuth();
   const { t } = useIdioma();
-  const { setTema } = useTema();
+  const { setTema, setCerrado } = useTema();
   const { textos, guardar: guardarTextoGlobal } = useTextos();
   const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
@@ -172,7 +172,7 @@ export default function Admin() {
   const [msg, setMsg] = useState('');
 
   // Contenido editable (fotos de home + galería de producto)
-  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT });
+  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT, cerrado: false });
   const [guardandoContenido, setGuardandoContenido] = useState(false);
   const [msgContenido, setMsgContenido] = useState('');
 
@@ -419,6 +419,29 @@ export default function Admin() {
                 />
                 <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
                   Un solo color para el menú (Shop, Kapac Made, B2B, Info, Admin) y todos los botones del sitio.
+                </p>
+              </div>
+
+              <div className="admin-foto-card">
+                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Tienda pública</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cerrado = !contenido.cerrado;
+                    persistirContenido({ ...contenido, cerrado });
+                    setCerrado(cerrado);
+                    try { localStorage.setItem('kapac_cerrado_v1', cerrado ? '1' : '0'); } catch (_) {}
+                  }}
+                  style={{
+                    padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13,
+                    background: contenido.cerrado ? '#f8d7da' : '#d4edda',
+                    color: contenido.cerrado ? '#842029' : '#155724',
+                  }}
+                >
+                  {contenido.cerrado ? '🔴 Cerrada — solo tú la ves' : '🟢 Abierta a todo el mundo'}
+                </button>
+                <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
+                  Cerrada: los visitantes ven una pantalla "Próximamente". Tú entras normal con tu cuenta (el candado de abajo a la derecha lleva al login).
                 </p>
               </div>
             </div>

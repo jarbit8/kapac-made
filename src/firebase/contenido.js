@@ -109,9 +109,10 @@ export async function obtenerContenido() {
       b2bBeneficios: Array.isArray(data.b2bBeneficios) && data.b2bBeneficios.length ? data.b2bBeneficios : B2B_BENEFICIOS_DEFAULT,
       almaBloques: Array.isArray(data.almaBloques) && data.almaBloques.length ? data.almaBloques : ALMA_BLOQUES_DEFAULT,
       infoExtra: Array.isArray(data.infoExtra) ? data.infoExtra : INFO_EXTRA_DEFAULT,
+      cerrado: data.cerrado === true, // tienda cerrada al público (pantalla "Próximamente")
     };
   } catch (e) {
-    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT, almaBloques: ALMA_BLOQUES_DEFAULT, infoExtra: INFO_EXTRA_DEFAULT };
+    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT, almaBloques: ALMA_BLOQUES_DEFAULT, infoExtra: INFO_EXTRA_DEFAULT, cerrado: false };
   }
 }
 
