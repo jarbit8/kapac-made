@@ -7,7 +7,6 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { crearPedido } from '../firebase/pedidos';
-import { descontarStock } from '../firebase/productos';
 import { loginAnonimo } from '../firebase/auth';
 import '../styles/MetodoPago.css';
 import imgYape from '../assets/images/yape.avif';
@@ -48,7 +47,17 @@ export default function MetodoPago() {
         email  = usuario.email;
         nombre = usuario.displayName || '';
       } else {
-        const cred = await loginAnonimo();
+        let cred;
+        try {
+          cred = await loginAnonimo();
+        } catch (e) {
+          // Proveedor anónimo apagado en Firebase: sin esto no hay compra de invitado
+          setError(idioma === 'en'
+            ? 'Guest checkout is unavailable right now. Please sign in to complete your purchase.'
+            : 'La compra como invitado no está disponible en este momento. Inicia sesión para completar tu compra.');
+          setProcesando(false);
+          return;
+        }
         uid    = cred.user.uid;
         email  = guestEmail;
         nombre = envio?.nombre || '';
@@ -65,9 +74,8 @@ export default function MetodoPago() {
         esInvitado: !usuario,
       });
 
-      // Descontar el stock de cada producto comprado
-      await Promise.all(items.map((i) => descontarStock(i.id, i.cantidad)));
-
+      // El stock lo descuenta el servidor cuando el pago se confirma
+      // (los clientes no tienen permiso para escribir en productos).
       vaciar();
       sessionStorage.removeItem('checkout_items');
       sessionStorage.setItem('pago_total', total);
