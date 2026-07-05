@@ -19,6 +19,13 @@ export function TemaProvider({ children }) {
     }
   });
 
+  // En la primera visita no se sabe aún cuál es el logo real: mejor no mostrar
+  // ninguno (que "flashear" el de fábrica y luego cambiarlo). Si ya hay cache
+  // de una visita anterior, se muestra al instante.
+  const [logoListo, setLogoListo] = useState(() => {
+    try { return localStorage.getItem(LOGO_CACHE_KEY) !== null; } catch (_) { return true; }
+  });
+
   useEffect(() => {
     obtenerContenido().then((c) => {
       const logo = c.logo || LOGO_DEFAULT;
@@ -32,10 +39,11 @@ export function TemaProvider({ children }) {
       document.documentElement.style.setProperty('--fondo', fondo);
       document.documentElement.style.setProperty('--ink', texto);
       try { localStorage.setItem(LOGO_CACHE_KEY, logo); } catch (_) {}
-    }).catch(() => {});
+      setLogoListo(true);
+    }).catch(() => setLogoListo(true));
   }, []);
 
-  return <TemaContext.Provider value={{ ...tema, setTema }}>{children}</TemaContext.Provider>;
+  return <TemaContext.Provider value={{ ...tema, logoListo, setTema }}>{children}</TemaContext.Provider>;
 }
 
 export const useTema = () => useContext(TemaContext);

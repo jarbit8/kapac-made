@@ -88,7 +88,7 @@ export default function Header({ transparente = false }) {
 
   const esAdmin = usuario?.email === 'jarb2299@gmail.com';
   const esSolido = !transparente || scrolled;
-  const { logo, setTema } = useTema();
+  const { logo, logoListo, setTema } = useTema();
   const logoSrc  = logo || logoTerracota; // logo del admin o el de la marca
 
   // El logo se cambia acá mismo (antes vivía en la pestaña Fotos del admin).
@@ -114,7 +114,8 @@ export default function Header({ transparente = false }) {
       <header className={`header${esSolido ? ' header-solido' : ''}`}>
         <div className="header-container">
           <Link to="/" className={`logo${esAdmin ? ' editable-img-wrap' : ''}`}>
-            <img src={logoSrc} alt="Kapac Made" className={`logo-simbolo${esAdmin ? ' editable-img' : ''}`} />
+            <img src={logoSrc} alt="Kapac Made" className={`logo-simbolo${esAdmin ? ' editable-img' : ''}`}
+              style={logoListo ? undefined : { opacity: 0 }} />
             {esAdmin && (
               <>
                 <button

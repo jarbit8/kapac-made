@@ -5,10 +5,11 @@ import { useTema } from '../../context/TemaContext';
 
 // Loader reutilizable: solo el logo Kapac Made (sin texto)
 export default function Cargando() {
-  const { logo } = useTema();
+  const { logo, logoListo } = useTema();
   return (
     <div className="cargando-box">
-      <img src={logo || logoLocal} alt="Kapac Made" className="cargando-logo" />
+      <img src={logo || logoLocal} alt="Kapac Made" className="cargando-logo"
+        style={logoListo ? undefined : { opacity: 0 }} />
     </div>
   );
 }
