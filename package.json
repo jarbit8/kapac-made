@@ -2,7 +2,7 @@
   "name": "kapac-made",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://jarbit8.github.io/kapac-made",
+  "homepage": "https://www.kapac-made.com",
   "dependencies": {
     "firebase": "^12.13.0",
     "framer-motion": "^12.38.0",
