@@ -51,8 +51,8 @@ export default function Pago() {
           body: JSON.stringify({
             amount: Number(total) * 100, // céntimos
             pedidoId,
-            email: usuario.email,
-            nombre: usuario.displayName || '',
+            email: usuario.email || sessionStorage.getItem('checkout_email') || '',
+            nombre: usuario.displayName || sessionStorage.getItem('checkout_nombre') || '',
           }),
         });
         const data = await resp.json();

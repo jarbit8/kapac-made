@@ -89,6 +89,7 @@ export default function Checkout() {
         setError(idioma === 'en' ? 'Please fill in all required fields (*).' : 'Por favor completa todos los campos obligatorios (*).');
         return;
       }
+      sessionStorage.setItem('checkout_nombre', form.nombre);
       sessionStorage.setItem('checkout_envio', JSON.stringify({
         tipo: 'envio',
         nombre: form.nombre,
@@ -102,6 +103,7 @@ export default function Checkout() {
         setError(idioma === 'en' ? 'Please enter your name and phone number.' : 'Por favor completa tu nombre y teléfono.');
         return;
       }
+      sessionStorage.setItem('checkout_nombre', formRecojo.nombre);
       sessionStorage.setItem('checkout_envio', JSON.stringify({
         tipo: 'recojo',
         nombre: formRecojo.nombre,
