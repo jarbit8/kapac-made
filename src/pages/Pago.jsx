@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
@@ -36,9 +36,12 @@ export default function Pago() {
   }, []);
 
   // Generar código PagoEfectivo automáticamente al entrar
+  const generandoCIP = useRef(false);
   useEffect(() => {
     if (metodo !== 'efectivo' || !total || !usuario || codigoCIP) return;
-    const generar = async () => {
+    if (generandoCIP.current) return;
+    generandoCIP.current = true;
+    const generar = async (reintento) => {
       setCargando(true);
       setErrorCIP('');
       try {
@@ -58,6 +61,9 @@ export default function Pago() {
           setVencimientoCIP(data.expiration);
           setQrCIP(data.qr || '');
           setUrlPe(data.urlPe || '');
+        } else if (resp.status === 429 && !reintento) {
+          setTimeout(() => generar(true), 6000);
+          return;
         } else {
           setErrorCIP(data.mensaje || 'No se pudo generar el código.');
         }
@@ -66,8 +72,9 @@ export default function Pago() {
         setErrorCIP('Error de conexión. Intenta de nuevo.');
       }
       setCargando(false);
+      generandoCIP.current = false;
     };
-    generar();
+    generar(false);
   }, [metodo, total, usuario, codigoCIP, pedidoId]);
 
   const copiarCIP = () => {
