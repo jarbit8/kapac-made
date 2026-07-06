@@ -10,8 +10,6 @@ import { useIdioma } from '../context/LanguageContext';
 import Cargando from '../components/Cargando/Cargando';
 import '../styles/Confirmacion.css';
 
-const TELEGRAM_BOT = 'https://t.me/kapacmade_bot';
-
 export default function Confirmacion() {
   const { pedidoId } = useParams();
   const navigate = useNavigate();
@@ -19,7 +17,7 @@ export default function Confirmacion() {
   const es = idioma === 'es';
   const [pedido, setPedido] = useState(null);
   const [cargando, setCargando] = useState(true);
-  const [canales, setCanales] = useState({ email: false, telegram: false });
+  const [quiereAviso, setQuiereAviso] = useState(false);
   const [emailConfirmado, setEmailConfirmado] = useState(false);
   const [emailInput, setEmailInput] = useState('');
 
@@ -39,42 +37,20 @@ export default function Confirmacion() {
     cargar();
   }, [pedidoId]);
 
-  // Calcula el valor a guardar según los canales activos
-  const calcularCanal = (email, telegram) => {
-    if (email && telegram) return 'ambos';
-    if (email)    return 'email';
-    if (telegram) return 'telegram';
-    return null;
-  };
-
-  const guardarCanal = async (email, telegram) => {
-    const valor = calcularCanal(email, telegram);
-    if (!valor) return;
+  const guardarCanal = async (activo) => {
     try {
-      await updateDoc(doc(db, 'pedidos', pedidoId), { canalNotificacion: valor });
+      await updateDoc(doc(db, 'pedidos', pedidoId), { canalNotificacion: activo ? 'email' : null });
     } catch (e) {
       console.error(e);
     }
   };
 
-  // Telegram → activa al instante (sin confirmar)
-  const toggleTelegram = async () => {
-    const nuevo = !canales.telegram;
-    setCanales(prev => ({ ...prev, telegram: nuevo }));
-    // Guarda inmediatamente — solo si email ya fue confirmado o no está marcado
-    if (emailConfirmado || !canales.email) {
-      await guardarCanal(canales.email && emailConfirmado, nuevo);
-    }
-  };
-
-  // Email → toggle (requiere confirmar después)
-  const toggleEmail = () => {
-    const nuevo = !canales.email;
-    setCanales(prev => ({ ...prev, email: nuevo }));
+  const toggleAviso = () => {
+    const nuevo = !quiereAviso;
+    setQuiereAviso(nuevo);
     if (!nuevo) {
       setEmailConfirmado(false);
-      // si desmarca email, guardar solo lo que quede
-      guardarCanal(false, canales.telegram);
+      guardarCanal(false);
     }
   };
 
@@ -89,7 +65,7 @@ export default function Confirmacion() {
       try {
         await updateDoc(doc(db, 'pedidos', pedidoId), {
           email: emailInput,
-          canalNotificacion: calcularCanal(true, canales.telegram),
+          canalNotificacion: 'email',
         });
         setPedido(prev => ({ ...prev, email: emailInput }));
         setEmailConfirmado(true);
@@ -99,7 +75,7 @@ export default function Confirmacion() {
       return;
     }
     setEmailConfirmado(true);
-    await guardarCanal(true, canales.telegram);
+    await guardarCanal(true);
   };
 
   const formatoFecha = () => {
@@ -210,29 +186,28 @@ export default function Confirmacion() {
           </div>
         </div>
 
-        {/* Canal de notificaciones */}
+        {/* Aviso por correo (opcional) */}
         <div className="confirmacion-canal">
-          <h2><Editable id="conf_canal_titulo" as="span">{es ? '¿Cómo quieres seguir tu pedido?' : 'How do you want to track your order?'}</Editable></h2>
-          <p><Editable id="conf_canal_sub" as="span" multiline>{es ? 'Puedes elegir uno o ambos. Te avisamos cada vez que cambie el estado.' : 'You can choose one or both. We\'ll notify you every time the status changes.'}</Editable></p>
+          <h2><Editable id="conf_canal_titulo" as="span">{es ? '¿Quieres que te avisemos por correo?' : 'Want us to notify you by email?'}</Editable></h2>
+          <p><Editable id="conf_canal_sub" as="span" multiline>{es ? 'Te avisamos cada vez que cambie el estado de tu pedido.' : 'We\'ll notify you every time your order status changes.'}</Editable></p>
 
           <div className="canal-opciones">
-            {/* Email */}
             <button
-              className={`canal-opcion ${canales.email ? 'seleccionado' : ''}`}
-              onClick={toggleEmail}
+              className={`canal-opcion ${quiereAviso ? 'seleccionado' : ''}`}
+              onClick={toggleAviso}
             >
               <span className="canal-icono">📧</span>
               <div>
                 <strong><ET k="conf.canal_email" /></strong>
                 <span>{pedido?.email || (es ? 'Recibe avisos por correo' : 'Get updates by email')}</span>
               </div>
-              <span className={`canal-check-box ${canales.email ? 'on' : ''}`}>
-                {canales.email ? '✓' : ''}
+              <span className={`canal-check-box ${quiereAviso ? 'on' : ''}`}>
+                {quiereAviso ? '✓' : ''}
               </span>
             </button>
 
             {/* Sub-bloque: si no hay correo guardado, pedirlo recién aquí */}
-            {canales.email && !emailConfirmado && !pedido?.email && (
+            {quiereAviso && !emailConfirmado && !pedido?.email && (
               <div className="canal-email-input">
                 <input
                   type="email"
@@ -247,41 +222,14 @@ export default function Confirmacion() {
             )}
 
             {/* Sub-bloque: confirmar correo ya existente (usuario con cuenta) */}
-            {canales.email && !emailConfirmado && pedido?.email && (
+            {quiereAviso && !emailConfirmado && pedido?.email && (
               <button className="canal-btn-confirmar" onClick={confirmarEmail}>
                 <Editable id="conf_confirmar_correo" as="span" sinColor>{es ? 'Confirmar correo →' : 'Confirm email →'}</Editable>
               </button>
             )}
-            {canales.email && emailConfirmado && (
+            {quiereAviso && emailConfirmado && (
               <div className="canal-guardado">
                 <span>✓</span> <Editable id="conf_te_avisaremos" as="span">{es ? 'Te avisaremos a' : 'We\'ll notify you at'}</Editable> <strong>{pedido?.email}</strong>
-              </div>
-            )}
-
-            {/* Telegram */}
-            <button
-              className={`canal-opcion ${canales.telegram ? 'seleccionado' : ''}`}
-              onClick={toggleTelegram}
-            >
-              <span className="canal-icono">✈️</span>
-              <div>
-                <strong><Editable id="conf_telegram_titulo" as="span" sinColor>Telegram</Editable></strong>
-                <span><Editable id="conf_telegram_desc" as="span">{es ? 'Notificación instantánea · @kapacmade_bot' : 'Instant notification · @kapacmade_bot'}</Editable></span>
-              </div>
-              <span className={`canal-check-box ${canales.telegram ? 'on' : ''}`}>
-                {canales.telegram ? '✓' : ''}
-              </span>
-            </button>
-
-            {/* Sub-bloque: Telegram activo */}
-            {canales.telegram && (
-              <div className="canal-telegram-info">
-                <a href={TELEGRAM_BOT} target="_blank" rel="noopener noreferrer" className="telegram-btn">
-                  <Editable id="conf_abrir_telegram" as="span">{es ? 'Abrir' : 'Open'}</Editable> @kapacmade_bot
-                </a>
-                <p className="telegram-hint">
-                  <Editable id="conf_envia" as="span">{es ? 'Envía' : 'Send'}</Editable> <code>/start</code> <Editable id="conf_y_escribe" as="span">{es ? 'y escribe:' : 'and type:'}</Editable> <strong>#{pedidoId.slice(0, 8).toUpperCase()}</strong>
-                </p>
               </div>
             )}
           </div>

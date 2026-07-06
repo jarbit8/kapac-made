@@ -72,8 +72,8 @@ export default function Legal() {
               ? 'También ofrecemos recojo en tienda en Arequipa coordinando previamente por WhatsApp. El envío a domicilio tiene un costo adicional según la ciudad de destino, que se comunica al confirmar el pedido.'
               : 'We also offer in-store pickup in Arequipa, coordinated in advance via WhatsApp. Home delivery has an additional cost depending on the destination city, communicated upon order confirmation.'}</Editable>
             <Editable id="legal_envios_p3" as="p" multiline>{es
-              ? 'El seguimiento del pedido se realiza a través de nuestro bot de Telegram @kapacmade_bot, por correo electrónico (si lo seleccionaste al hacer el pedido), o contactándonos directamente.'
-              : 'Order tracking is done through our Telegram bot @kapacmade_bot, by email (if selected during checkout), or by contacting us directly.'}</Editable>
+              ? 'El seguimiento del pedido se realiza por correo electrónico (si lo seleccionaste al confirmar tu compra) o contactándonos directamente.'
+              : 'Order tracking is done by email (if selected when confirming your purchase) or by contacting us directly.'}</Editable>
           </section>
 
           {/* ── Política de Privacidad ── */}
@@ -193,7 +193,6 @@ export default function Legal() {
             <p><Editable id="legal_contacto_intro" as="span">{es ? 'Para consultas, reclamos o cualquier duda:' : 'For inquiries, complaints or any questions:'}</Editable></p>
             <p><Editable id="legal_contacto_tel" as="span">📞 +51 997 050 752 (WhatsApp)</Editable></p>
             <p><Editable id="legal_contacto_lugar" as="span">{es ? '📍 Arequipa, Perú' : '📍 Arequipa, Peru'}</Editable></p>
-            <p><Editable id="legal_contacto_bot" as="span">{es ? '🤖 @kapacmade_bot en Telegram para seguimiento de pedidos' : '🤖 @kapacmade_bot on Telegram for order tracking'}</Editable></p>
           </section>
 
           <p className="legal-actualizado">

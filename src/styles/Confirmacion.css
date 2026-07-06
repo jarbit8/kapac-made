@@ -300,45 +300,6 @@
   font-weight: 600;
 }
 
-.canal-telegram-info {
-  margin-top: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Telegram (dentro del nuevo bloque canal) */
-
-.telegram-btn {
-  display: inline-block;
-  background: #229ed9;
-  color: #fff;
-  padding: 0.75rem 2rem;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.95rem;
-  transition: background 0.2s;
-}
-
-.telegram-btn:hover {
-  background: #1a8bbf;
-}
-
-.telegram-hint {
-  margin-top: 0.8rem;
-  font-size: 0.82rem;
-  color: #555;
-}
-
-.telegram-hint code {
-  background: #fff;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
 /* Acciones */
 .confirmacion-acciones {
   display: flex;
