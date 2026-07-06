@@ -32,7 +32,7 @@ export default function Checkout() {
   const { t, idioma } = useIdioma();
   const [modo, setModo] = useState(null); // 'envio' | 'recojo'
   const [form, setForm] = useState({
-    nombre: '', telefono: '', direccion: '', distrito: '', referencia: '', email: '',
+    nombre: '', telefono: '', direccion: '', distrito: '', referencia: '',
   });
   const [formRecojo, setFormRecojo] = useState({
     nombre: '', telefono: '',
@@ -73,16 +73,9 @@ export default function Checkout() {
       return;
     }
 
-    // Email obligatorio para invitados
-    if (!usuario) {
-      if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) {
-        setError(idioma === 'en' ? 'Please enter a valid email address.' : 'Por favor ingresa un correo válido.');
-        return;
-      }
-      sessionStorage.setItem('checkout_email', form.email);
-    } else {
-      sessionStorage.setItem('checkout_email', usuario.email);
-    }
+    // El correo ya no se pide aquí: se ofrece como opción después del pago
+    // (pantalla de Confirmación), para no frenar la compra a quien no quiere darlo.
+    sessionStorage.setItem('checkout_email', usuario ? usuario.email : '');
 
     if (modo === 'envio') {
       if (!form.nombre || !form.telefono || !form.direccion || !form.distrito) {
@@ -138,29 +131,6 @@ export default function Checkout() {
         </div>
 
         <h1><ET k="checkout.tipo_envio" /></h1>
-
-        {/* Email para invitados */}
-        {!usuario && (
-          <div className="checkout-form" style={{ marginBottom: '12px' }}>
-            <h2><Editable id="checkout_email_titulo" as="span">{idioma === 'en' ? 'Your email' : 'Tu correo'}</Editable></h2>
-            <div className="checkout-grid">
-              <label className="full">
-                <Editable id="checkout_email_label" as="span">Email</Editable> <span className="req">*</span>
-                <input
-                  type="email"
-                  placeholder="tucorreo@email.com"
-                  value={form.email}
-                  onChange={e => setForm({ ...form, email: e.target.value })}
-                />
-              </label>
-            </div>
-            <p style={{ fontSize: '12px', color: '#888', marginTop: '6px' }}>
-              <Editable id="checkout_email_hint" as="span" multiline>{idioma === 'en'
-                ? 'We\'ll send your order confirmation here.'
-                : 'Te enviaremos la confirmación de tu pedido aquí.'}</Editable>
-            </p>
-          </div>
-        )}
 
         {/* Tarjetas de opción */}
         <div className="checkout-opciones">

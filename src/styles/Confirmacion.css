@@ -265,6 +265,34 @@
 
 .canal-btn-confirmar:hover { background: #333; }
 
+.canal-email-input {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.canal-email-input input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--ink);
+}
+
+.canal-email-input input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.canal-email-input .canal-btn-confirmar {
+  width: auto;
+  margin-top: 0;
+  padding: 12px 18px;
+  white-space: nowrap;
+}
+
 .canal-guardado {
   margin-top: 12px;
   font-size: 0.88rem;

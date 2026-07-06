@@ -21,6 +21,7 @@ export default function Confirmacion() {
   const [cargando, setCargando] = useState(true);
   const [canales, setCanales] = useState({ email: false, telegram: false });
   const [emailConfirmado, setEmailConfirmado] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
 
   useEffect(() => {
     const cargar = async () => {
@@ -77,8 +78,26 @@ export default function Confirmacion() {
     }
   };
 
-  // Botón Confirmar correo
+  // Botón Confirmar correo — si el pedido no tenía correo (invitado que no lo dio
+  // en el checkout), se guarda el que recién escribió aquí.
   const confirmarEmail = async () => {
+    if (!pedido?.email) {
+      if (!/\S+@\S+\.\S+/.test(emailInput)) {
+        alert(es ? 'Ingresa un correo válido.' : 'Enter a valid email address.');
+        return;
+      }
+      try {
+        await updateDoc(doc(db, 'pedidos', pedidoId), {
+          email: emailInput,
+          canalNotificacion: calcularCanal(true, canales.telegram),
+        });
+        setPedido(prev => ({ ...prev, email: emailInput }));
+        setEmailConfirmado(true);
+      } catch (e) {
+        console.error(e);
+      }
+      return;
+    }
     setEmailConfirmado(true);
     await guardarCanal(true, canales.telegram);
   };
@@ -205,15 +224,30 @@ export default function Confirmacion() {
               <span className="canal-icono">📧</span>
               <div>
                 <strong><ET k="conf.canal_email" /></strong>
-                <span>{pedido?.email}</span>
+                <span>{pedido?.email || (es ? 'Recibe avisos por correo' : 'Get updates by email')}</span>
               </div>
               <span className={`canal-check-box ${canales.email ? 'on' : ''}`}>
                 {canales.email ? '✓' : ''}
               </span>
             </button>
 
-            {/* Sub-bloque: confirmar correo */}
-            {canales.email && !emailConfirmado && (
+            {/* Sub-bloque: si no hay correo guardado, pedirlo recién aquí */}
+            {canales.email && !emailConfirmado && !pedido?.email && (
+              <div className="canal-email-input">
+                <input
+                  type="email"
+                  placeholder={es ? 'tucorreo@email.com' : 'youremail@email.com'}
+                  value={emailInput}
+                  onChange={e => setEmailInput(e.target.value)}
+                />
+                <button className="canal-btn-confirmar" onClick={confirmarEmail}>
+                  <Editable id="conf_guardar_correo" as="span" sinColor>{es ? 'Guardar →' : 'Save →'}</Editable>
+                </button>
+              </div>
+            )}
+
+            {/* Sub-bloque: confirmar correo ya existente (usuario con cuenta) */}
+            {canales.email && !emailConfirmado && pedido?.email && (
               <button className="canal-btn-confirmar" onClick={confirmarEmail}>
                 <Editable id="conf_confirmar_correo" as="span" sinColor>{es ? 'Confirmar correo →' : 'Confirm email →'}</Editable>
               </button>
