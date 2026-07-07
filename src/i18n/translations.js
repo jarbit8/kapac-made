@@ -189,7 +189,6 @@ const translations = {
     'conf.recibo':           'Resumen',
     'conf.canal':            '¿Cómo quieres recibir notificaciones?',
     'conf.canal_email':      'Por correo electrónico',
-    'conf.canal_tg':         'Por Telegram (más rápido)',
     'conf.canal_ambos':      'Ambos',
     'conf.confirmar':        'Confirmar',
     'conf.ver_pedidos':      'Ver mis pedidos',
@@ -257,7 +256,6 @@ const translations = {
     'contacto.titulo':       'Contacto',
     'contacto.sub':          '¿Tienes preguntas? Escríbenos.',
     'contacto.whatsapp':     'WhatsApp',
-    'contacto.telegram':     'Telegram',
     'contacto.ubicacion':    'Ubicación',
     'contacto.instagram':    'Instagram',
 
@@ -515,7 +513,6 @@ const translations = {
     'conf.recibo':           'Summary',
     'conf.canal':            'How do you want to receive notifications?',
     'conf.canal_email':      'By email',
-    'conf.canal_tg':         'By Telegram (faster)',
     'conf.canal_ambos':      'Both',
     'conf.confirmar':        'Confirm',
     'conf.ver_pedidos':      'See my orders',
@@ -583,7 +580,6 @@ const translations = {
     'contacto.titulo':       'Contact',
     'contacto.sub':          'Got questions? Write to us.',
     'contacto.whatsapp':     'WhatsApp',
-    'contacto.telegram':     'Telegram',
     'contacto.ubicacion':    'Location',
     'contacto.instagram':    'Instagram',
 
