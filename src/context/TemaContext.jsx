@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { obtenerContenido, ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT } from '../firebase/contenido';
 
 export const LOGO_CACHE_KEY = 'kapac_logo_v1';
+const ACENTO_CACHE_KEY = 'kapac_acento_v1';
+const FONDO_CACHE_KEY = 'kapac_fondo_v1';
 const CERRADO_CACHE_KEY = 'kapac_cerrado_v1';
 
 const TemaContext = createContext({ logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, setTema: () => {} });
@@ -11,8 +13,8 @@ export function TemaProvider({ children }) {
     try {
       return {
         logo: localStorage.getItem(LOGO_CACHE_KEY) || LOGO_DEFAULT,
-        acento: ACENTO_DEFAULT,
-        fondo: FONDO_DEFAULT,
+        acento: localStorage.getItem(ACENTO_CACHE_KEY) || ACENTO_DEFAULT,
+        fondo: localStorage.getItem(FONDO_CACHE_KEY) || FONDO_DEFAULT,
         texto: TEXTO_DEFAULT,
       };
     } catch (_) {
@@ -33,6 +35,15 @@ export function TemaProvider({ children }) {
     try { return localStorage.getItem(CERRADO_CACHE_KEY) === '1'; } catch (_) { return false; }
   });
 
+  // Aplica el acento/fondo cacheados ANTES de pintar (useLayoutEffect corre
+  // sincrónico, antes de que el navegador muestre el frame), para no destellar
+  // el terracota de fábrica mientras se espera la respuesta de Firestore.
+  useLayoutEffect(() => {
+    document.documentElement.style.setProperty('--clay', tema.acento);
+    document.documentElement.style.setProperty('--fondo', tema.fondo);
+    document.documentElement.style.setProperty('--ink', tema.texto);
+  }, [tema.acento, tema.fondo, tema.texto]);
+
   useEffect(() => {
     obtenerContenido().then((c) => {
       const logo = c.logo || LOGO_DEFAULT;
@@ -43,11 +54,10 @@ export function TemaProvider({ children }) {
       const texto = TEXTO_DEFAULT;
       setTema({ logo, acento, fondo, texto });
       setCerrado(c.cerrado === true);
-      if (acento) document.documentElement.style.setProperty('--clay', acento);
-      document.documentElement.style.setProperty('--fondo', fondo);
-      document.documentElement.style.setProperty('--ink', texto);
       try {
         localStorage.setItem(LOGO_CACHE_KEY, logo);
+        localStorage.setItem(ACENTO_CACHE_KEY, acento);
+        localStorage.setItem(FONDO_CACHE_KEY, fondo);
         localStorage.setItem(CERRADO_CACHE_KEY, c.cerrado === true ? '1' : '0');
       } catch (_) {}
       setLogoListo(true);
