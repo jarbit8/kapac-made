@@ -143,6 +143,13 @@ const ESTADO_LABELS = {
   pagado:      '📦 Pendiente de envío',
 };
 
+const METODO_PAGO_LABELS = {
+  yape:         '📱 Yape (QR)',
+  'yape-codigo': '📱 Yape (código)',
+  tarjeta:      '💳 Tarjeta',
+  efectivo:     '💵 PagoEfectivo',
+};
+
 const ESTADO_COLORES = {
   procesando_pago: { bg: '#fff3cd', color: '#856404' },
   pendiente_envio: { bg: '#d4edda', color: '#155724' },
@@ -752,6 +759,9 @@ export default function Admin() {
                       </span>
                     </div>
                     <p className="admin-pedido-fecha">{formatoFecha(p.fecha)}</p>
+                    <p className="admin-pedido-metodo">
+                      {METODO_PAGO_LABELS[p.metodoPago] || `❔ ${p.metodoPago || 'Sin método'}`}
+                    </p>
                     <ul className="admin-pedido-items">
                       {p.items?.map((it, i) => (
                         <li key={i}>{it.cantidad}× {it.nombre} — S/{it.precio * it.cantidad}.00</li>

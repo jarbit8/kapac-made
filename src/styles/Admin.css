@@ -356,6 +356,13 @@
   margin-bottom: 10px;
 }
 
+.admin-pedido-metodo {
+  font-size: 13px;
+  color: #444;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
 .admin-pedido-items {
   list-style: none;
   padding: 0;
@@ -699,6 +706,7 @@
 .admin-pedido-email { font-size: 13.5px !important; }
 .admin-pedido-estado { font-size: 12px !important; padding: 5px 14px !important; }
 .admin-pedido-fecha { font-size: 13px !important; }
+.admin-pedido-metodo { font-size: 13.5px !important; }
 .admin-pedido-items { font-size: 13.5px !important; gap: 5px; }
 .admin-pedido-items li { font-size: 13.5px !important; }
 .admin-pedido-envio { font-size: 13.5px !important; padding: 10px 14px !important; }
