@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -74,6 +74,8 @@ function AppRoutes() {
       <Route path="/pago/:metodo/:pedidoId" element={<><NavBar /><Pago /></>} />
       <Route path="/confirmacion/:pedidoId" element={<><NavBar /><Confirmacion /></>} />
       <Route path="/perfil"   element={<><NavBar /><Perfil /></>} />
+      {/* URLs viejas o desconocidas (ej. enlaces antiguos de Google) → al inicio */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
