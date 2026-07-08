@@ -80,16 +80,16 @@ export default function Legal() {
           <section className="legal-section">
             <h2><Editable id="legal_privacidad_titulo" as="span">{es ? 'Política de Privacidad' : 'Privacy Policy'}</Editable></h2>
             <Editable id="legal_priv_p1" as="p" multiline>{es
-              ? 'En Kapac Made respetamos tu privacidad y cumplimos con la Ley N° 29733 de Protección de Datos Personales del Perú. Los datos personales que recopilamos (nombre, correo electrónico, dirección, teléfono) se utilizan exclusivamente para:'
-              : 'At Kapac Made we respect your privacy and comply with Peruvian Law N° 29733 on Personal Data Protection. The personal data we collect (name, email, address, phone) is used exclusively to:'}</Editable>
+              ? 'En Kapac Made respetamos tu privacidad y cumplimos con la Ley N° 29733 de Protección de Datos Personales del Perú. Los datos personales que recopilamos al comprar (nombre y teléfono para coordinar la entrega; dirección únicamente si eliges envío a domicilio; y correo electrónico de forma opcional, solo si decides recibir notificaciones del estado de tu pedido) se utilizan exclusivamente para:'
+              : 'At Kapac Made we respect your privacy and comply with Peruvian Law N° 29733 on Personal Data Protection. The personal data we collect at checkout (name and phone to coordinate delivery; address only if you choose home delivery; and email optionally, only if you decide to receive order-status notifications) is used exclusively to:'}</Editable>
             <ul className="legal-lista">
               <li><Editable id="legal_priv_li1" as="span">{es ? 'Procesar y entregar tu pedido' : 'Process and deliver your order'}</Editable></li>
               <li><Editable id="legal_priv_li2" as="span">{es ? 'Enviarte notificaciones sobre el estado de tu compra' : 'Send you notifications about your order status'}</Editable></li>
               <li><Editable id="legal_priv_li3" as="span">{es ? 'Mejorar tu experiencia de compra' : 'Improve your shopping experience'}</Editable></li>
             </ul>
             <Editable id="legal_priv_p2" as="p" multiline>{es
-              ? 'No compartimos tu información personal con terceros, excepto los servicios estrictamente necesarios para procesar pagos (Culqi, certificado PCI-DSS) y entregas (courier).'
-              : 'We do not share your personal information with third parties, except for services strictly necessary for payment processing (Culqi, PCI-DSS certified) and deliveries (courier).'}</Editable>
+              ? 'No compartimos tu información personal con terceros, excepto los servicios estrictamente necesarios para: procesar pagos (Culqi, certificado PCI-DSS), realizar entregas (courier), enviar correos de notificación (Resend), alojar el sitio y los datos (Google Firebase) y responder tus consultas en el chat de ayuda (asistente de IA). Si escribes en el chat, tu mensaje se procesa a través de un proveedor de inteligencia artificial externo únicamente para generarte una respuesta.'
+              : 'We do not share your personal information with third parties, except for services strictly necessary to: process payments (Culqi, PCI-DSS certified), make deliveries (courier), send notification emails (Resend), host the site and data (Google Firebase) and answer your questions in the help chat (AI assistant). If you write in the chat, your message is processed by a third-party AI provider solely to generate a reply.'}</Editable>
             <Editable id="legal_priv_p3" as="p" multiline>{es
               ? 'Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos al +51 997 050 752.'
               : 'You can request the deletion of your data at any time by writing to us at +51 997 050 752.'}</Editable>
@@ -100,8 +100,8 @@ export default function Legal() {
               : 'To improve our service and understand which pages are most visited, we record anonymous visits to our site. Important things to know:'}</Editable>
             <ul className="legal-lista">
               <li><Editable id="legal_priv_li4" as="span" multiline>{es
-                ? 'No usamos cookies de seguimiento. No instalamos archivos persistentes en tu dispositivo para identificarte entre sesiones.'
-                : "We do not use tracking cookies. We don't install persistent files on your device to identify you between sessions."}</Editable></li>
+                ? 'No usamos cookies de seguimiento ni de publicidad. Sí usamos el almacenamiento local de tu navegador (localStorage) con fines únicamente funcionales: recordar tu carrito, tus preferencias de idioma y visualización, y mantener tu sesión. Nunca usamos esos datos para identificarte con fines publicitarios ni los compartimos.'
+                : 'We do not use tracking or advertising cookies. We do use your browser\'s local storage (localStorage) for functional purposes only: remembering your cart, your language and display preferences, and keeping your session. We never use this data to identify you for advertising, nor do we share it.'}</Editable></li>
               <li><Editable id="legal_priv_li5" as="span" multiline>{es
                 ? 'Si has iniciado sesión con tu cuenta, registramos tu correo electrónico junto a las páginas que visitas dentro de Kapac Made. Esto se basa en el consentimiento que diste al iniciar sesión.'
                 : 'If you are signed in, we record your email along with the pages you visit within Kapac Made. This is based on the consent you gave when signing in.'}</Editable></li>
