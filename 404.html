@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kapac Made</title>
+  <script>
+    // GitHub Pages sirve este archivo cuando la URL no existe como archivo real.
+    // El sitio usa HashRouter (rutas con #). Los enlaces viejos indexados por
+    // Google apuntan a URLs sin # (ej. /catalogo) que en GitHub Pages dan 404.
+    // Aqui redirigimos /catalogo -> /#/catalogo para aterrizar en la pagina real.
+    (function () {
+      var l = window.location;
+      var ruta = l.pathname.replace(/^\/+/, '');
+      // Si ya viene con hash o es la raiz, mandamos al inicio.
+      l.replace(l.origin + '/#/' + ruta + l.search);
+    })();
+  </script>
+</head>
+<body></body>
+</html>
