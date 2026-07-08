@@ -4,6 +4,7 @@ import '../../styles/Header.css';
 import '../EditableImage.css';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import { esCorreoAdmin } from '../../config/admins';
 import { useIdioma } from '../../context/LanguageContext';
 import { obtenerProductos } from '../../firebase/productos';
 import logoVerde    from '../../assets/images/kapac_made_3.png';
@@ -86,7 +87,7 @@ export default function Header({ transparente = false }) {
     }
   };
 
-  const esAdmin = usuario?.email === 'jarb2299@gmail.com';
+  const esAdmin = esCorreoAdmin(usuario?.email);
   const esSolido = !transparente || scrolled;
   const { logo, logoListo, setTema } = useTema();
   const logoSrc  = logo || logoTerracota; // logo del admin o el de la marca

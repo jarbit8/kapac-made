@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { esCorreoAdmin } from './config/admins';
 import { CartProvider } from './context/CartContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { TextosProvider } from './context/TextosContext';
@@ -86,7 +87,7 @@ function CierreGate({ children }) {
   const { cerrado } = useTema();
   const { usuario, cargando } = useAuth();
   const { pathname } = useLocation();
-  const esAdmin = usuario?.email === 'jarb2299@gmail.com';
+  const esAdmin = esCorreoAdmin(usuario?.email);
   if (cerrado && !cargando && !esAdmin && pathname !== '/login') return <SitioCerrado />;
   return children;
 }

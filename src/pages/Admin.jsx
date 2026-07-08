@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import { useAuth } from '../context/AuthContext';
+import { esCorreoAdmin } from '../config/admins';
 import {
   obtenerProductos, agregarProducto, actualizarProducto, eliminarProducto,
 } from '../firebase/productos';
@@ -324,7 +325,7 @@ export default function Admin() {
     );
   }
 
-  if (!usuario || usuario.email !== 'jarb2299@gmail.com') {
+  if (!usuario || !esCorreoAdmin(usuario.email)) {
     return (
       <>
         <Header />

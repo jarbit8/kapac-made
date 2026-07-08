@@ -7,8 +7,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { registrarVisita } from '../firebase/visitas';
 import { useAuth } from '../context/AuthContext';
-
-const EMAIL_ADMIN = 'jarb2299@gmail.com';
+import { esCorreoAdmin } from '../config/admins';
 
 export default function useTrackVisita() {
   const location = useLocation();
@@ -18,7 +17,7 @@ export default function useTrackVisita() {
     // Esperar a que termine de cargar el estado de auth
     if (cargando) return;
     // No registrar visitas del propio admin (ni de su navegador, aunque no esté logueado)
-    if (usuario?.email === EMAIL_ADMIN) return;
+    if (esCorreoAdmin(usuario?.email)) return;
     try {
       if (localStorage.getItem('kapac_dispositivo_admin') === '1') return;
     } catch (_) {}

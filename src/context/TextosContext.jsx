@@ -2,13 +2,14 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { obtenerTextos, guardarTexto } from '../firebase/textos';
 import { traducirEsEn } from '../i18n/traducir';
 import { useAuth } from './AuthContext';
+import { esCorreoAdmin } from '../config/admins';
 
 const TextosContext = createContext({ textos: {}, esAdmin: false, guardar: async () => {} });
 
 export function TextosProvider({ children }) {
   const [textos, setTextos] = useState({});
   const { usuario } = useAuth();
-  const esAdmin = usuario?.email === 'jarb2299@gmail.com';
+  const esAdmin = esCorreoAdmin(usuario?.email);
 
   useEffect(() => {
     obtenerTextos().then(setTextos).catch(() => {});

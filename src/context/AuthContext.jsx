@@ -1,9 +1,9 @@
 // Contexto global de autenticación
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { observarUsuario } from '../firebase/auth';
+import { esCorreoAdmin } from '../config/admins';
 
 const AuthContext = createContext();
-const EMAIL_ADMIN = 'jarb2299@gmail.com';
 const DISPOSITIVO_ADMIN_KEY = 'kapac_dispositivo_admin';
 
 export function AuthProvider({ children }) {
@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
       setCargando(false);
       // Una vez que el admin entra con su cuenta desde este navegador, lo recordamos
       // para no contarlo como visita aunque después navegue sin loguearse.
-      if (user?.email === EMAIL_ADMIN) {
+      if (esCorreoAdmin(user?.email)) {
         try { localStorage.setItem(DISPOSITIVO_ADMIN_KEY, '1'); } catch (_) {}
       }
     });

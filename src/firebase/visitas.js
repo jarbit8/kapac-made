@@ -7,9 +7,9 @@ import {
   collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './config';
+import { esCorreoAdmin } from '../config/admins';
 
 const COLECCION = 'visitas';
-const EMAIL_ADMIN = 'jarb2299@gmail.com';
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
@@ -145,7 +145,7 @@ export async function obtenerVisitasRecientes(n = 10) {
     );
     return snap.docs
       .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((v) => v.email !== EMAIL_ADMIN)
+      .filter((v) => !esCorreoAdmin(v.email))
       .filter((v) => v.entrada)
       .slice(0, n);
   } catch (e) {
@@ -168,7 +168,7 @@ export async function obtenerEstadisticas(diasAtras = 30) {
     const visitas = snap.docs
       .map((d) => d.data())
       .filter((v) => (v.dia || '') >= limiteStr)
-      .filter((v) => v.email !== EMAIL_ADMIN); // excluir admin
+      .filter((v) => !esCorreoAdmin(v.email)); // excluir admin
 
     const porRuta = {};
     const porPais = {};
