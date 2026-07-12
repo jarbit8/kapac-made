@@ -19,9 +19,19 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [redirigir, setRedirigir] = useState(false);
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const { t, idioma } = useIdioma();
+
+  // No navegar apenas resuelve el login: hay que esperar a que el contexto
+  // de auth (usuario) se actualice de verdad. Si navegamos antes, la pantalla
+  // "Próximamente" alcanza a renderizar con el usuario todavía en null y
+  // el admin ve el sitio cerrado por una fracción de segundo (o hasta que
+  // recarga, si no nota que se autocorrige).
+  useEffect(() => {
+    if (redirigir && usuario) navigate('/');
+  }, [redirigir, usuario, navigate]);
 
   const handleLogout = async () => {
     await cerrarSesion();
@@ -59,7 +69,7 @@ export default function Login() {
       } else {
         await registrar(email, password);
       }
-      navigate('/');
+      setRedirigir(true);
     } catch (err) {
       setError(traducirError(err.code));
     }
@@ -71,7 +81,7 @@ export default function Login() {
     setCargando(true);
     try {
       await iniciarSesionGoogle();
-      navigate('/');
+      setRedirigir(true);
     } catch (err) {
       setError(idioma === 'en' ? 'Could not sign in with Google.' : 'No se pudo iniciar con Google.');
     }
