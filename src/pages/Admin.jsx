@@ -392,6 +392,14 @@ export default function Admin() {
             <p className="admin-fotos-intro">
               Sube las fotos del sitio. Cada cambio se <b>guarda solo</b> al subir, quitar o salir de un campo de texto.
             </p>
+            {(guardandoContenido || msgContenido) && (
+              <p style={{
+                fontSize: 13, fontWeight: 600, marginTop: -8, marginBottom: 16,
+                color: guardandoContenido ? '#888' : (msgContenido.startsWith('✓') ? '#1a7d3b' : '#c0392b'),
+              }}>
+                {guardandoContenido ? 'Guardando…' : msgContenido}
+              </p>
+            )}
 
             <h3 className="admin-fotos-titulo">Diseño (fondo, navegación y botones)</h3>
             <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>El color de cada texto se cambia con la pastilla 🎨 al lado de su lápiz ✏️, directo en la página. El logo se cambia pasando el mouse por encima, en la página de inicio. El menú y los botones usan un único color, acá abajo.</p>

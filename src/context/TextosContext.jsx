@@ -16,8 +16,15 @@ export function TextosProvider({ children }) {
   }, []);
 
   const guardar = async (clave, valor) => {
+    const anterior = textos[clave];
     setTextos((prev) => ({ ...prev, [clave]: valor })); // refleja al instante
-    try { await guardarTexto(clave, valor); } catch (e) { /* error silencioso */ }
+    try {
+      await guardarTexto(clave, valor);
+    } catch (e) {
+      console.error('No se pudo guardar el texto:', clave, e);
+      setTextos((prev) => ({ ...prev, [clave]: anterior })); // revertir: no se guardó de verdad
+      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
   };
 
   // Textos editados cuya traducción quedó pendiente (la API falló al guardar):
