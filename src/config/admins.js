@@ -5,6 +5,7 @@
 export const ADMINS = [
   'jarb2299@gmail.com',
   'cristhian.ccapa@qhapaqbrands.com',
+  'joel.reinoso@ucsp.edu.pe', // prueba temporal del fix de guardado
 ];
 
 // Compara sin distinguir mayúsculas/minúsculas.
