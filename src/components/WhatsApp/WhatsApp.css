@@ -4,13 +4,13 @@
   right: 24px;
   width: 44px;
   height: 44px;
-  background: var(--clay);
+  background: #25d366;
   color: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(176, 83, 46, 0.4);
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
   z-index: 250;
   transition: transform 0.3s ease, box-shadow 0.2s ease, opacity 0.3s ease, visibility 0.3s ease;
   text-decoration: none;
@@ -18,7 +18,7 @@
 
 .wa-float:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 22px rgba(176, 83, 46, 0.6);
+  box-shadow: 0 6px 22px rgba(37, 211, 102, 0.6);
 }
 
 /* Oculto hasta pasar el video (home) */
