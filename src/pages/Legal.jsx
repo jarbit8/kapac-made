@@ -88,8 +88,8 @@ export default function Legal() {
               <li><Editable id="legal_priv_li3" as="span">{es ? 'Mejorar tu experiencia de compra' : 'Improve your shopping experience'}</Editable></li>
             </ul>
             <Editable id="legal_priv_p2" as="p" multiline>{es
-              ? 'No compartimos tu información personal con terceros, excepto los servicios estrictamente necesarios para: procesar pagos (Culqi, certificado PCI-DSS), realizar entregas (courier), enviar correos de notificación (Resend), alojar el sitio y los datos (Google Firebase) y responder tus consultas en el chat de ayuda (asistente de IA). Si escribes en el chat, tu mensaje se procesa a través de un proveedor de inteligencia artificial externo únicamente para generarte una respuesta.'
-              : 'We do not share your personal information with third parties, except for services strictly necessary to: process payments (Culqi, PCI-DSS certified), make deliveries (courier), send notification emails (Resend), host the site and data (Google Firebase) and answer your questions in the help chat (AI assistant). If you write in the chat, your message is processed by a third-party AI provider solely to generate a reply.'}</Editable>
+              ? 'No compartimos tu información personal con terceros, excepto los servicios estrictamente necesarios para: procesar pagos (Culqi, certificado PCI-DSS), realizar entregas (courier), enviar correos de notificación (Resend) y alojar el sitio y los datos (Google Firebase).'
+              : 'We do not share your personal information with third parties, except for services strictly necessary to: process payments (Culqi, PCI-DSS certified), make deliveries (courier), send notification emails (Resend), and host the site and data (Google Firebase).'}</Editable>
             <Editable id="legal_priv_p3" as="p" multiline>{es
               ? 'Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos al +51 997 050 752.'
               : 'You can request the deletion of your data at any time by writing to us at +51 997 050 752.'}</Editable>

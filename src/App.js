@@ -32,7 +32,6 @@ import PagoYapeCulqi from './pages/PagoYapeCulqi';
 import Confirmacion from './pages/Confirmacion';
 import Perfil from './pages/Perfil';
 import WhatsApp from './components/WhatsApp/WhatsApp';
-import KapacAI from './components/KapacAI/KapacAI';
 import ScrollToTop from './components/ScrollToTop';
 import NavBar from './components/NavBar/NavBar';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
@@ -112,7 +111,7 @@ function App() {
                 <ScrollToTop />
                 <CierreGate>
                   <AppRoutes />
-                  <KapacAI />
+                  <WhatsApp />
                 </CierreGate>
               </HashRouter>
             </TemaProvider>
