@@ -8,9 +8,6 @@ import videoFondo from '../../assets/videos/proximamente-fondo.mp4';
 import poster from '../../assets/images/proximamente.jpg';
 import './SitioCerrado.css';
 
-const WHATSAPP = 'https://wa.me/51997050752?text=' +
-  encodeURIComponent('¡Hola Kapac Made! 🎒 Tengo una consulta sobre sus mochilas.');
-
 const FRASES = ['COMING SOON', 'NEXT WEEK'];
 const GLIFOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&/*+<>';
 const PANTALLA_ANCHA = '(min-aspect-ratio: 3/4)';
@@ -191,8 +188,7 @@ export default function SitioCerrado() {
 
       <footer className="cerrado-pie">
         <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
-        <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>
-        <span className="cerrado-pie-der">© Kapac Made</span>
+        <span className="cerrado-pie-der">Powered by jarbit</span>
       </footer>
 
       <Link to="/login" className="cerrado-admin" aria-label="Admin">·</Link>
