@@ -23,12 +23,6 @@ function reproducir(v) {
   v.play().catch(() => {});
 }
 
-function horaArequipa() {
-  return new Date().toLocaleTimeString('es-PE', {
-    timeZone: 'America/Lima', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
-  });
-}
-
 // Las letras se mezclan y se van fijando de izquierda a derecha;
 // cada pocos segundos el título pasa al otro idioma.
 function useTitulo(primero) {
@@ -75,11 +69,10 @@ function useTitulo(primero) {
 // está cerrada desde el admin. El admin entra normal con su cuenta (/login).
 export default function SitioCerrado() {
   const { logo, logoListo } = useTema();
-  const { idioma, setIdioma } = useIdioma();
+  const { idioma } = useIdioma();
   const es = idioma === 'es';
 
   const [ancha, setAncha] = useState(() => window.matchMedia(PANTALLA_ANCHA).matches);
-  const [hora, setHora] = useState(horaArequipa);
   const letras = useTitulo(es ? 'es' : 'en');
   const videoRef = useRef(null);
   const fondoRef = useRef(null);
@@ -101,11 +94,9 @@ export default function SitioCerrado() {
       reproducir(fondoRef.current);
     };
     document.addEventListener('visibilitychange', alVolver);
-    const reloj = setInterval(() => setHora(horaArequipa()), 1000);
     return () => {
       mq.removeEventListener('change', onCambio);
       document.removeEventListener('visibilitychange', alVolver);
-      clearInterval(reloj);
     };
   }, []);
 
@@ -131,25 +122,14 @@ export default function SitioCerrado() {
       <div className="cerrado-grano" />
 
       <header className="cerrado-top">
-        <span>{es ? 'Arequipa, Perú' : 'Arequipa, Peru'}<br />16°24′S 71°32′W</span>
-        <span className="cerrado-top-der">
-          <span className="cerrado-idioma">
-            <button className={es ? 'activo' : ''} onClick={() => setIdioma('es')}>ES</button>
-            /
-            <button className={es ? '' : 'activo'} onClick={() => setIdioma('en')}>EN</button>
-          </span>
-          <span><i className="cerrado-rec" />AQP {hora}</span>
-        </span>
-      </header>
-
-      <main className="cerrado-centro">
         <img
           src={logo || logoLocal}
           alt="Kapac Made"
           className="cerrado-logo"
           style={logoListo ? undefined : { opacity: 0 }}
         />
-      </main>
+        <span className="cerrado-lugar">{es ? 'Arequipa, Perú' : 'Arequipa, Peru'}<br />16°24′S 71°32′W</span>
+      </header>
 
       <h1 className="cerrado-titulo" aria-label={es ? 'Próximamente' : 'Coming soon'}>
         {letras.map((l, i) => (

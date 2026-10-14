@@ -57,7 +57,6 @@
 }
 
 .cerrado-top,
-.cerrado-centro,
 .cerrado-titulo,
 .cerrado-pie {
   position: relative;
@@ -67,64 +66,29 @@
 .cerrado-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 22px var(--pad) 0;
+  align-items: center;
+  padding: 24px var(--pad) 0;
   font-size: 11px;
   line-height: 1.7;
   letter-spacing: 2px;
   text-transform: uppercase;
-  animation: cerrado-aparece 1s ease 1.6s both;
-}
-
-.cerrado-top-der {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.cerrado-idioma button {
-  background: none;
-  border: none;
-  padding: 0 4px;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  cursor: pointer;
-  opacity: 0.45;
-}
-.cerrado-idioma button.activo { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
-.cerrado-idioma button:last-child { padding-right: 0; }
-
-.cerrado-centro {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--pad);
 }
 
 .cerrado-logo {
-  width: 640px;
-  max-width: 78%;
+  width: 230px;
   object-fit: contain;
-  filter: brightness(0) invert(1) drop-shadow(0 6px 30px rgba(0, 0, 0, 0.35));
+  filter: brightness(0) invert(1) drop-shadow(0 4px 20px rgba(0, 0, 0, 0.35));
   animation: cerrado-logo 1.4s cubic-bezier(0.2, 0.7, 0.1, 1) 0.2s both;
 }
 
-.cerrado-rec {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background: #ff3b30;
-  vertical-align: 1px;
-  animation: cerrado-rec 1.2s steps(1) infinite;
+.cerrado-lugar {
+  text-align: right;
+  animation: cerrado-aparece 1s ease 1.6s both;
 }
 
 /* 12 casillas a todo el ancho: la letra de IBM Plex Mono mide 0.6em */
 .cerrado-titulo {
-  margin: 0;
+  margin: auto 0 0;
   padding: 0 var(--pad) 14px;
   color: #fff;
   font-size: min(calc((100cqw - 2 * var(--pad)) / (12 * 0.61)), 26vh);
@@ -208,14 +172,10 @@
   to { opacity: 1; }
 }
 
-@keyframes cerrado-rec {
-  50% { opacity: 0; }
-}
-
 @media (max-width: 768px) {
   .cerrado-page { --pad: 16px; }
   .cerrado-top { padding-top: 16px; font-size: 10px; letter-spacing: 1.5px; }
-  .cerrado-logo { max-width: 86%; }
+  .cerrado-logo { width: 150px; }
   .cerrado-titulo { padding-bottom: 10px; }
   .cerrado-pie { gap: 20px; padding-right: 40px; font-size: 10px; letter-spacing: 1.5px; }
   .cerrado-pie-der { display: none; }
