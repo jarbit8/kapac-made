@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTema } from '../../context/TemaContext';
 import logoLocal from '../../assets/images/kapac_made_1.png';
 import video from '../../assets/videos/proximamente.mp4';
@@ -190,8 +189,6 @@ export default function SitioCerrado() {
         <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
         <span className="cerrado-pie-der">Powered by jarbit</span>
       </footer>
-
-      <Link to="/login" className="cerrado-admin" aria-label="Admin">·</Link>
     </div>
   );
 }
