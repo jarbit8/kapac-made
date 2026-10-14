@@ -91,17 +91,61 @@
 }
 .cerrado-lugar:hover { border-bottom-color: #fff; }
 
-/* "COMING SOON" en Anton mide 5.08em: con esto ocupa todo el ancho */
+/* Celular: una palabra por línea; "COMING" en Archivo ancha mide 5.54em */
 .cerrado-titulo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.08em;
   margin: auto 0 0;
-  padding: 0 var(--pad) 14px;
+  padding: 0 var(--pad) 18px;
   color: #fff;
-  font-size: min(calc((100cqw - 2 * var(--pad)) / 5.15), 36vh);
-  font-weight: 400;
-  line-height: 1;
+  font-size: min(calc((100cqw - 2 * var(--pad)) / 5.6), 14vh);
+  font-weight: 900;
+  line-height: 0.95;
   letter-spacing: 0;
-  text-align: center;
   white-space: nowrap;
+}
+
+.cerrado-palabra {
+  display: flex;
+}
+
+.cerrado-palabra span {
+  display: inline-block;
+  font-family: 'Archivo', sans-serif !important;
+  font-weight: 900;
+  font-stretch: 125%;
+  text-align: center;
+  text-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+}
+
+.cerrado-palabra.contorno span.fija {
+  color: transparent;
+  -webkit-text-stroke: 0.028em #fff;
+  text-shadow: none;
+}
+
+.cerrado-palabra span.mezcla {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.7);
+  text-shadow: none;
+}
+
+.cerrado-palabra span.destello {
+  text-shadow: 0.05em 0 rgba(255, 40, 90, 0.85), -0.05em 0 rgba(0, 220, 255, 0.85);
+}
+
+.cerrado-medidor {
+  position: absolute;
+  top: 0;
+  left: -9999px;
+  visibility: hidden;
+  white-space: pre;
+  font-family: 'Archivo', sans-serif !important;
+  font-size: 100px;
+  font-weight: 900;
+  font-stretch: 125%;
 }
 
 /* Al pasar de una frase a otra la palabra se corta en franjas y salta */
@@ -118,22 +162,8 @@
   100% { transform: none; clip-path: none; }
 }
 
-.cerrado-titulo span {
-  display: inline-block;
-  font-family: 'Anton', 'Impact', sans-serif !important;
-  text-align: center;
-  text-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
-}
 
-.cerrado-titulo span.mezcla {
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.8);
-  text-shadow: none;
-}
 
-.cerrado-titulo span.destello {
-  text-shadow: 0.05em 0 rgba(255, 40, 90, 0.85), -0.05em 0 rgba(0, 220, 255, 0.85);
-}
 
 .cerrado-pie {
   display: flex;
@@ -192,9 +222,14 @@
   to { opacity: 1; }
 }
 
-/* En PC a todo el ancho queda enorme: ahí ocupa un poco más de la mitad */
+/* En PC va en una sola línea y más discreta: ~43 % del ancho */
 @media (min-width: 769px) {
-  .cerrado-titulo { font-size: min(10.5cqw, 18vh); }
+  .cerrado-titulo {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.29em;
+    font-size: min(4.4cqw, 8vh);
+  }
 }
 
 @media (max-width: 768px) {

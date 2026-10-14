@@ -15,19 +15,31 @@ const FRASES = ['COMING SOON', 'NEXT WEEK'];
 const GLIFOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&/*+<>';
 const PANTALLA_ANCHA = '(min-aspect-ratio: 3/4)';
 const MAPA = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Arequipa, Perú');
-const FUENTE_TITULO = 'Anton';
-
-// Anton no es monoespaciada: cada casilla toma el ancho de la letra final
-// para que la palabra no salte mientras las letras se mezclan.
+// Archivo ancha no es monoespaciada: cada casilla toma el ancho de la letra
+// final para que la palabra no salte mientras las letras se mezclan.
 const anchos = {};
-let lienzo = null;
+let medidor = null;
 function anchoLetra(c) {
   if (!(c in anchos)) {
-    lienzo = lienzo || document.createElement('canvas').getContext('2d');
-    lienzo.font = `100px "${FUENTE_TITULO}"`;
-    anchos[c] = lienzo.measureText(c).width / 100;
+    if (!medidor) {
+      medidor = document.createElement('span');
+      medidor.className = 'cerrado-medidor';
+      document.body.appendChild(medidor);
+    }
+    medidor.textContent = c;
+    anchos[c] = medidor.getBoundingClientRect().width / 100;
   }
   return anchos[c];
+}
+
+// La primera palabra va llena y la segunda en contorno
+function enPalabras(letras) {
+  const grupos = [[]];
+  letras.forEach((l, i) => {
+    if (l.final === ' ') grupos.push([]);
+    else grupos[grupos.length - 1].push({ ...l, i });
+  });
+  return grupos;
 }
 
 // React no escribe el atributo muted y algunos celulares no reproducen solos sin él
@@ -102,7 +114,7 @@ export default function SitioCerrado() {
 
   useEffect(() => {
     if (!document.fonts) return;
-    document.fonts.load(`100px "${FUENTE_TITULO}"`, 'PRÓXIMAMENTE COMING SOON')
+    document.fonts.load('900 100px "Archivo"', 'COMING SOON NEXT WEEK')
       .then(() => setFuenteLista(true))
       .catch(() => {});
   }, []);
@@ -161,13 +173,19 @@ export default function SitioCerrado() {
       </header>
 
       <h1 className={`cerrado-titulo ${cambiando ? 'cambiando' : ''}`} aria-label="Coming soon, next week">
-        {letras.map((l, i) => (
-          <span
-            key={i}
-            className={l.estado}
-            style={fuenteLista ? { width: `${anchoLetra(l.final)}em` } : undefined}
-            aria-hidden="true"
-          >{l.c === ' ' ? ' ' : l.c}</span>
+        {enPalabras(letras).map((palabra, k) => (
+          <span key={k} className={`cerrado-palabra${k ? ' contorno' : ''}`}>
+            {palabra.map((l) => (
+              <span
+                key={l.i}
+                className={l.estado}
+                style={fuenteLista ? { width: `${anchoLetra(l.final)}em` } : undefined}
+                aria-hidden="true"
+              >
+                {l.c}
+              </span>
+            ))}
+          </span>
         ))}
       </h1>
 
