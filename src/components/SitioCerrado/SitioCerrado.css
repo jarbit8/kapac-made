@@ -91,18 +91,31 @@
 }
 .cerrado-lugar:hover { border-bottom-color: #fff; }
 
-/* "PRÓXIMAMENTE" en Anton mide 5.84em: con esto ocupa todo el ancho */
+/* "COMING SOON" en Anton mide 5.08em: con esto ocupa todo el ancho */
 .cerrado-titulo {
   margin: auto 0 0;
   padding: 0 var(--pad) 14px;
   color: #fff;
-  font-size: min(calc((100cqw - 2 * var(--pad)) / 5.9), 36vh);
+  font-size: min(calc((100cqw - 2 * var(--pad)) / 5.15), 36vh);
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0;
   text-align: center;
   white-space: nowrap;
-  animation: cerrado-aparece 0.6s ease 0.3s both;
+}
+
+/* Al pasar de una frase a otra la palabra se corta en franjas y salta */
+.cerrado-titulo.cambiando {
+  animation: cerrado-glitch 0.36s steps(1) both;
+}
+
+@keyframes cerrado-glitch {
+  0% { transform: translateX(-0.04em) skewX(-10deg); clip-path: inset(8% 0 52% 0); }
+  20% { transform: translateX(0.05em); clip-path: inset(58% 0 6% 0); }
+  40% { transform: translateX(-0.02em) skewX(8deg); clip-path: inset(28% 0 34% 0); }
+  60% { transform: translateX(0.03em); clip-path: inset(0 0 68% 0); }
+  80% { transform: translateX(-0.01em); clip-path: inset(44% 0 0 0); }
+  100% { transform: none; clip-path: none; }
 }
 
 .cerrado-titulo span {
@@ -181,7 +194,7 @@
 
 /* En PC a todo el ancho queda enorme: ahí ocupa un poco más de la mitad */
 @media (min-width: 769px) {
-  .cerrado-titulo { font-size: min(9.5cqw, 17vh); }
+  .cerrado-titulo { font-size: min(10.5cqw, 18vh); }
 }
 
 @media (max-width: 768px) {

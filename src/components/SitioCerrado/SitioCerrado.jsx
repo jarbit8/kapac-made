@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTema } from '../../context/TemaContext';
-import { useIdioma } from '../../context/LanguageContext';
 import logoLocal from '../../assets/images/kapac_made_1.png';
 import video from '../../assets/videos/proximamente.mp4';
 import videoMovil from '../../assets/videos/proximamente-movil.mp4';
@@ -12,7 +11,7 @@ import './SitioCerrado.css';
 const WHATSAPP = 'https://wa.me/51997050752?text=' +
   encodeURIComponent('¡Hola Kapac Made! 🎒 Tengo una consulta sobre sus mochilas.');
 
-const PALABRAS = { es: 'PRÓXIMAMENTE', en: 'COMING SOON' };
+const FRASES = ['COMING SOON', 'NEXT WEEK'];
 const GLIFOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&/*+<>';
 const PANTALLA_ANCHA = '(min-aspect-ratio: 3/4)';
 const MAPA = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Arequipa, Perú');
@@ -39,29 +38,31 @@ function reproducir(v) {
   v.play().catch(() => {});
 }
 
-// Las letras se mezclan y se van fijando de izquierda a derecha;
-// cada pocos segundos el título pasa al otro idioma.
-function useTitulo(primero) {
-  const [letras, setLetras] = useState(() => PALABRAS[primero].split('').map((c) => ({ c, final: c, estado: 'fija' })));
+// Las letras se mezclan y se van fijando de izquierda a derecha; cada pocos
+// segundos la palabra se corta con un glitch y pasa a la siguiente frase.
+function useTitulo() {
+  const [letras, setLetras] = useState([]);
+  const [cambiando, setCambiando] = useState(false);
 
   useEffect(() => {
-    const orden = primero === 'es' ? ['es', 'en'] : ['en', 'es'];
     const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let vuelta = 0;
     let reloj = null;
     let pausa = null;
 
     const siguiente = () => {
-      const meta = PALABRAS[orden[vuelta % 2]].split('');
+      const meta = FRASES[vuelta % FRASES.length].split('');
       vuelta++;
       if (quieto) {
         setLetras(meta.map((c) => ({ c, final: c, estado: 'fija' })));
-        pausa = setTimeout(siguiente, 4000);
+        pausa = setTimeout(siguiente, 3200);
         return;
       }
+      setCambiando(true);
       let cuadro = 0;
       reloj = setInterval(() => {
         cuadro++;
+        if (cuadro === 8) setCambiando(false);
         setLetras(meta.map((c, i) => {
           const fijaEn = 8 + i * 2;
           if (cuadro < fijaEn) return { c: GLIFOS[Math.floor(Math.random() * GLIFOS.length)], final: c, estado: 'mezcla' };
@@ -69,28 +70,26 @@ function useTitulo(primero) {
         }));
         if (cuadro > 12 + meta.length * 2) {
           clearInterval(reloj);
-          pausa = setTimeout(siguiente, 4000);
+          pausa = setTimeout(siguiente, 3200);
         }
       }, 45);
     };
 
-    pausa = setTimeout(siguiente, 500);
+    pausa = setTimeout(siguiente, 400);
     return () => { clearInterval(reloj); clearTimeout(pausa); };
-  }, [primero]);
+  }, []);
 
-  return letras;
+  return { letras, cambiando };
 }
 
 // Pantalla "Próximamente": lo que ve cualquier visitante cuando la tienda
 // está cerrada desde el admin. El admin entra normal con su cuenta (/login).
 export default function SitioCerrado() {
   const { logo, logoListo } = useTema();
-  const { idioma } = useIdioma();
-  const es = idioma === 'es';
 
   const [ancha, setAncha] = useState(() => window.matchMedia(PANTALLA_ANCHA).matches);
   const [fuenteLista, setFuenteLista] = useState(false);
-  const letras = useTitulo(es ? 'es' : 'en');
+  const { letras, cambiando } = useTitulo();
   const videoRef = useRef(null);
   const fondoRef = useRef(null);
   const refVideo = useCallback((v) => { videoRef.current = v; reproducir(v); }, []);
@@ -157,11 +156,11 @@ export default function SitioCerrado() {
           style={logoListo ? undefined : { opacity: 0 }}
         />
         <a className="cerrado-lugar" href={MAPA} target="_blank" rel="noopener noreferrer">
-          {es ? 'Arequipa, Perú' : 'Arequipa, Peru'}<br />16°24′S 71°32′W
+          Arequipa, Peru<br />16°24′S 71°32′W
         </a>
       </header>
 
-      <h1 className="cerrado-titulo" aria-label={es ? 'Próximamente' : 'Coming soon'}>
+      <h1 className={`cerrado-titulo ${cambiando ? 'cambiando' : ''}`} aria-label="Coming soon, next week">
         {letras.map((l, i) => (
           <span
             key={i}
