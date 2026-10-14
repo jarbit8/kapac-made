@@ -179,6 +179,11 @@
   to { opacity: 1; }
 }
 
+/* En PC a todo el ancho queda enorme: ahí ocupa un poco más de la mitad */
+@media (min-width: 769px) {
+  .cerrado-titulo { font-size: min(9.5cqw, 17vh); }
+}
+
 @media (max-width: 768px) {
   .cerrado-page { --pad: 16px; }
   .cerrado-top { padding-top: 16px; font-size: 10px; letter-spacing: 1.5px; }
