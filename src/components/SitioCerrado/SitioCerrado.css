@@ -86,14 +86,14 @@
   animation: cerrado-aparece 1s ease 1.6s both;
 }
 
-/* 12 casillas a todo el ancho: la letra de IBM Plex Mono mide 0.6em */
+/* "PRÓXIMAMENTE" en Anton mide 5.84em: con esto ocupa todo el ancho */
 .cerrado-titulo {
   margin: auto 0 0;
   padding: 0 var(--pad) 14px;
   color: #fff;
-  font-size: min(calc((100cqw - 2 * var(--pad)) / (12 * 0.61)), 26vh);
-  font-weight: 700;
-  line-height: 0.85;
+  font-size: min(calc((100cqw - 2 * var(--pad)) / 5.9), 36vh);
+  font-weight: 400;
+  line-height: 1;
   letter-spacing: 0;
   text-align: center;
   white-space: nowrap;
@@ -102,12 +102,14 @@
 
 .cerrado-titulo span {
   display: inline-block;
+  font-family: 'Anton', 'Impact', sans-serif !important;
+  text-align: center;
   text-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
 }
 
 .cerrado-titulo span.mezcla {
   color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.75);
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.8);
   text-shadow: none;
 }
 

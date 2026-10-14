@@ -14,6 +14,20 @@ const WHATSAPP = 'https://wa.me/51997050752?text=' +
 const PALABRAS = { es: 'PRÓXIMAMENTE', en: 'COMING SOON' };
 const GLIFOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&/*+<>';
 const PANTALLA_ANCHA = '(min-aspect-ratio: 3/4)';
+const FUENTE_TITULO = 'Anton';
+
+// Anton no es monoespaciada: cada casilla toma el ancho de la letra final
+// para que la palabra no salte mientras las letras se mezclan.
+const anchos = {};
+let lienzo = null;
+function anchoLetra(c) {
+  if (!(c in anchos)) {
+    lienzo = lienzo || document.createElement('canvas').getContext('2d');
+    lienzo.font = `100px "${FUENTE_TITULO}"`;
+    anchos[c] = lienzo.measureText(c).width / 100;
+  }
+  return anchos[c];
+}
 
 // React no escribe el atributo muted y algunos celulares no reproducen solos sin él
 function reproducir(v) {
@@ -26,7 +40,7 @@ function reproducir(v) {
 // Las letras se mezclan y se van fijando de izquierda a derecha;
 // cada pocos segundos el título pasa al otro idioma.
 function useTitulo(primero) {
-  const [letras, setLetras] = useState(() => PALABRAS[primero].split('').map((c) => ({ c, estado: 'fija' })));
+  const [letras, setLetras] = useState(() => PALABRAS[primero].split('').map((c) => ({ c, final: c, estado: 'fija' })));
 
   useEffect(() => {
     const orden = primero === 'es' ? ['es', 'en'] : ['en', 'es'];
@@ -39,7 +53,7 @@ function useTitulo(primero) {
       const meta = PALABRAS[orden[vuelta % 2]].split('');
       vuelta++;
       if (quieto) {
-        setLetras(meta.map((c) => ({ c, estado: 'fija' })));
+        setLetras(meta.map((c) => ({ c, final: c, estado: 'fija' })));
         pausa = setTimeout(siguiente, 4000);
         return;
       }
@@ -48,8 +62,8 @@ function useTitulo(primero) {
         cuadro++;
         setLetras(meta.map((c, i) => {
           const fijaEn = 8 + i * 2;
-          if (cuadro < fijaEn) return { c: GLIFOS[Math.floor(Math.random() * GLIFOS.length)], estado: 'mezcla' };
-          return { c, estado: cuadro < fijaEn + 3 ? 'destello' : 'fija' };
+          if (cuadro < fijaEn) return { c: GLIFOS[Math.floor(Math.random() * GLIFOS.length)], final: c, estado: 'mezcla' };
+          return { c, final: c, estado: cuadro < fijaEn + 3 ? 'destello' : 'fija' };
         }));
         if (cuadro > 12 + meta.length * 2) {
           clearInterval(reloj);
@@ -73,6 +87,7 @@ export default function SitioCerrado() {
   const es = idioma === 'es';
 
   const [ancha, setAncha] = useState(() => window.matchMedia(PANTALLA_ANCHA).matches);
+  const [fuenteLista, setFuenteLista] = useState(false);
   const letras = useTitulo(es ? 'es' : 'en');
   const videoRef = useRef(null);
   const fondoRef = useRef(null);
@@ -83,6 +98,13 @@ export default function SitioCerrado() {
     const f = fondoRef.current;
     if (f && Math.abs(f.currentTime - e.target.currentTime) > 0.3) f.currentTime = e.target.currentTime;
   };
+
+  useEffect(() => {
+    if (!document.fonts) return;
+    document.fonts.load(`100px "${FUENTE_TITULO}"`, 'PRÓXIMAMENTE COMING SOON')
+      .then(() => setFuenteLista(true))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia(PANTALLA_ANCHA);
@@ -133,7 +155,12 @@ export default function SitioCerrado() {
 
       <h1 className="cerrado-titulo" aria-label={es ? 'Próximamente' : 'Coming soon'}>
         {letras.map((l, i) => (
-          <span key={i} className={l.estado} aria-hidden="true">{l.c === ' ' ? ' ' : l.c}</span>
+          <span
+            key={i}
+            className={l.estado}
+            style={fuenteLista ? { width: `${anchoLetra(l.final)}em` } : undefined}
+            aria-hidden="true"
+          >{l.c === ' ' ? ' ' : l.c}</span>
         ))}
       </h1>
 
