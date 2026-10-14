@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/static/css/main.ca3be5f7.css",
+    "main.css": "/static/css/main.f4668db4.css",
     "main.js": "/static/js/main.dee30909.js",
     "static/media/proximamente.mp4": "/static/media/proximamente.900817f2f34f885017f1.mp4",
     "static/media/proximamente-movil.mp4": "/static/media/proximamente-movil.8cabe2fc945257f12f32.mp4",
@@ -23,7 +23,7 @@
     "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.ca3be5f7.css",
+    "static/css/main.f4668db4.css",
     "static/js/main.dee30909.js"
   ]
 }
