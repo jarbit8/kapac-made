@@ -81,32 +81,41 @@ function AppRoutes() {
 }
 
 // Tienda cerrada al público: todos ven "Próximamente" salvo el admin.
-// El /login queda accesible para que el admin pueda entrar desde cualquier lado.
+// Mientras se verifica la sesión también se muestra, para que nada del sitio
+// se asome. El /login queda accesible para que el admin pueda entrar.
 function CierreGate({ children }) {
   const { cerrado } = useTema();
-  const { usuario, cargando } = useAuth();
+  const { usuario } = useAuth();
   const { pathname } = useLocation();
-  const esAdmin = esCorreoAdmin(usuario?.email);
-  if (cerrado && !cargando && !esAdmin && pathname !== '/login') return <SitioCerrado />;
+  if (cerrado && !esCorreoAdmin(usuario?.email) && pathname !== '/login') return <SitioCerrado />;
   return children;
 }
 
-function App() {
+// Con la tienda cerrada se entra directo al video, sin la pantalla del logo
+function Carga() {
+  const { cerrado } = useTema();
   const [fase, setFase] = useState('cargando'); // 'cargando' | 'saliendo' | 'listo'
 
   useEffect(() => {
+    // La clase la pone index.html para mostrar el primer cuadro del video antes de que cargue React
+    document.documentElement.classList.remove('cerrado');
     const t1 = setTimeout(() => setFase('saliendo'), 1300);
     const t2 = setTimeout(() => setFase('listo'), 1780);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
+  if (cerrado || fase === 'listo') return null;
+  return <LoadingScreen saliendo={fase === 'saliendo'} />;
+}
+
+function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
         <CartProvider>
           <TextosProvider>
             <TemaProvider>
-              {fase !== 'listo' && <LoadingScreen saliendo={fase === 'saliendo'} />}
+              <Carga />
               <HashRouter>
                 <ScrollToTop />
                 <CierreGate>

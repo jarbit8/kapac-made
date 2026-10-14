@@ -4,7 +4,6 @@
 // Para agregar o quitar un admin, edita esta lista y vuelve a publicar.
 export const ADMINS = [
   'jarb2299@gmail.com',
-  'cristhian.ccapa@qhapaqbrands.com',
 ];
 
 // Compara sin distinguir mayúsculas/minúsculas.

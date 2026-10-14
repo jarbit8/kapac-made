@@ -7,6 +7,8 @@ import Editable from '../components/Editable';
 import { registrar, iniciarSesion, iniciarSesionGoogle, cerrarSesion } from '../firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
+import { useTema } from '../context/TemaContext';
+import { esCorreoAdmin } from '../config/admins';
 import '../styles/Login.css';
 
 export default function Login() {
@@ -23,6 +25,17 @@ export default function Login() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const { t, idioma } = useIdioma();
+  const { cerrado } = useTema();
+  // Con la tienda cerrada solo entra el admin: cualquier otra cuenta se cierra al instante
+  const bloqueado = cerrado && usuario && !esCorreoAdmin(usuario.email);
+  const modoActual = cerrado ? 'login' : modo;
+
+  useEffect(() => {
+    if (!bloqueado) return;
+    cerrarSesion();
+    setRedirigir(false);
+    setError(idioma === 'en' ? 'For now only the administrator can sign in.' : 'Por ahora solo el administrador puede entrar.');
+  }, [bloqueado, idioma]);
 
   // No navegar apenas resuelve el login: hay que esperar a que el contexto
   // de auth (usuario) se actualice de verdad. Si navegamos antes, la pantalla
@@ -30,8 +43,8 @@ export default function Login() {
   // el admin ve el sitio cerrado por una fracción de segundo (o hasta que
   // recarga, si no nota que se autocorrige).
   useEffect(() => {
-    if (redirigir && usuario) navigate('/');
-  }, [redirigir, usuario, navigate]);
+    if (redirigir && usuario && !bloqueado) navigate('/');
+  }, [redirigir, usuario, bloqueado, navigate]);
 
   const handleLogout = async () => {
     await cerrarSesion();
@@ -64,7 +77,7 @@ export default function Login() {
     setError('');
     setCargando(true);
     try {
-      if (modo === 'login') {
+      if (modoActual === 'login') {
         await iniciarSesion(email, password);
       } else {
         await registrar(email, password);
@@ -89,7 +102,7 @@ export default function Login() {
   };
 
   // Si ya está logueado, mostrar info de la cuenta en vez del form
-  if (usuario) {
+  if (usuario && !bloqueado) {
     return (
       <>
         <Header />
@@ -131,17 +144,19 @@ export default function Login() {
         <div className="login-card">
           <div className="login-tabs">
             <button
-              className={modo === 'login' ? 'activo' : ''}
+              className={modoActual === 'login' ? 'activo' : ''}
               onClick={() => { setModo('login'); setError(''); }}
             >
               <ET k="menu.iniciar_sesion" sinColor />
             </button>
-            <button
-              className={modo === 'registro' ? 'activo' : ''}
-              onClick={() => { setModo('registro'); setError(''); }}
-            >
-              <ET k="login.crear_cuenta" sinColor />
-            </button>
+            {!cerrado && (
+              <button
+                className={modoActual === 'registro' ? 'activo' : ''}
+                onClick={() => { setModo('registro'); setError(''); }}
+              >
+                <ET k="login.crear_cuenta" sinColor />
+              </button>
+            )}
           </div>
 
           <form className="login-form" onSubmit={handleSubmit}>
@@ -161,7 +176,7 @@ export default function Login() {
             />
             {error && <p className="login-error">{error}</p>}
             <button type="submit" className="login-btn" disabled={cargando}>
-              {cargando ? <Editable id="login_cargando" as="span" sinColor>{idioma === 'en' ? 'Loading...' : 'Cargando...'}</Editable> : (modo === 'login' ? <ET k="login.entrar" sinColor /> : <ET k="login.crear_cuenta" sinColor />)}
+              {cargando ? <Editable id="login_cargando" as="span" sinColor>{idioma === 'en' ? 'Loading...' : 'Cargando...'}</Editable> : (modoActual === 'login' ? <ET k="login.entrar" sinColor /> : <ET k="login.crear_cuenta" sinColor />)}
             </button>
           </form>
 

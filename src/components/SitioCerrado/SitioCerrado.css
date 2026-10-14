@@ -82,9 +82,14 @@
 }
 
 .cerrado-lugar {
+  color: #fff;
   text-align: right;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
   animation: cerrado-aparece 1s ease 1.6s both;
 }
+.cerrado-lugar:hover { border-bottom-color: #fff; }
 
 /* "PRÓXIMAMENTE" en Anton mide 5.84em: con esto ocupa todo el ancho */
 .cerrado-titulo {

@@ -4,6 +4,7 @@ import { useTema } from '../../context/TemaContext';
 import { useIdioma } from '../../context/LanguageContext';
 import logoLocal from '../../assets/images/kapac_made_1.png';
 import video from '../../assets/videos/proximamente.mp4';
+import videoMovil from '../../assets/videos/proximamente-movil.mp4';
 import videoFondo from '../../assets/videos/proximamente-fondo.mp4';
 import poster from '../../assets/images/proximamente.jpg';
 import './SitioCerrado.css';
@@ -14,6 +15,7 @@ const WHATSAPP = 'https://wa.me/51997050752?text=' +
 const PALABRAS = { es: 'PRÓXIMAMENTE', en: 'COMING SOON' };
 const GLIFOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&/*+<>';
 const PANTALLA_ANCHA = '(min-aspect-ratio: 3/4)';
+const MAPA = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Arequipa, Perú');
 const FUENTE_TITULO = 'Anton';
 
 // Anton no es monoespaciada: cada casilla toma el ancho de la letra final
@@ -116,9 +118,13 @@ export default function SitioCerrado() {
       reproducir(fondoRef.current);
     };
     document.addEventListener('visibilitychange', alVolver);
+    // Con ahorro de batería algunos celulares no reproducen solos: arranca al primer toque
+    const toques = ['touchstart', 'pointerdown', 'scroll', 'keydown'];
+    toques.forEach((t) => window.addEventListener(t, alVolver, { passive: true }));
     return () => {
       mq.removeEventListener('change', onCambio);
       document.removeEventListener('visibilitychange', alVolver);
+      toques.forEach((t) => window.removeEventListener(t, alVolver));
     };
   }, []);
 
@@ -134,7 +140,7 @@ export default function SitioCerrado() {
       )}
       <video
         ref={refVideo}
-        src={video}
+        src={ancha ? video : videoMovil}
         poster={poster}
         className="cerrado-video"
         autoPlay loop muted playsInline aria-hidden="true"
@@ -150,7 +156,9 @@ export default function SitioCerrado() {
           className="cerrado-logo"
           style={logoListo ? undefined : { opacity: 0 }}
         />
-        <span className="cerrado-lugar">{es ? 'Arequipa, Perú' : 'Arequipa, Peru'}<br />16°24′S 71°32′W</span>
+        <a className="cerrado-lugar" href={MAPA} target="_blank" rel="noopener noreferrer">
+          {es ? 'Arequipa, Perú' : 'Arequipa, Peru'}<br />16°24′S 71°32′W
+        </a>
       </header>
 
       <h1 className="cerrado-titulo" aria-label={es ? 'Próximamente' : 'Coming soon'}>

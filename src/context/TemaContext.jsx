@@ -30,9 +30,9 @@ export function TemaProvider({ children }) {
   });
 
   // Tienda cerrada al público (pantalla "Próximamente"). Cacheado para que en
-  // visitas repetidas el bloqueo aplique al instante, sin esperar a Firestore.
+  // visitas repetidas aplique al instante; si no se sabe todavía, se asume cerrada.
   const [cerrado, setCerrado] = useState(() => {
-    try { return localStorage.getItem(CERRADO_CACHE_KEY) === '1'; } catch (_) { return false; }
+    try { return localStorage.getItem(CERRADO_CACHE_KEY) !== '0'; } catch (_) { return true; }
   });
 
   // Aplica el acento/fondo cacheados ANTES de pintar (useLayoutEffect corre
