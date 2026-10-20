@@ -28,19 +28,23 @@ export default function Alma() {
   const bloques = contenido ? contenido.almaBloques : [];
   const fotos = contenido ? contenido.almaFotos : [];
 
-  const guardarContenidoParcial = async (parcial) => {
-    const base = contenido;
-    const nuevo = { ...base, ...parcial };
-    setContenido(nuevo);
-    try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
+  const guardarContenidoParcial = async (cambiar) => {
+    // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
+    // para no perder lo que se haya cambiado desde otro dispositivo.
+    try {
+      const base = await obtenerContenido();
+      const nuevo = { ...base, ...cambiar(base) };
+      setContenido(nuevo);
+      await guardarContenido(nuevo, base);
+    } catch (_) { /* error silencioso */ }
   };
 
-  const agregarBloque = () => guardarContenidoParcial({ almaBloques: [...bloques, `bloque_${Date.now()}`] });
-  const quitarBloque = (key) => guardarContenidoParcial({ almaBloques: bloques.filter((k) => k !== key) });
+  const agregarBloque = () => guardarContenidoParcial((b) => ({ almaBloques: [...b.almaBloques, `bloque_${Date.now()}`] }));
+  const quitarBloque = (key) => guardarContenidoParcial((b) => ({ almaBloques: b.almaBloques.filter((k) => k !== key) }));
 
   const claveFotoDe = (foto, i) => (typeof foto === 'object' && foto !== null) ? `legacy${i}` : foto;
-  const agregarFoto = () => guardarContenidoParcial({ almaFotos: [...fotos, `foto_${Date.now()}`] });
-  const quitarFoto = (key) => guardarContenidoParcial({ almaFotos: fotos.filter((f, i) => claveFotoDe(f, i) !== key) });
+  const agregarFoto = () => guardarContenidoParcial((b) => ({ almaFotos: [...b.almaFotos, `foto_${Date.now()}`] }));
+  const quitarFoto = (key) => guardarContenidoParcial((b) => ({ almaFotos: b.almaFotos.filter((f, i) => claveFotoDe(f, i) !== key) }));
 
   return (
     <>

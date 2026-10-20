@@ -14,7 +14,7 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
 
   if (!esAdmin) {
     if (listos && !url) return null;
-    return <img src={listos ? url : undefined} alt={listos ? alt : ''} className={className} />;
+    return <img src={listos ? url : undefined} alt={listos ? alt : ''} className={className} loading="lazy" decoding="async" />;
   }
 
   const onArchivo = async (e) => {
@@ -32,7 +32,7 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
 
   return (
     <div className={`editable-img-wrap ${className}`}>
-      {listos && url ? <img src={url} alt={alt} className="editable-img" /> : <div className="editable-img" />}
+      {listos && url ? <img src={url} alt={alt} className="editable-img" loading="lazy" decoding="async" /> : <div className="editable-img" />}
       <button
         type="button"
         className="editable-img-btn"

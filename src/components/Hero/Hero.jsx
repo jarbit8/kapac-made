@@ -31,7 +31,7 @@ export default function Hero() {
     <section className="hero">
       {videoCfg !== null && (
         usarSubido && medio.tipo === 'imagen' ? (
-          <img src={medio.url} alt="Kapac Made" className="hero-bg"
+          <img src={medio.url} alt="Kapac Made" className="hero-bg" fetchpriority="high"
             onError={() => setFallo(true)} />
         ) : (
           <video

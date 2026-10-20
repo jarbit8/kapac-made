@@ -34,17 +34,21 @@ export default function Lifestyle() {
 
   const fotos = contenido ? contenido.homeFotos : [];
 
-  const guardarFotos = async (nuevas) => {
-    const base = contenido;
-    const nuevo = { ...base, homeFotos: nuevas };
-    setContenido(nuevo);
-    try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
+  const guardarFotos = async (cambiar) => {
+    // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
+    // para no perder lo que se haya cambiado desde otro dispositivo.
+    try {
+      const base = await obtenerContenido();
+      const nuevo = { ...base, homeFotos: cambiar(base.homeFotos) };
+      setContenido(nuevo);
+      await guardarContenido(nuevo, base);
+    } catch (_) { /* error silencioso */ }
   };
 
   const claveDe = (foto, i) => (typeof foto === 'object' && foto !== null) ? `legacy${i}` : foto;
 
-  const agregarFoto = () => guardarFotos([...fotos, `foto_${Date.now()}`]);
-  const quitarFoto = (key) => guardarFotos(fotos.filter((f, i) => claveDe(f, i) !== key));
+  const agregarFoto = () => guardarFotos((f) => [...f, `foto_${Date.now()}`]);
+  const quitarFoto = (key) => guardarFotos((f) => f.filter((x, i) => claveDe(x, i) !== key));
 
   return (
     <section className="lm-section">

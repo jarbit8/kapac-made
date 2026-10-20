@@ -19,15 +19,19 @@ export default function Contacto() {
 
   const extras = contenido ? contenido.infoExtra : [];
 
-  const guardarExtras = async (nuevos) => {
-    const base = contenido;
-    const nuevo = { ...base, infoExtra: nuevos };
-    setContenido(nuevo);
-    try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
+  const guardarExtras = async (cambiar) => {
+    // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
+    // para no perder lo que se haya cambiado desde otro dispositivo.
+    try {
+      const base = await obtenerContenido();
+      const nuevo = { ...base, infoExtra: cambiar(base.infoExtra) };
+      setContenido(nuevo);
+      await guardarContenido(nuevo, base);
+    } catch (_) { /* error silencioso */ }
   };
 
-  const agregarExtra = () => guardarExtras([...extras, `campo_${Date.now()}`]);
-  const quitarExtra = (key) => guardarExtras(extras.filter((k) => k !== key));
+  const agregarExtra = () => guardarExtras((e) => [...e, `campo_${Date.now()}`]);
+  const quitarExtra = (key) => guardarExtras((e) => e.filter((k) => k !== key));
 
   return (
     <>

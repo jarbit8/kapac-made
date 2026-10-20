@@ -229,7 +229,7 @@ export default function Producto() {
               <div className="galeria-edit-grid">
                 {fotos.map((src, i) => (
                   <figure key={i} className={`galeria-edit-item pos-${i}`}>
-                    <img src={src} alt={`${nombreProducto(producto, idioma)} ${i + 1}`} loading="lazy" />
+                    <img src={src} alt={`${nombreProducto(producto, idioma)} ${i + 1}`} loading="lazy" decoding="async" />
                   </figure>
                 ))}
               </div>
@@ -245,7 +245,7 @@ export default function Producto() {
               {relacionados.map((p) => (
                 <Link key={p.id} to={`/producto/${p.id}`} className="relacionado-card">
                   <div className="relacionado-img">
-                    <img src={imagen(p.imagenMochila)} alt={nombreProducto(p, idioma)} />
+                    <img src={imagen(p.imagenMochila)} alt={nombreProducto(p, idioma)} loading="lazy" decoding="async" />
                   </div>
                   <span className="relacionado-nombre"><TextoProducto texto={p.nombre} idioma={idioma} /></span>
                   <span className="relacionado-precio">{p.moneda}{p.precio}.00</span>

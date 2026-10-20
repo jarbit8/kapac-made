@@ -21,7 +21,7 @@ export default function Zone() {
 
   return (
     <div className="zone">
-      {foto && <img src={foto} alt="Kapac Made" className="zone-img" />}
+      {foto && <img src={foto} alt="Kapac Made" className="zone-img" fetchpriority="high" />}
       <div className="zone-vineta" />
       <p className="zone-txt"><Editable id="zone_txt" as="span">in the zone</Editable></p>
     </div>

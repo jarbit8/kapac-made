@@ -91,17 +91,25 @@ export function slotMedio(cfg, slot) {
   return null;
 }
 
-// Lo último que llegó de Firestore en esta sesión: así, al volver a una página,
-// se pinta el contenido real al instante y no el de fábrica.
-let contenidoSesion = null;
+// Lo último que llegó de Firestore (en esta sesión o en la visita anterior):
+// la página se pinta al instante con eso y se actualiza cuando responde Firestore.
+const CACHE_KEY = 'kapac_contenido_v1';
+let contenidoSesion = (() => {
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (_) { return null; }
+})();
 export const contenidoGuardado = () => contenidoSesion;
+
+function recordar(c) {
+  contenidoSesion = c;
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch (_) {}
+}
 
 // Si Firestore no responde, falla: cada página se queda como estaba en vez de
 // mostrar fotos de fábrica o abrir la tienda cerrada.
 export async function obtenerContenido() {
   const snap = await getDoc(REF());
   const data = snap.exists() ? snap.data() : {};
-  contenidoSesion = {
+  recordar({
     homeFotos: Array.isArray(data.homeFotos) && data.homeFotos.length ? data.homeFotos : HOME_FOTOS_DEFAULT,
     galeriaProducto: Array.isArray(data.galeriaProducto) && data.galeriaProducto.length ? data.galeriaProducto : GALERIA_PRODUCTO_DEFAULT,
     footerFondo: (data.footerFondo?.pc || data.footerFondo?.mobile || data.footerFondo?.url) ? data.footerFondo : FOOTER_FONDO_DEFAULT,
@@ -116,7 +124,7 @@ export async function obtenerContenido() {
     almaBloques: Array.isArray(data.almaBloques) && data.almaBloques.length ? data.almaBloques : ALMA_BLOQUES_DEFAULT,
     infoExtra: Array.isArray(data.infoExtra) ? data.infoExtra : INFO_EXTRA_DEFAULT,
     cerrado: data.cerrado === true, // tienda cerrada al público (pantalla "Próximamente")
-  };
+  });
   return contenidoSesion;
 }
 
@@ -130,5 +138,5 @@ export async function guardarContenido(nuevo, anterior = {}) {
   });
   if (!Object.keys(cambios).length) return;
   await updateDoc(REF(), cambios);
-  contenidoSesion = { ...(contenidoSesion || nuevo), ...cambios };
+  recordar({ ...(contenidoSesion || nuevo), ...cambios });
 }

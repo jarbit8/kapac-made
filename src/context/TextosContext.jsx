@@ -6,15 +6,30 @@ import { esCorreoAdmin } from '../config/admins';
 
 const TextosContext = createContext({ textos: {}, esAdmin: false, guardar: async () => {} });
 
+// Textos de la visita anterior: se pintan al instante y Firestore los actualiza después
+const CACHE_KEY = 'kapac_textos_v1';
+const textosGuardados = (() => {
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (_) { return null; }
+})();
+
 export function TextosProvider({ children }) {
-  const [textos, setTextos] = useState({});
-  const [listos, setListos] = useState(false);
+  const [textos, setTextos] = useState(textosGuardados || {});
+  const [listos, setListos] = useState(textosGuardados !== null);
+  const [frescos, setFrescos] = useState(false); // ya respondió Firestore
   const { usuario } = useAuth();
   const esAdmin = esCorreoAdmin(usuario?.email);
 
   useEffect(() => {
-    obtenerTextos().then(setTextos).catch(() => {}).finally(() => setListos(true));
+    obtenerTextos()
+      .then((t) => { setTextos(t); setFrescos(true); })
+      .catch(() => {})
+      .finally(() => setListos(true));
   }, []);
+
+  useEffect(() => {
+    if (!frescos) return;
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(textos)); } catch (_) {}
+  }, [textos, frescos]);
 
   const guardar = async (clave, valor) => {
     const anterior = textos[clave];
@@ -29,10 +44,11 @@ export function TextosProvider({ children }) {
   };
 
   // Textos editados cuya traducción quedó pendiente (la API falló al guardar):
-  // cuando entra el admin se completan solas, una vez por sesión.
+  // cuando entra el admin se completan solas, una vez por sesión. Solo con los
+  // textos recién leídos: con los guardados podría pisar una traducción nueva.
   const rellenado = useRef(false);
   useEffect(() => {
-    if (!esAdmin || rellenado.current) return;
+    if (!esAdmin || !frescos || rellenado.current) return;
     const claves = Object.keys(textos).filter((k) => k.endsWith('__es'));
     if (!claves.length) return;
     rellenado.current = true;
@@ -44,7 +60,7 @@ export function TextosProvider({ children }) {
         if (tr) await guardar(`${id}__en`, tr);
       }
     })();
-  }, [esAdmin, textos]);
+  }, [esAdmin, textos, frescos]);
 
   return (
     <TextosContext.Provider value={{ textos, listos, esAdmin, guardar }}>

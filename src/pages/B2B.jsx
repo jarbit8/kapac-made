@@ -30,15 +30,19 @@ export default function B2B() {
 
   const beneficios = contenido ? contenido.b2bBeneficios : [];
 
-  const guardarBeneficios = async (nuevos) => {
-    const base = contenido;
-    const nuevo = { ...base, b2bBeneficios: nuevos };
-    setContenido(nuevo);
-    try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
+  const guardarBeneficios = async (cambiar) => {
+    // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
+    // para no perder lo que se haya cambiado desde otro dispositivo.
+    try {
+      const base = await obtenerContenido();
+      const nuevo = { ...base, b2bBeneficios: cambiar(base.b2bBeneficios) };
+      setContenido(nuevo);
+      await guardarContenido(nuevo, base);
+    } catch (_) { /* error silencioso */ }
   };
 
-  const agregarBeneficio = () => guardarBeneficios([...beneficios, `beneficio_${Date.now()}`]);
-  const quitarBeneficio = (key) => guardarBeneficios(beneficios.filter((k) => k !== key));
+  const agregarBeneficio = () => guardarBeneficios((b) => [...b, `beneficio_${Date.now()}`]);
+  const quitarBeneficio = (key) => guardarBeneficios((b) => b.filter((k) => k !== key));
 
   return (
     <>

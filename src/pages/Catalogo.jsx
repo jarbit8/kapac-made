@@ -115,7 +115,7 @@ export default function Catalogo() {
             {filtrados.map((p) => (
               <div key={p.id} className="catalogo-page-card">
                 <Link to={`/producto/${p.id}`} className="cat-img-wrap">
-                  <img src={imagen(p.imagenMochila)} alt={p.nombre} />
+                  <img src={imagen(p.imagenMochila)} alt={p.nombre} loading="lazy" decoding="async" />
                 </Link>
                 <div className="catalogo-page-info">
                   <Link to={`/producto/${p.id}`} className="catalogo-page-name">

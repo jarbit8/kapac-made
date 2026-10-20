@@ -4,13 +4,10 @@ import { db } from './config';
 
 const REF = () => doc(db, 'contenido', 'textos');
 
+// Si Firestore no responde, falla (y se quedan los textos de la visita anterior).
 export async function obtenerTextos() {
-  try {
-    const snap = await getDoc(REF());
-    return snap.exists() ? (snap.data() || {}) : {};
-  } catch (e) {
-    return {};
-  }
+  const snap = await getDoc(REF());
+  return snap.exists() ? (snap.data() || {}) : {};
 }
 
 export async function guardarTexto(clave, valor) {

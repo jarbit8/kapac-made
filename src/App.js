@@ -109,20 +109,37 @@ function CierreGate({ children }) {
   return children;
 }
 
+// La pantalla del logo sale al entrar por el inicio, como mucho una vez cada 12 horas
+// (no en cada recarga ni en las pestañas nuevas, como la de "in the zone")
+const INTRO_KEY = 'kapac_intro_v1';
+const INTRO_CADA = 12 * 60 * 60 * 1000;
+const introVista = () => {
+  if (window.location.pathname !== '/') return true;
+  try { return Date.now() - Number(localStorage.getItem(INTRO_KEY) || 0) < INTRO_CADA; } catch (_) { return false; }
+};
+
 // Con la tienda cerrada se entra directo al video, sin la pantalla del logo
 function Carga() {
   const { cerrado } = useTema();
-  const [fase, setFase] = useState('cargando'); // 'cargando' | 'saliendo' | 'listo'
+  const [vista] = useState(introVista);
+  const [fase, setFase] = useState(vista ? 'listo' : 'cargando'); // 'cargando' | 'saliendo' | 'listo'
 
   useEffect(() => {
     // La clase la pone index.html para mostrar el primer cuadro del video antes de que cargue React
     document.documentElement.classList.remove('cerrado');
+    if (vista) return;
     const t1 = setTimeout(() => setFase('saliendo'), 1300);
     const t2 = setTimeout(() => setFase('listo'), 1780);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+  }, [vista]);
 
-  if (cerrado || fase === 'listo') return null;
+  const mostrando = !cerrado && fase !== 'listo';
+  useEffect(() => {
+    if (!mostrando) return;
+    try { localStorage.setItem(INTRO_KEY, String(Date.now())); } catch (_) {}
+  }, [mostrando]);
+
+  if (!mostrando) return null;
   return <LoadingScreen saliendo={fase === 'saliendo'} />;
 }
 
