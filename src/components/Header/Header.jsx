@@ -61,7 +61,7 @@ export default function Header({ transparente = false }) {
   const handleBuscar = (e) => {
     e.preventDefault();
     if (termino.trim()) {
-      navigate(`/catalogo?q=${encodeURIComponent(termino.trim())}`);
+      navigate(`/shop?q=${encodeURIComponent(termino.trim())}`);
       cerrarBuscador();
     }
   };
@@ -73,10 +73,10 @@ export default function Header({ transparente = false }) {
 
   // Navegación principal
   const itemsMenu = [
-    { label: 'Shop',       to: '/catalogo' },
+    { label: 'Shop',       to: '/shop' },
     { label: 'B2B',        to: '/b2b' },
-    { label: 'Kapac Made', to: '/alma' },
-    { label: t('menu.contacto'), to: '/contacto' },
+    { label: 'Kapac Made', to: '/kapac-made' },
+    { label: t('menu.contacto'), to: '/info' },
   ];
 
   const handleCuenta = () => {

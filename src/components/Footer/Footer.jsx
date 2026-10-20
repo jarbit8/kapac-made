@@ -6,7 +6,7 @@ import { useIdioma } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { cerrarSesion } from '../../firebase/auth';
 import { pedirCodigo, confirmarCodigo } from '../../firebase/newsletter';
-import { obtenerContenido, FOOTER_FONDO_DEFAULT, medioDispositivo } from '../../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, FOOTER_FONDO_DEFAULT, medioDispositivo } from '../../firebase/contenido';
 import Editable from '../Editable';
 
 /* ─── Iconos SVG (sociales) ─────────────────────────────────────────────── */
@@ -95,7 +95,7 @@ export default function Footer() {
   const [paso, setPaso] = useState('email'); // 'email' | 'codigo' | 'ok'
   const [cargandoNews, setCargandoNews] = useState(false);
   const [msgNews, setMsgNews] = useState('');
-  const [fondoCfg, setFondoCfg] = useState(null);
+  const [fondoCfg, setFondoCfg] = useState(() => contenidoGuardado()?.footerFondo ?? null);
   const [videoFallo, setVideoFallo] = useState(false);
   const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
 

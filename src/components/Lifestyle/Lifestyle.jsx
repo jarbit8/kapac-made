@@ -5,7 +5,7 @@ import EditableImage from '../EditableImage';
 import { useIdioma } from '../../context/LanguageContext';
 import { useTextos } from '../../context/TextosContext';
 import { useTraducido } from '../../i18n/useTraducido';
-import { obtenerContenido, guardarContenido, HOME_FOTOS_DEFAULT } from '../../firebase/contenido';
+import { obtenerContenido, guardarContenido, contenidoGuardado } from '../../firebase/contenido';
 
 // Texto/imagen por defecto de las 4 fotos originales (las nuevas arrancan vacías).
 const DEFAULTS_FOTO = {
@@ -26,13 +26,13 @@ export default function Lifestyle() {
   const { idioma } = useIdioma();
   const es = idioma === 'es';
   const { esAdmin } = useTextos();
-  const [contenido, setContenido] = useState(null);
+  const [contenido, setContenido] = useState(contenidoGuardado);
 
   useEffect(() => {
     obtenerContenido().then(setContenido).catch(() => {});
   }, []);
 
-  const fotos = contenido?.homeFotos || HOME_FOTOS_DEFAULT;
+  const fotos = contenido ? contenido.homeFotos : [];
 
   const guardarFotos = async (nuevas) => {
     const base = contenido || await obtenerContenido();
@@ -85,7 +85,7 @@ export default function Lifestyle() {
           );
         })}
 
-        {esAdmin && (
+        {esAdmin && contenido && (
           <button type="button" className="lm-item lm-agregar" onClick={agregarFoto}>
             <div className="lm-img-wrap lm-agregar-caja">+ Agregar foto</div>
           </button>
@@ -95,7 +95,7 @@ export default function Lifestyle() {
       {/* Línea inferior + texto — abre la pantalla épica en pestaña nueva */}
       <div className="lm-footer">
         <a
-          href={`${window.location.origin}${window.location.pathname}#/zone`}
+          href="/zone"
           target="_blank"
           rel="noopener noreferrer"
           className="lm-footer-txt"

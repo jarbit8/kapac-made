@@ -125,3 +125,6 @@
   .catalogo-page-grid { grid-template-columns: 1fr 1fr; gap: 26px 12px; }
   .catalogo-page-name { font-size: 11px !important; }
 }
+
+/* La foto del producto se ve completa, sin recortes */
+.catalogo-page-card img { object-fit: contain; }

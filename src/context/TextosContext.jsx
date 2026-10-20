@@ -8,11 +8,12 @@ const TextosContext = createContext({ textos: {}, esAdmin: false, guardar: async
 
 export function TextosProvider({ children }) {
   const [textos, setTextos] = useState({});
+  const [listos, setListos] = useState(false);
   const { usuario } = useAuth();
   const esAdmin = esCorreoAdmin(usuario?.email);
 
   useEffect(() => {
-    obtenerTextos().then(setTextos).catch(() => {});
+    obtenerTextos().then(setTextos).catch(() => {}).finally(() => setListos(true));
   }, []);
 
   const guardar = async (clave, valor) => {
@@ -46,7 +47,7 @@ export function TextosProvider({ children }) {
   }, [esAdmin, textos]);
 
   return (
-    <TextosContext.Provider value={{ textos, esAdmin, guardar }}>
+    <TextosContext.Provider value={{ textos, listos, esAdmin, guardar }}>
       {children}
     </TextosContext.Provider>
   );

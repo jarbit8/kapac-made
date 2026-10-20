@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { obtenerContenido, IN_THE_ZONE_DEFAULT, urlDispositivo } from '../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, IN_THE_ZONE_DEFAULT, urlDispositivo } from '../firebase/contenido';
 import Editable from '../components/Editable';
 import '../styles/Zone.css';
 
 export default function Zone() {
-  const [foto, setFoto] = useState(null);
   const esMobile = window.innerWidth < 768;
+  const [foto, setFoto] = useState(() => {
+    const c = contenidoGuardado();
+    return c ? (urlDispositivo(c.inTheZoneFoto, esMobile) || IN_THE_ZONE_DEFAULT) : null;
+  });
 
   useEffect(() => {
     document.title = 'In the zone · Kapac Made';

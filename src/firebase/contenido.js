@@ -91,11 +91,16 @@ export function slotMedio(cfg, slot) {
   return null;
 }
 
+// Lo último que llegó de Firestore en esta sesión: así, al volver a una página,
+// se pinta el contenido real al instante y no el de fábrica.
+let contenidoSesion = null;
+export const contenidoGuardado = () => contenidoSesion;
+
 export async function obtenerContenido() {
   try {
     const snap = await getDoc(REF());
     const data = snap.exists() ? snap.data() : {};
-    return {
+    contenidoSesion = {
       homeFotos: Array.isArray(data.homeFotos) && data.homeFotos.length ? data.homeFotos : HOME_FOTOS_DEFAULT,
       galeriaProducto: Array.isArray(data.galeriaProducto) && data.galeriaProducto.length ? data.galeriaProducto : GALERIA_PRODUCTO_DEFAULT,
       footerFondo: (data.footerFondo?.pc || data.footerFondo?.mobile || data.footerFondo?.url) ? data.footerFondo : FOOTER_FONDO_DEFAULT,
@@ -111,6 +116,7 @@ export async function obtenerContenido() {
       infoExtra: Array.isArray(data.infoExtra) ? data.infoExtra : INFO_EXTRA_DEFAULT,
       cerrado: data.cerrado === true, // tienda cerrada al público (pantalla "Próximamente")
     };
+    return contenidoSesion;
   } catch (e) {
     return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT, almaBloques: ALMA_BLOQUES_DEFAULT, infoExtra: INFO_EXTRA_DEFAULT, cerrado: false };
   }
@@ -120,4 +126,5 @@ export async function guardarContenido(datos) {
   // Sin merge: "datos" siempre trae el objeto completo, y así no quedan
   // campos viejos (como el "url" legado de footerFondo) pegados para siempre.
   await setDoc(REF(), datos);
+  contenidoSesion = datos;
 }

@@ -694,7 +694,7 @@ export default function Admin() {
               🔒 <strong>100% legal en Perú (Ley 29733)</strong> — sin cookies. Los visitantes logueados se identifican
               por su correo (al cual nos dieron consentimiento al loguearse). Los anónimos quedan como "Desconocido".
               La ubicación (país/ciudad) se obtiene vía servicio externo sin guardar la IP cruda. Esto está informado
-              en la página <a href="#/legal">/legal</a>.
+              en la página <a href="/legal">/legal</a>.
             </p>
           </div>
         )}

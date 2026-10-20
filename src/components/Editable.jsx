@@ -11,7 +11,7 @@ const FUENTE_SITIO = 'IBM Plex Mono';
 // id: clave única · children: texto por defecto · as: etiqueta (p, h2, span...)
 // sinColor: oculta pastilla y fuente (para texto dentro de <button>, que sigue el color único de botones)
 export default function Editable({ id, children, as = 'span', className = '', multiline = false, sinColor = false }) {
-  const { textos, esAdmin, guardar } = useTextos();
+  const { textos, listos, esAdmin, guardar } = useTextos();
   const { idioma } = useIdioma();
   const clave = `${id}__${idioma}`;            // override de texto por idioma
   const claveColor = `${id}__color`;           // override de color (no depende del idioma)
@@ -44,7 +44,7 @@ export default function Editable({ id, children, as = 'span', className = '', mu
   }, [colorPropio, fuentePropia, sinColor, editando]);
 
   if (!esAdmin) {
-    return <Tag ref={elRef} className={className}>{valor}</Tag>;
+    return <Tag ref={elRef} className={className} style={listos ? undefined : { visibility: 'hidden' }}>{valor}</Tag>;
   }
 
   const abrir = (e) => {

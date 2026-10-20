@@ -30,7 +30,7 @@ export default function Carrito() {
         {items.length === 0 ? (
           <div className="carrito-vacio">
             <p><ET k="carrito.vacio" /></p>
-            <button onClick={() => navigate('/catalogo')}><ET k="carrito.ver_catalogo" sinColor /></button>
+            <button onClick={() => navigate('/shop')}><ET k="carrito.ver_catalogo" sinColor /></button>
           </div>
         ) : (
           <>

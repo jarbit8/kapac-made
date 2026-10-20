@@ -6,14 +6,14 @@ import './EditableImage.css';
 // Imagen editable en la propia página (solo el admin ve el overlay).
 // id: clave única · srcDefault: imagen que se usa si nadie subió otra · carpeta: subcarpeta en Storage
 export default function EditableImage({ id, srcDefault, alt = '', className = '', carpeta = 'sitio' }) {
-  const { textos, esAdmin, guardar } = useTextos();
+  const { textos, listos, esAdmin, guardar } = useTextos();
   const url = textos[id] || srcDefault;
 
   const [subiendo, setSubiendo] = useState(false);
   const inputRef = useRef(null);
 
   if (!esAdmin) {
-    return <img src={url} alt={alt} className={className} />;
+    return <img src={listos ? url : undefined} alt={listos ? alt : ''} className={className} />;
   }
 
   const onArchivo = async (e) => {
@@ -31,7 +31,7 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
 
   return (
     <div className={`editable-img-wrap ${className}`}>
-      <img src={url} alt={alt} className="editable-img" />
+      <img src={listos ? url : undefined} alt={listos ? alt : ''} className="editable-img" />
       <button
         type="button"
         className="editable-img-btn"

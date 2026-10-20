@@ -24,10 +24,10 @@ export default function NavBar() {
   const [menu, setMenu] = useState(false);
 
   const links = [
-    { id: 'nav_shop',       label: 'Shop',       to: '/catalogo' },
-    { id: 'nav_kapac_made', label: 'Kapac Made', to: '/alma'     },
+    { id: 'nav_shop',       label: 'Shop',       to: '/shop' },
+    { id: 'nav_kapac_made', label: 'Kapac Made', to: '/kapac-made' },
     { id: 'nav_b2b',        label: 'B2B',        to: '/b2b'      },
-    { id: 'nav_info',       label: 'Info',       to: '/contacto' },
+    { id: 'nav_info',       label: 'Info',       to: '/info' },
   ];
 
   const cerrar = () => setMenu(false);

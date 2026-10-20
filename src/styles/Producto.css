@@ -409,3 +409,8 @@
   .relacionados-grid { grid-template-columns: 1fr 1fr; gap: 18px; }
   .relacionado-img img { height: 200px; }
 }
+
+/* Las fotos se ven completas, sin recortes */
+.galeria-img,
+.galeria-edit-item img,
+.relacionado-img img { object-fit: contain; }

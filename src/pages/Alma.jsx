@@ -5,7 +5,7 @@ import Editable from '../components/Editable';
 import EditableImage from '../components/EditableImage';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
-import { obtenerContenido, guardarContenido, ALMA_BLOQUES_DEFAULT, ALMA_FOTOS_DEFAULT } from '../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, guardarContenido, ALMA_BLOQUES_DEFAULT, ALMA_FOTOS_DEFAULT } from '../firebase/contenido';
 import '../styles/Alma.css';
 
 // Texto por defecto de los 3 bloques originales (los nuevos arrancan vacíos).
@@ -20,7 +20,7 @@ export default function Alma() {
   const es = idioma === 'es';
   const { textos, esAdmin, guardar } = useTextos();
 
-  const [contenido, setContenido] = useState(null);
+  const [contenido, setContenido] = useState(contenidoGuardado);
   useEffect(() => {
     obtenerContenido().then(setContenido).catch(() => {});
   }, []);

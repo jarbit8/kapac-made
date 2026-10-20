@@ -21,7 +21,7 @@
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://www.kapac-made.com/" />
     <script type="application/ld+json">
-      { "@context": "https://schema.org", "@type": "WebSite", "name": "Kapac Made", "url": "https://www.kapac-made.com/" }
+      { "@context": "https://schema.org", "@type": "WebSite", "name": "Kapac Made", "url": "https://www.kapac-made.com/", "image": "https://www.kapac-made.com/og-kapac.jpg" }
     </script>
 
     <!-- Favicon -->
@@ -33,15 +33,18 @@
     <meta property="og:url" content="https://www.kapac-made.com/" />
     <meta property="og:title" content="Kapac Made" />
     <meta property="og:description" content="Mountaineering, Climbing &amp; Trekking" />
-    <meta property="og:image" content="%PUBLIC_URL%/logo-og.png" />
+    <meta property="og:image" content="https://www.kapac-made.com/og-kapac.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content="Kapac Made" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Kapac Made" />
     <meta name="twitter:description" content="Mountaineering, Climbing &amp; Trekking" />
-    <meta name="twitter:image" content="%PUBLIC_URL%/logo-og.png" />
+    <meta name="twitter:image" content="https://www.kapac-made.com/og-kapac.jpg" />
     <script>
+      if (location.hash.indexOf('#/') === 0) history.replaceState(null, '', location.hash.slice(1));
       try { if (localStorage.getItem('kapac_cerrado_v1') !== '0') document.documentElement.classList.add('cerrado'); } catch (e) {}
     </script>
     <style>

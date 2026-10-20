@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { esCorreoAdmin } from './config/admins';
 import { CartProvider } from './context/CartContext';
@@ -51,17 +51,26 @@ function Home() {
   );
 }
 
+// Direcciones viejas: llevan a la nueva sin perder la búsqueda (?q=)
+function RedirigirA({ ruta }) {
+  const { search } = useLocation();
+  return <Navigate to={`${ruta}${search}`} replace />;
+}
+
 function AppRoutes() {
   useTrackVisita();
   return (
     <Routes>
       <Route path="/"         element={<Home />} />
-      <Route path="/catalogo" element={<><NavBar /><Catalogo /></>} />
+      <Route path="/shop"     element={<><NavBar /><Catalogo /></>} />
       <Route path="/producto/:id" element={<><NavBar /><Producto /></>} />
       <Route path="/zone" element={<Zone />} />
-      <Route path="/alma"     element={<><NavBar /><Alma /></>} />
+      <Route path="/kapac-made" element={<><NavBar /><Alma /></>} />
       <Route path="/b2b"      element={<><NavBar /><B2B /></>} />
-      <Route path="/contacto" element={<><NavBar /><Contacto /></>} />
+      <Route path="/info"     element={<><NavBar /><Contacto /></>} />
+      <Route path="/catalogo" element={<RedirigirA ruta="/shop" />} />
+      <Route path="/alma"     element={<Navigate to="/kapac-made" replace />} />
+      <Route path="/contacto" element={<Navigate to="/info" replace />} />
       <Route path="/legal"    element={<><NavBar /><Legal /></>} />
       <Route path="/admin"    element={<><NavBar /><Admin /></>} />
       <Route path="/login"    element={<><NavBar /><Login /></>} />
@@ -116,13 +125,13 @@ function App() {
           <TextosProvider>
             <TemaProvider>
               <Carga />
-              <HashRouter>
+              <BrowserRouter>
                 <ScrollToTop />
                 <CierreGate>
                   <AppRoutes />
                   <WhatsApp />
                 </CierreGate>
-              </HashRouter>
+              </BrowserRouter>
             </TemaProvider>
           </TextosProvider>
         </CartProvider>

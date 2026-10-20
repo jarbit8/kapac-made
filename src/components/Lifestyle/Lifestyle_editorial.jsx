@@ -140,7 +140,7 @@ export default function Lifestyle() {
             La ciudad blanca
           </span>
           <h2 className="ls-cta-title">Arequipa<br /><em>te llama.</em></h2>
-          <a href="#/catalogo" className="ls-cta-btn">Ver colección →</a>
+          <a href="/shop" className="ls-cta-btn">Ver colección →</a>
         </div>
       </section>
 

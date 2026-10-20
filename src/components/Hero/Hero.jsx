@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/Hero.css';
 import videoFallback from '../../assets/videos/ojo.mp4';
-import { obtenerContenido, normalizarMedio } from '../../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, normalizarMedio } from '../../firebase/contenido';
 
 // Clave compartida con Admin.jsx para sincronizar el cache del hero.
 export const HERO_CACHE_KEY = 'kapac_hero_v1';
 
 export default function Hero() {
   const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
-  const [videoCfg, setVideoCfg] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(HERO_CACHE_KEY)); }
-    catch (_) { return null; }
-  });
+  const [videoCfg, setVideoCfg] = useState(() => contenidoGuardado()?.heroVideo ?? null);
   const [fallo, setFallo] = useState(false);
 
   useEffect(() => {
@@ -22,9 +19,7 @@ export default function Hero() {
 
   useEffect(() => {
     obtenerContenido().then((c) => {
-      const cfg = c.heroVideo || null;
-      setVideoCfg(cfg);
-      try { localStorage.setItem(HERO_CACHE_KEY, JSON.stringify(cfg)); } catch (_) {}
+      setVideoCfg(c.heroVideo || null);
     }).catch(() => {});
   }, []);
 

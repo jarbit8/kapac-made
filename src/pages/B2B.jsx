@@ -7,7 +7,7 @@ import EditableImage from '../components/EditableImage';
 import { useTextos } from '../context/TextosContext';
 import coser1 from '../assets/images/coser1.png';
 import { useIdioma } from '../context/LanguageContext';
-import { obtenerContenido, guardarContenido, B2B_BENEFICIOS_DEFAULT } from '../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, guardarContenido, B2B_BENEFICIOS_DEFAULT } from '../firebase/contenido';
 import '../styles/B2B.css';
 
 // Texto por defecto de los 4 beneficios originales (nuevas tarjetas arrancan vacías).
@@ -23,7 +23,7 @@ export default function B2B() {
   const es = idioma === 'es';
   const { esAdmin } = useTextos();
 
-  const [contenido, setContenido] = useState(null);
+  const [contenido, setContenido] = useState(contenidoGuardado);
   useEffect(() => {
     obtenerContenido().then(setContenido).catch(() => {});
   }, []);
@@ -100,7 +100,7 @@ export default function B2B() {
               ? 'Cuéntanos sobre tu proyecto y diseñemos algo único para tu empresa.'
               : "Tell us about your project and let's design something unique for your company."}
           </Editable>
-          <Link to="/contacto" className="b2b-btn">
+          <Link to="/info" className="b2b-btn">
             <Editable id="b2b_cta_boton" as="span" sinColor>{es ? 'Hablemos' : "Let's talk"}</Editable> →
           </Link>
         </section>

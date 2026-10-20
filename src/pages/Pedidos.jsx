@@ -80,7 +80,7 @@ export default function Pedidos() {
         {!cargando && !error && pedidos.length === 0 && (
           <div className="pedidos-vacio">
             <p><ET k="pedidos.vacio" /></p>
-            <button onClick={() => navigate('/catalogo')}><ET k="pedidos.ver_tienda" sinColor /></button>
+            <button onClick={() => navigate('/shop')}><ET k="pedidos.ver_tienda" sinColor /></button>
           </div>
         )}
 

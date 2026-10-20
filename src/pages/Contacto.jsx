@@ -4,7 +4,7 @@ import Footer from '../components/Footer/Footer';
 import Editable from '../components/Editable';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
-import { obtenerContenido, guardarContenido, INFO_EXTRA_DEFAULT } from '../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, guardarContenido, INFO_EXTRA_DEFAULT } from '../firebase/contenido';
 import '../styles/Contacto.css';
 
 export default function Contacto() {
@@ -12,7 +12,7 @@ export default function Contacto() {
   const es = idioma === 'es';
   const { esAdmin } = useTextos();
 
-  const [contenido, setContenido] = useState(null);
+  const [contenido, setContenido] = useState(contenidoGuardado);
   useEffect(() => {
     obtenerContenido().then(setContenido).catch(() => {});
   }, []);
