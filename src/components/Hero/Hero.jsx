@@ -41,7 +41,7 @@ export default function Hero() {
         ) : (
           <video
             key={usarSubido ? medio.url : videoLocal}
-            src={usarSubido ? medio.url : videoLocal}
+            src={usarSubido ? fotoRapida(medio.url) : videoLocal}
             autoPlay
             loop
             muted

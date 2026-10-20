@@ -147,7 +147,7 @@ export default function Footer() {
 
       {/* Fondo: video o imagen (editable desde el admin). Si el video falla, usa la imagen por defecto. */}
       {fondo && fondo.tipo === 'video' && !videoFallo ? (
-        <video className="footer-bg" src={fondo.url} autoPlay muted loop playsInline
+        <video className="footer-bg" src={fotoRapida(fondo.url)} autoPlay muted loop playsInline
           onError={() => setVideoFallo(true)} />
       ) : fondo ? (
         <div className="footer-bg" style={{ backgroundImage: `url('${fotoRapida(fondo.url)}')` }} />
