@@ -191,3 +191,4 @@
 }
 img.lm-img-wrap:not(.cargada) { aspect-ratio: 4 / 3; }
 .lm-img-wrap.editable-img-wrap .editable-img { height: auto; max-height: 85vh; object-fit: contain; }
+.lm-img-wrap.editable-img-wrap .editable-img:not(.cargada) { aspect-ratio: 4 / 3; }

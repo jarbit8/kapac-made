@@ -262,3 +262,4 @@
 img.alma-foto-img-wrap:not(.cargada) { aspect-ratio: 4 / 3; }
 .alma-foto--hero img.alma-foto-img-wrap:not(.cargada) { aspect-ratio: 21 / 9; }
 .alma-foto-img-wrap.editable-img-wrap .editable-img { height: auto; max-height: 85vh; object-fit: contain; }
+.alma-foto-img-wrap.editable-img-wrap .editable-img:not(.cargada) { aspect-ratio: 4 / 3; }

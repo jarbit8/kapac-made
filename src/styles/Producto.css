@@ -410,7 +410,10 @@
   .relacionado-img img { height: 200px; }
 }
 
-/* Las fotos se ven completas, sin recortes */
+/* Las fotos se ven completas; lo que sobra queda del color de la página */
+.galeria-marco,
+.galeria-edit-item,
+.relacionado-img { background: var(--fondo); }
 .galeria-img,
 .galeria-edit-item img,
 .relacionado-img img { object-fit: contain; }

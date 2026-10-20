@@ -126,5 +126,6 @@
   .catalogo-page-name { font-size: 11px !important; }
 }
 
-/* La foto del producto se ve completa, sin recortes */
+/* La foto del producto se ve completa; lo que sobra queda del color de la página */
+.cat-img-wrap { background: var(--fondo); }
 .catalogo-page-card img { object-fit: contain; }
