@@ -7,6 +7,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { TextosProvider } from './context/TextosContext';
 import { TemaProvider, useTema } from './context/TemaContext';
 import SitioCerrado from './components/SitioCerrado/SitioCerrado';
+import Cargando from './components/Cargando/Cargando';
 import Header from './components/Header/Header';
 import Hero from './components/Hero/Hero';
 import Products from './components/Products/Products';
@@ -92,11 +93,19 @@ function AppRoutes() {
 // Tienda cerrada al público: todos ven "Próximamente" salvo el admin.
 // Mientras se verifica la sesión también se muestra, para que nada del sitio
 // se asome. El /login queda accesible para que el admin pueda entrar.
+const esDispositivoAdmin = () => {
+  try { return localStorage.getItem('kapac_dispositivo_admin') === '1'; } catch (_) { return false; }
+};
+
 function CierreGate({ children }) {
   const { cerrado } = useTema();
-  const { usuario } = useAuth();
+  const { usuario, cargando } = useAuth();
   const { pathname } = useLocation();
-  if (cerrado && !esCorreoAdmin(usuario?.email) && pathname !== '/login') return <SitioCerrado />;
+  if (cerrado && !esCorreoAdmin(usuario?.email) && pathname !== '/login') {
+    // En el navegador del admin se espera a la sesión en vez de mostrar "Próximamente"
+    if (cargando && esDispositivoAdmin()) return <Cargando />;
+    return <SitioCerrado />;
+  }
   return children;
 }
 

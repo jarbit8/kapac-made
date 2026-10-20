@@ -190,10 +190,11 @@ export default function Admin() {
 
   // Guarda un objeto de contenido en Firestore y refleja el estado.
   const persistirContenido = async (nuevo) => {
+    const anterior = contenido;
     setContenido(nuevo);
     setGuardandoContenido(true); setMsgContenido('');
     try {
-      await guardarContenido(nuevo);
+      await guardarContenido(nuevo, anterior);
       try { localStorage.setItem(HERO_CACHE_KEY, JSON.stringify(nuevo.heroVideo || null)); } catch (_) {}
       try {
         if (nuevo.logo) localStorage.setItem(LOGO_CACHE_KEY, nuevo.logo);

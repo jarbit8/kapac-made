@@ -102,7 +102,7 @@ export default function Header({ transparente = false }) {
     try {
       const url = await subirImagen(file, 'logo');
       const c = await obtenerContenido();
-      await guardarContenido({ ...c, logo: url });
+      await guardarContenido({ ...c, logo: url }, c);
       setTema((prev) => ({ ...prev, logo: url }));
       try { localStorage.setItem(LOGO_CACHE_KEY, url); } catch (_) {}
     } catch (_) { /* error silencioso */ }

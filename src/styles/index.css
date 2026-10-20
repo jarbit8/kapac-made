@@ -401,8 +401,9 @@ code {
 }
 
 /* ── Mientras carga una foto se ve el logo con un brillo suave ── */
-img.lm-img-wrap, img.alma-foto-img-wrap, .editable-img, .cat-img-wrap img, .galeria-img,
-.galeria-edit-item img, .relacionado-img img, .carrito-item img, img.b2b-hero-img {
+img.lm-img-wrap:not(.cargada), img.alma-foto-img-wrap:not(.cargada), .editable-img:not(.cargada),
+.cat-img-wrap img:not(.cargada), .galeria-img:not(.cargada), .galeria-edit-item img:not(.cargada),
+.relacionado-img img:not(.cargada), .carrito-item img:not(.cargada), img.b2b-hero-img:not(.cargada) {
   background:
     url('../assets/images/cargando-logo.png') center / min(46%, 230px) auto no-repeat,
     linear-gradient(100deg, #eeece8 40%, #f8f7f4 50%, #eeece8 60%) 0 0 / 250% 100% !important;
@@ -414,17 +415,13 @@ img.lm-img-wrap, img.alma-foto-img-wrap, .editable-img, .cat-img-wrap img, .gale
 }
 .hero:has(.cargada), .zone:has(.cargada) { background-image: none !important; }
 
-img.cargada {
-  background: none !important;
-  animation: none !important;
-}
-
 @keyframes cargandoBrillo {
   from { background-position: center, 120% 0; }
   to { background-position: center, -120% 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  img.lm-img-wrap, img.alma-foto-img-wrap, .editable-img, .cat-img-wrap img, .galeria-img,
-  .galeria-edit-item img, .relacionado-img img, .carrito-item img, img.b2b-hero-img { animation: none !important; }
+  img.lm-img-wrap:not(.cargada), img.alma-foto-img-wrap:not(.cargada), .editable-img:not(.cargada),
+  .cat-img-wrap img:not(.cargada), .galeria-img:not(.cargada), .galeria-edit-item img:not(.cargada),
+  .relacionado-img img:not(.cargada), .carrito-item img:not(.cargada), img.b2b-hero-img:not(.cargada) { animation: none !important; }
 }

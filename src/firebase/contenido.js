@@ -1,6 +1,6 @@
 // Contenido editable del sitio (fotos de la home y galería de producto).
 // Vive en un único doc: contenido/sitio. Si no existe, se usan los defaults.
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from './config';
 
 const REF = () => doc(db, 'contenido', 'sitio');
@@ -122,9 +122,15 @@ export async function obtenerContenido() {
   }
 }
 
-export async function guardarContenido(datos) {
-  // Sin merge: "datos" siempre trae el objeto completo, y así no quedan
-  // campos viejos (como el "url" legado de footerFondo) pegados para siempre.
-  await setDoc(REF(), datos);
-  contenidoSesion = datos;
+// Solo escribe los campos que cambiaron respecto de "anterior": una página abierta
+// hace rato no debe pisar con su copia vieja lo que se cambió desde otra.
+// updateDoc reemplaza cada campo entero, así no quedan claves viejas pegadas.
+export async function guardarContenido(nuevo, anterior = {}) {
+  const cambios = {};
+  Object.keys(nuevo).forEach((k) => {
+    if (JSON.stringify(nuevo[k]) !== JSON.stringify(anterior[k])) cambios[k] = nuevo[k];
+  });
+  if (!Object.keys(cambios).length) return;
+  await updateDoc(REF(), cambios);
+  contenidoSesion = { ...(contenidoSesion || nuevo), ...cambios };
 }

@@ -45,7 +45,7 @@
     <meta name="twitter:image" content="https://www.kapac-made.com/og-kapac.jpg" />
     <script>
       if (location.hash.indexOf('#/') === 0) history.replaceState(null, '', location.hash.slice(1));
-      try { if (localStorage.getItem('kapac_cerrado_v1') !== '0') document.documentElement.classList.add('cerrado'); } catch (e) {}
+      try { if (localStorage.getItem('kapac_cerrado_v1') !== '0' && localStorage.getItem('kapac_dispositivo_admin') !== '1') document.documentElement.classList.add('cerrado'); } catch (e) {}
     </script>
     <style>
       html.cerrado, html.cerrado body { background: #0a0a0a; }

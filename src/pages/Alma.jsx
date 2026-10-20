@@ -32,7 +32,7 @@ export default function Alma() {
     const base = contenido || await obtenerContenido();
     const nuevo = { ...base, ...parcial };
     setContenido(nuevo);
-    try { await guardarContenido(nuevo); } catch (_) { /* error silencioso */ }
+    try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
   };
 
   const agregarBloque = () => guardarContenidoParcial({ almaBloques: [...bloques, `bloque_${Date.now()}`] });

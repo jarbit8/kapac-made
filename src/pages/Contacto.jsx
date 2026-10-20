@@ -23,7 +23,7 @@ export default function Contacto() {
     const base = contenido || await obtenerContenido();
     const nuevo = { ...base, infoExtra: nuevos };
     setContenido(nuevo);
-    try { await guardarContenido(nuevo); } catch (_) { /* error silencioso */ }
+    try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
   };
 
   const agregarExtra = () => guardarExtras([...extras, `campo_${Date.now()}`]);
