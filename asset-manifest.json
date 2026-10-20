@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.84d3a0c3.css",
-    "main.js": "/static/js/main.94e70efb.js",
+    "main.css": "/static/css/main.6bdc9fb5.css",
+    "main.js": "/static/js/main.d10a09a6.js",
     "static/media/proximamente.mp4": "/static/media/proximamente.94d63b428aaae14e819a.mp4",
     "static/media/proximamente-movil.mp4": "/static/media/proximamente-movil.2e96ac2b7bbe90addaec.mp4",
     "static/media/coser1.png": "/static/media/coser1.20835861b4c0f9614448.png",
@@ -19,11 +19,13 @@
     "static/media/proximamente-fondo.mp4": "/static/media/proximamente-fondo.a8c0625d096371652aff.mp4",
     "static/media/tarjeta.jpg": "/static/media/tarjeta.1d5da35973b951da1e03.jpg",
     "static/media/yape.avif": "/static/media/yape.840564865fab99eb2367.avif",
+    "static/media/cargando-logo.png": "/static/media/cargando-logo.eecea12e9e82859f0ab6.png",
+    "static/media/cargando-logo-claro.png": "/static/media/cargando-logo-claro.c188a28d35d6f96ca8fa.png",
     "static/media/pago efectivo.avif": "/static/media/pago efectivo.a8d588e2c58fed29b1ae.avif",
     "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.84d3a0c3.css",
-    "static/js/main.94e70efb.js"
+    "static/css/main.6bdc9fb5.css",
+    "static/js/main.d10a09a6.js"
   ]
 }
