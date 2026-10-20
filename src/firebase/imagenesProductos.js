@@ -5,6 +5,7 @@ import gonzalo  from '../assets/images/gonzalo.jpeg';
 import gonzalo2 from '../assets/images/gonzalo2.jpeg';
 import foto1 from '../assets/images/foto 1.png';
 import foto2 from '../assets/images/foto 2.png';
+import { fotoRapida } from '../utils/fotos';
 
 export const IMAGENES = {
   'mochila-1': mochila1,
@@ -19,6 +20,7 @@ export const IMAGENES = {
 // Acepta tanto una URL (foto subida por el admin a Storage) como una clave local.
 export function imagen(valor) {
   if (!valor) return '';
-  if (/^https?:\/\//.test(valor) || valor.startsWith('data:')) return valor;
+  if (/^https?:\/\//.test(valor)) return fotoRapida(valor);
+  if (valor.startsWith('data:')) return valor;
   return IMAGENES[valor] || '';
 }

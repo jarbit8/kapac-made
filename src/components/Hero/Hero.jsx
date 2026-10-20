@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/Hero.css';
 import videoFallback from '../../assets/videos/ojo.mp4';
 import { obtenerContenido, contenidoGuardado, normalizarMedio } from '../../firebase/contenido';
+import { fotoRapida } from '../../utils/fotos';
 
 // Clave compartida con Admin.jsx para sincronizar el cache del hero.
 export const HERO_CACHE_KEY = 'kapac_hero_v1';
@@ -31,8 +32,12 @@ export default function Hero() {
     <section className="hero">
       {videoCfg !== null && (
         usarSubido && medio.tipo === 'imagen' ? (
-          <img src={medio.url} alt="Kapac Made" className="hero-bg" fetchpriority="high"
-            onError={() => setFallo(true)} />
+          <img src={fotoRapida(medio.url)} alt="Kapac Made" className="hero-bg" fetchpriority="high"
+            onError={(e) => {
+              // Si falla la copia publicada, se intenta con Storage antes de caer al video
+              if (e.currentTarget.src !== medio.url) e.currentTarget.src = medio.url;
+              else setFallo(true);
+            }} />
         ) : (
           <video
             key={usarSubido ? medio.url : videoLocal}

@@ -55,8 +55,9 @@
         var c = JSON.parse(localStorage.getItem('kapac_contenido_v1'));
         var h = c && c.heroVideo && c.heroVideo[innerWidth < 768 ? 'mobile' : 'pc'];
         if (location.pathname === '/' && h && h.tipo === 'imagen' && h.url && !document.documentElement.classList.contains('cerrado')) {
+          var copias = window.__FOTOS__ || {}, ruta = decodeURIComponent((h.url.split('/o/')[1] || '').split('?')[0]);
           var l = document.createElement('link');
-          l.rel = 'preload'; l.as = 'image'; l.href = h.url; l.setAttribute('fetchpriority', 'high');
+          l.rel = 'preload'; l.as = 'image'; l.href = copias[ruta] || h.url; l.setAttribute('fetchpriority', 'high');
           document.head.appendChild(l);
         }
       } catch (e) {}

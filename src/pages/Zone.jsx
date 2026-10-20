@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { obtenerContenido, contenidoGuardado, IN_THE_ZONE_DEFAULT, urlDispositivo } from '../firebase/contenido';
 import Editable from '../components/Editable';
+import { fotoRapida } from '../utils/fotos';
 import '../styles/Zone.css';
 
 export default function Zone() {
@@ -21,7 +22,7 @@ export default function Zone() {
 
   return (
     <div className="zone">
-      {foto && <img src={foto} alt="Kapac Made" className="zone-img" fetchpriority="high" />}
+      {foto && <img src={fotoRapida(foto)} alt="Kapac Made" className="zone-img" fetchpriority="high" />}
       <div className="zone-vineta" />
       <p className="zone-txt"><Editable id="zone_txt" as="span">in the zone</Editable></p>
     </div>

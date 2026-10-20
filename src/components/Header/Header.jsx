@@ -12,6 +12,7 @@ import logoTerracota from '../../assets/images/kapac_made_1.png';
 import { useTema, LOGO_CACHE_KEY } from '../../context/TemaContext';
 import { obtenerContenido, guardarContenido } from '../../firebase/contenido';
 import { subirImagen } from '../../firebase/almacenamiento';
+import { fotoRapida } from '../../utils/fotos';
 
 export default function Header({ transparente = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -90,7 +91,7 @@ export default function Header({ transparente = false }) {
   const esAdmin = esCorreoAdmin(usuario?.email);
   const esSolido = !transparente || scrolled;
   const { logo, logoListo, setTema } = useTema();
-  const logoSrc  = logo || logoTerracota; // logo del admin o el de la marca
+  const logoSrc  = fotoRapida(logo) || logoTerracota; // logo del admin o el de la marca
 
   // El logo se cambia acá mismo (antes vivía en la pestaña Fotos del admin).
   const [subiendoLogo, setSubiendoLogo] = useState(false);

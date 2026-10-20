@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTema } from '../../context/TemaContext';
+import { fotoRapida } from '../../utils/fotos';
 import logoLocal from '../../assets/images/kapac_made_1.png';
 import video from '../../assets/videos/proximamente.mp4';
 import videoMovil from '../../assets/videos/proximamente-movil.mp4';
@@ -158,7 +159,7 @@ export default function SitioCerrado() {
 
       <header className="cerrado-top">
         <img
-          src={logo || logoLocal}
+          src={fotoRapida(logo) || logoLocal}
           alt="Kapac Made"
           className="cerrado-logo"
           style={logoListo ? undefined : { opacity: 0 }}

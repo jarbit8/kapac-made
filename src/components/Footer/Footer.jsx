@@ -8,6 +8,7 @@ import { cerrarSesion } from '../../firebase/auth';
 import { pedirCodigo, confirmarCodigo } from '../../firebase/newsletter';
 import { obtenerContenido, contenidoGuardado, FOOTER_FONDO_DEFAULT, medioDispositivo } from '../../firebase/contenido';
 import Editable from '../Editable';
+import { fotoRapida } from '../../utils/fotos';
 
 /* ─── Iconos SVG (sociales) ─────────────────────────────────────────────── */
 const IconInstagram = () => (
@@ -149,7 +150,7 @@ export default function Footer() {
         <video className="footer-bg" src={fondo.url} autoPlay muted loop playsInline
           onError={() => setVideoFallo(true)} />
       ) : fondo ? (
-        <div className="footer-bg" style={{ backgroundImage: `url('${fondo.url}')` }} />
+        <div className="footer-bg" style={{ backgroundImage: `url('${fotoRapida(fondo.url)}')` }} />
       ) : null}
       <div className="footer-overlay" />
 

@@ -1,13 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { useTextos } from '../context/TextosContext';
 import { subirImagen } from '../firebase/almacenamiento';
+import { fotoRapida } from '../utils/fotos';
 import './EditableImage.css';
 
 // Imagen editable en la propia página (solo el admin ve el overlay).
 // id: clave única · srcDefault: imagen que se usa si nadie subió otra · carpeta: subcarpeta en Storage
 export default function EditableImage({ id, srcDefault, alt = '', className = '', carpeta = 'sitio' }) {
   const { textos, listos, esAdmin, guardar } = useTextos();
-  const url = textos[id] || srcDefault;
+  const url = fotoRapida(textos[id] || srcDefault);
 
   const [subiendo, setSubiendo] = useState(false);
   const inputRef = useRef(null);
