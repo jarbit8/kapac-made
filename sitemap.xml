@@ -6,22 +6,22 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.kapac-made.com/#/catalogo</loc>
+    <loc>https://www.kapac-made.com/shop</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.kapac-made.com/#/b2b</loc>
+    <loc>https://www.kapac-made.com/b2b</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.kapac-made.com/#/alma</loc>
+    <loc>https://www.kapac-made.com/kapac-made</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.kapac-made.com/#/contacto</loc>
+    <loc>https://www.kapac-made.com/info</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
