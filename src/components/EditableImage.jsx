@@ -32,7 +32,7 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
 
   return (
     <div className={`editable-img-wrap ${className}`}>
-      <img src={listos ? url : undefined} alt={listos ? alt : ''} className="editable-img" />
+      {listos && url ? <img src={url} alt={alt} className="editable-img" /> : <div className="editable-img" />}
       <button
         type="button"
         className="editable-img-btn"
