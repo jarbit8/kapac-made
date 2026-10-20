@@ -94,6 +94,8 @@ export default function Alma() {
                 const urlDefault = esViejo ? (foto.url || '') : '';
                 const captionDefault = esViejo ? (foto.caption || '') : '';
                 const tamano = textos[`alma_${key}_tamano`] || 'normal';
+                // Un espacio sin foto solo lo ve el admin (para subirle una)
+                if (!esAdmin && !(textos[`alma_${key}_img`] || urlDefault)) return null;
 
                 return (
                   <div key={key} className={`alma-foto${tamano === 'grande' ? ' alma-foto--hero' : ''}`}>

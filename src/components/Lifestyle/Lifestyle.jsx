@@ -25,7 +25,7 @@ function EditableTraducido({ id, as = 'span', className = '', multiline = false,
 export default function Lifestyle() {
   const { idioma } = useIdioma();
   const es = idioma === 'es';
-  const { esAdmin } = useTextos();
+  const { textos, esAdmin } = useTextos();
   const [contenido, setContenido] = useState(contenidoGuardado);
 
   useEffect(() => {
@@ -61,6 +61,7 @@ export default function Lifestyle() {
           const urlDefault = defReal ? ((esViejo && foto.url) || defReal.url) : (esViejo ? (foto.url || '') : '');
           const tituloDefault = defReal ? (es ? defReal.t[0] : defReal.t[1]) : (esViejo ? (foto.titulo || '') : '');
           const descDefault = defReal ? (es ? defReal.d[0] : defReal.d[1]) : (esViejo ? (foto.desc || '') : '');
+          if (!esAdmin && !(textos[`home_${key}_img`] || urlDefault)) return null;
 
           return (
             <div key={key} className="lm-item">

@@ -13,6 +13,7 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
   const inputRef = useRef(null);
 
   if (!esAdmin) {
+    if (listos && !url) return null;
     return <img src={listos ? url : undefined} alt={listos ? alt : ''} className={className} />;
   }
 
