@@ -11,15 +11,11 @@ import { imagen } from '../firebase/imagenesProductos';
 import '../styles/Carrito.css';
 
 export default function Carrito() {
-  const { items, quitar, cambiarCantidad, vaciar, totalPrecio } = useCart();
+  const { items, quitar, cambiarCantidad, totalPrecio } = useCart();
   const { usuario } = useAuth();
   const { t, idioma } = useIdioma();
   const navigate = useNavigate();
-  const finalizar = () => {
-    sessionStorage.setItem('checkout_items', JSON.stringify(items));
-    sessionStorage.setItem('checkout_total', totalPrecio);
-    navigate('/checkout');
-  };
+  const finalizar = () => navigate('/checkout');
 
   return (
     <>
@@ -67,7 +63,7 @@ export default function Carrito() {
               <button className="carrito-finalizar" onClick={finalizar}>
                 <ET k="carrito.ir_pagar" sinColor />
               </button>
-              <button className="carrito-vaciar" onClick={vaciar}><ET k="carrito.continuar" sinColor /></button>
+              <button className="carrito-vaciar" onClick={() => navigate('/shop')}><ET k="carrito.continuar" sinColor /></button>
             </div>
           </>
         )}

@@ -7,7 +7,7 @@ import EditableImage from '../components/EditableImage';
 import { useTextos } from '../context/TextosContext';
 import coser1 from '../assets/images/coser1.png';
 import { useIdioma } from '../context/LanguageContext';
-import { obtenerContenido, contenidoGuardado, guardarContenido, B2B_BENEFICIOS_DEFAULT } from '../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, guardarContenido } from '../firebase/contenido';
 import '../styles/B2B.css';
 
 // Texto por defecto de los 4 beneficios originales (nuevas tarjetas arrancan vacías).
@@ -28,10 +28,10 @@ export default function B2B() {
     obtenerContenido().then(setContenido).catch(() => {});
   }, []);
 
-  const beneficios = contenido?.b2bBeneficios || B2B_BENEFICIOS_DEFAULT;
+  const beneficios = contenido ? contenido.b2bBeneficios : [];
 
   const guardarBeneficios = async (nuevos) => {
-    const base = contenido || await obtenerContenido();
+    const base = contenido;
     const nuevo = { ...base, b2bBeneficios: nuevos };
     setContenido(nuevo);
     try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
@@ -84,7 +84,7 @@ export default function B2B() {
                 </div>
               );
             })}
-            {esAdmin && (
+            {esAdmin && contenido && (
               <button type="button" className="b2b-agregar-beneficio" onClick={agregarBeneficio}>
                 + Agregar beneficio
               </button>

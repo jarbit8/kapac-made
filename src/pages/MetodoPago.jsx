@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useRef, useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import ET from '../components/ET';
@@ -24,7 +24,8 @@ export default function MetodoPago() {
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState('');
 
-  const total = sessionStorage.getItem('checkout_total') || totalPrecio;
+  const total = totalPrecio;
+  const pedidoCreado = useRef(false);
 
   const confirmar = async () => {
     if (!metodo) {
@@ -76,8 +77,8 @@ export default function MetodoPago() {
 
       // El stock lo descuenta el servidor cuando el pago se confirma
       // (los clientes no tienen permiso para escribir en productos).
+      pedidoCreado.current = true;
       vaciar();
-      sessionStorage.removeItem('checkout_items');
       sessionStorage.setItem('pago_total', total);
 
       if (metodo === 'yape' || metodo === 'yape-codigo') {
@@ -94,6 +95,8 @@ export default function MetodoPago() {
 
     setProcesando(false);
   };
+
+  if (!items.length && !pedidoCreado.current) return <Navigate to="/carrito" replace />;
 
   return (
     <>

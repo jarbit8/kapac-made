@@ -5,7 +5,7 @@ import Editable from '../components/Editable';
 import EditableImage from '../components/EditableImage';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
-import { obtenerContenido, contenidoGuardado, guardarContenido, ALMA_BLOQUES_DEFAULT, ALMA_FOTOS_DEFAULT } from '../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, guardarContenido } from '../firebase/contenido';
 import '../styles/Alma.css';
 
 // Texto por defecto de los 3 bloques originales (los nuevos arrancan vacíos).
@@ -25,11 +25,11 @@ export default function Alma() {
     obtenerContenido().then(setContenido).catch(() => {});
   }, []);
 
-  const bloques = contenido?.almaBloques || ALMA_BLOQUES_DEFAULT;
-  const fotos = contenido?.almaFotos || ALMA_FOTOS_DEFAULT;
+  const bloques = contenido ? contenido.almaBloques : [];
+  const fotos = contenido ? contenido.almaFotos : [];
 
   const guardarContenidoParcial = async (parcial) => {
-    const base = contenido || await obtenerContenido();
+    const base = contenido;
     const nuevo = { ...base, ...parcial };
     setContenido(nuevo);
     try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
@@ -74,7 +74,7 @@ export default function Alma() {
                 </section>
               );
             })}
-            {esAdmin && (
+            {esAdmin && contenido && (
               <button type="button" className="alma-agregar-bloque" onClick={agregarBloque}>
                 + Agregar bloque
               </button>
@@ -120,7 +120,7 @@ export default function Alma() {
                 );
               })}
             </div>
-            {esAdmin && (
+            {esAdmin && contenido && (
               <button type="button" className="alma-agregar-foto" onClick={agregarFoto}>
                 + Agregar foto
               </button>

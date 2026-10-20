@@ -61,7 +61,7 @@ export function TemaProvider({ children }) {
         localStorage.setItem(CERRADO_CACHE_KEY, c.cerrado === true ? '1' : '0');
       } catch (_) {}
       setLogoListo(true);
-    }).catch(() => setLogoListo(true));
+    }).catch(() => setLogoListo(true)); // sin conexión: se mantiene lo de la visita anterior
   }, []);
 
   return <TemaContext.Provider value={{ ...tema, logoListo, cerrado, setCerrado, setTema }}>{children}</TemaContext.Provider>;

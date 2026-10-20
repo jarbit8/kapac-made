@@ -15,9 +15,7 @@ export default function Zone() {
     obtenerContenido().then((c) => {
       const url = urlDispositivo(c.inTheZoneFoto, esMobile);
       setFoto(url || IN_THE_ZONE_DEFAULT);
-    }).catch(() => {
-      setFoto(IN_THE_ZONE_DEFAULT);
-    });
+    }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

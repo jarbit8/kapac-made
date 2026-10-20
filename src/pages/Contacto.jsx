@@ -4,7 +4,7 @@ import Footer from '../components/Footer/Footer';
 import Editable from '../components/Editable';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
-import { obtenerContenido, contenidoGuardado, guardarContenido, INFO_EXTRA_DEFAULT } from '../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, guardarContenido } from '../firebase/contenido';
 import '../styles/Contacto.css';
 
 export default function Contacto() {
@@ -17,10 +17,10 @@ export default function Contacto() {
     obtenerContenido().then(setContenido).catch(() => {});
   }, []);
 
-  const extras = contenido?.infoExtra || INFO_EXTRA_DEFAULT;
+  const extras = contenido ? contenido.infoExtra : [];
 
   const guardarExtras = async (nuevos) => {
-    const base = contenido || await obtenerContenido();
+    const base = contenido;
     const nuevo = { ...base, infoExtra: nuevos };
     setContenido(nuevo);
     try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }
@@ -102,7 +102,7 @@ export default function Contacto() {
             </section>
           ))}
 
-          {esAdmin && (
+          {esAdmin && contenido && (
             <button type="button" className="info-agregar-campo" onClick={agregarExtra}>
               + Agregar campo
             </button>

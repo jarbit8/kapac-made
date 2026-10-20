@@ -48,7 +48,7 @@ export default function Producto() {
   const navigate = useNavigate();
   const { agregar } = useCart();
   const { t, idioma } = useIdioma();
-  const { textos } = useTextos();
+  const { textos, esAdmin } = useTextos();
   const specsColor = textos['producto_specs_color'] || '';
   const [producto, setProducto] = useState(null);
   const [relacionados, setRelacionados] = useState([]);
@@ -69,10 +69,12 @@ export default function Producto() {
   useEffect(() => {
     window.scrollTo(0, 0);
     setCargando(true);
+    setProducto(null);
+    setError('');
     setImgIdx(0);
     obtenerProducto(id)
       .then((p) => {
-        if (!p) setError(t('producto.no_encontrado'));
+        if (!p || (p.activo === false && !esAdmin)) setError(t('producto.no_encontrado'));
         else setProducto(p);
         setCargando(false);
       })
@@ -84,12 +86,12 @@ export default function Producto() {
     // Productos relacionados (otros del catálogo)
     obtenerProductos()
       .then((todos) => {
-        const otros = todos.filter((p) => p.id !== id).slice(0, 3);
+        const otros = todos.filter((p) => p.id !== id && p.activo !== false).slice(0, 3);
         setRelacionados(otros);
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, esAdmin]);
 
   const handleAgregar = () => {
     agregar(producto);
@@ -112,6 +114,7 @@ export default function Producto() {
                 ? producto.fotos
                 : [producto.imagenMochila, producto.imagenContexto]).filter(Boolean);
               const total = imgs.length;
+              if (!total) return <div className="producto-galeria"><div className="galeria-marco" /></div>;
               const idx = ((imgIdx % total) + total) % total;
               return (
                 <div className="producto-galeria">

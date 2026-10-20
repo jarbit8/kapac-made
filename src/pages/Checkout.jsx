@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import ET from '../components/ET';
 import Editable from '../components/Editable';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { obtenerPerfil } from '../firebase/perfil';
 import '../styles/Checkout.css';
@@ -29,6 +30,7 @@ const IconoTienda = () => (
 export default function Checkout() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  const { items } = useCart();
   const { t, idioma } = useIdioma();
   const [modo, setModo] = useState(null); // 'envio' | 'recojo'
   const [form, setForm] = useState({
@@ -107,6 +109,8 @@ export default function Checkout() {
 
     navigate('/metodo-pago');
   };
+
+  if (!items.length) return <Navigate to="/carrito" replace />;
 
   return (
     <>

@@ -35,7 +35,7 @@ export default function Lifestyle() {
   const fotos = contenido ? contenido.homeFotos : [];
 
   const guardarFotos = async (nuevas) => {
-    const base = contenido || await obtenerContenido();
+    const base = contenido;
     const nuevo = { ...base, homeFotos: nuevas };
     setContenido(nuevo);
     try { await guardarContenido(nuevo, base); } catch (_) { /* error silencioso */ }

@@ -96,30 +96,28 @@ export function slotMedio(cfg, slot) {
 let contenidoSesion = null;
 export const contenidoGuardado = () => contenidoSesion;
 
+// Si Firestore no responde, falla: cada página se queda como estaba en vez de
+// mostrar fotos de fábrica o abrir la tienda cerrada.
 export async function obtenerContenido() {
-  try {
-    const snap = await getDoc(REF());
-    const data = snap.exists() ? snap.data() : {};
-    contenidoSesion = {
-      homeFotos: Array.isArray(data.homeFotos) && data.homeFotos.length ? data.homeFotos : HOME_FOTOS_DEFAULT,
-      galeriaProducto: Array.isArray(data.galeriaProducto) && data.galeriaProducto.length ? data.galeriaProducto : GALERIA_PRODUCTO_DEFAULT,
-      footerFondo: (data.footerFondo?.pc || data.footerFondo?.mobile || data.footerFondo?.url) ? data.footerFondo : FOOTER_FONDO_DEFAULT,
-      inTheZoneFoto: data.inTheZoneFoto || IN_THE_ZONE_DEFAULT,
-      almaFotos: Array.isArray(data.almaFotos) ? data.almaFotos : ALMA_FOTOS_DEFAULT,
-      heroVideo: data.heroVideo || HERO_VIDEO_DEFAULT,
-      acento: data.acento || ACENTO_DEFAULT,
-      logo: data.logo || LOGO_DEFAULT,
-      fondo: data.fondo || FONDO_DEFAULT,
-      texto: data.texto || TEXTO_DEFAULT,
-      b2bBeneficios: Array.isArray(data.b2bBeneficios) && data.b2bBeneficios.length ? data.b2bBeneficios : B2B_BENEFICIOS_DEFAULT,
-      almaBloques: Array.isArray(data.almaBloques) && data.almaBloques.length ? data.almaBloques : ALMA_BLOQUES_DEFAULT,
-      infoExtra: Array.isArray(data.infoExtra) ? data.infoExtra : INFO_EXTRA_DEFAULT,
-      cerrado: data.cerrado === true, // tienda cerrada al público (pantalla "Próximamente")
-    };
-    return contenidoSesion;
-  } catch (e) {
-    return { homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT, almaBloques: ALMA_BLOQUES_DEFAULT, infoExtra: INFO_EXTRA_DEFAULT, cerrado: false };
-  }
+  const snap = await getDoc(REF());
+  const data = snap.exists() ? snap.data() : {};
+  contenidoSesion = {
+    homeFotos: Array.isArray(data.homeFotos) && data.homeFotos.length ? data.homeFotos : HOME_FOTOS_DEFAULT,
+    galeriaProducto: Array.isArray(data.galeriaProducto) && data.galeriaProducto.length ? data.galeriaProducto : GALERIA_PRODUCTO_DEFAULT,
+    footerFondo: (data.footerFondo?.pc || data.footerFondo?.mobile || data.footerFondo?.url) ? data.footerFondo : FOOTER_FONDO_DEFAULT,
+    inTheZoneFoto: data.inTheZoneFoto || IN_THE_ZONE_DEFAULT,
+    almaFotos: Array.isArray(data.almaFotos) ? data.almaFotos : ALMA_FOTOS_DEFAULT,
+    heroVideo: data.heroVideo || HERO_VIDEO_DEFAULT,
+    acento: data.acento || ACENTO_DEFAULT,
+    logo: data.logo || LOGO_DEFAULT,
+    fondo: data.fondo || FONDO_DEFAULT,
+    texto: data.texto || TEXTO_DEFAULT,
+    b2bBeneficios: Array.isArray(data.b2bBeneficios) && data.b2bBeneficios.length ? data.b2bBeneficios : B2B_BENEFICIOS_DEFAULT,
+    almaBloques: Array.isArray(data.almaBloques) && data.almaBloques.length ? data.almaBloques : ALMA_BLOQUES_DEFAULT,
+    infoExtra: Array.isArray(data.infoExtra) ? data.infoExtra : INFO_EXTRA_DEFAULT,
+    cerrado: data.cerrado === true, // tienda cerrada al público (pantalla "Próximamente")
+  };
+  return contenidoSesion;
 }
 
 // Solo escribe los campos que cambiaron respecto de "anterior": una página abierta
