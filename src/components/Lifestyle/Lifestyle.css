@@ -179,3 +179,15 @@
 @media (max-width: 480px) {
   .lm-grid { grid-template-columns: 1fr; }
 }
+
+/* Cada foto se ve completa, sin recortes */
+.lm-grid { align-items: start; }
+.lm-img-wrap {
+  aspect-ratio: auto;
+  height: auto;
+  max-height: 85vh;
+  object-fit: contain;
+  background: transparent;
+}
+img.lm-img-wrap:not(.cargada) { aspect-ratio: 4 / 3; }
+.lm-img-wrap.editable-img-wrap .editable-img { height: auto; max-height: 85vh; object-fit: contain; }

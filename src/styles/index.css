@@ -399,3 +399,32 @@ code {
     font-size: 14.5px !important;
   }
 }
+
+/* ── Mientras carga una foto se ve el logo con un brillo suave ── */
+img.lm-img-wrap, img.alma-foto-img-wrap, .editable-img, .cat-img-wrap img, .galeria-img,
+.galeria-edit-item img, .relacionado-img img, .carrito-item img, img.b2b-hero-img {
+  background:
+    url('../assets/images/cargando-logo.png') center / min(46%, 230px) auto no-repeat,
+    linear-gradient(100deg, #eeece8 40%, #f8f7f4 50%, #eeece8 60%) 0 0 / 250% 100% !important;
+  animation: cargandoBrillo 1.5s linear infinite !important;
+}
+
+.hero, .zone {
+  background: #0a0a0a url('../assets/images/cargando-logo-claro.png') center / min(38%, 300px) auto no-repeat !important;
+}
+.hero:has(.cargada), .zone:has(.cargada) { background-image: none !important; }
+
+img.cargada {
+  background: none !important;
+  animation: none !important;
+}
+
+@keyframes cargandoBrillo {
+  from { background-position: center, 120% 0; }
+  to { background-position: center, -120% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  img.lm-img-wrap, img.alma-foto-img-wrap, .editable-img, .cat-img-wrap img, .galeria-img,
+  .galeria-edit-item img, .relacionado-img img, .carrito-item img, img.b2b-hero-img { animation: none !important; }
+}

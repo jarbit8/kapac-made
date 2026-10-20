@@ -253,3 +253,12 @@
 @media (max-width: 480px) {
   .alma-galeria-grid { grid-template-columns: 1fr; }
 }
+
+/* Cada foto se ve completa, sin recortes */
+.alma-galeria-grid { align-items: start; }
+.alma-foto,
+.alma-foto--hero { aspect-ratio: auto; background: transparent; }
+.alma-foto-img-wrap { height: auto; max-height: 85vh; object-fit: contain; }
+img.alma-foto-img-wrap:not(.cargada) { aspect-ratio: 4 / 3; }
+.alma-foto--hero img.alma-foto-img-wrap:not(.cargada) { aspect-ratio: 21 / 9; }
+.alma-foto-img-wrap.editable-img-wrap .editable-img { height: auto; max-height: 85vh; object-fit: contain; }
