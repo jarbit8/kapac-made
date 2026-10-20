@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.54eaad10.css",
-    "main.js": "/static/js/main.da5679e7.js",
+    "main.js": "/static/js/main.8556d5b9.js",
     "static/media/proximamente.mp4": "/static/media/proximamente.94d63b428aaae14e819a.mp4",
     "static/media/proximamente-movil.mp4": "/static/media/proximamente-movil.2e96ac2b7bbe90addaec.mp4",
     "static/media/coser1.png": "/static/media/coser1.20835861b4c0f9614448.png",
@@ -12,10 +12,10 @@
     "static/media/mochila 2.png": "/static/media/mochila 2.74cf5b6ce32636e12bb6.png",
     "static/media/qr.jpeg": "/static/media/qr.a7392dc6d98a4cf92a65.jpeg",
     "static/media/kapac_made_3.png": "/static/media/kapac_made_3.42f89327b7a17078a0af.png",
-    "static/media/kapac_made_1.png": "/static/media/kapac_made_1.a607dc18bacaa5815367.png",
     "static/media/gonzalo.jpeg": "/static/media/gonzalo.60279df319f61406a8ad.jpeg",
     "static/media/gonzalo2.jpeg": "/static/media/gonzalo2.371bf1974fd01bafb78d.jpeg",
     "static/media/proximamente.jpg": "/static/media/proximamente.46fa8be45212a8545982.jpg",
+    "static/media/kapac_made_1.png": "/static/media/kapac_made_1.f88ad278b3a4d1eaf4f7.png",
     "static/media/proximamente-fondo.mp4": "/static/media/proximamente-fondo.a8c0625d096371652aff.mp4",
     "static/media/tarjeta.jpg": "/static/media/tarjeta.1d5da35973b951da1e03.jpg",
     "static/media/yape.avif": "/static/media/yape.840564865fab99eb2367.avif",
@@ -26,6 +26,6 @@
   },
   "entrypoints": [
     "static/css/main.54eaad10.css",
-    "static/js/main.da5679e7.js"
+    "static/js/main.8556d5b9.js"
   ]
 }
