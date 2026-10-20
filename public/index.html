@@ -57,7 +57,8 @@
         if (location.pathname === '/' && h && h.tipo === 'imagen' && h.url && !document.documentElement.classList.contains('cerrado')) {
           var copias = window.__FOTOS__ || {}, ruta = decodeURIComponent((h.url.split('/o/')[1] || '').split('?')[0]);
           var l = document.createElement('link');
-          l.rel = 'preload'; l.as = 'image'; l.href = copias[ruta] || h.url; l.setAttribute('fetchpriority', 'high');
+          l.rel = 'preload'; l.as = 'image'; l.setAttribute('fetchpriority', 'high');
+          l.href = copias[ruta] || (ruta ? 'https://storage.googleapis.com/kapac-made.firebasestorage.app/' + encodeURI(ruta) : h.url);
           document.head.appendChild(l);
         }
       } catch (e) {}
