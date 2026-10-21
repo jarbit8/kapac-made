@@ -24,6 +24,9 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  /* Mientras carga, el logo va a la esquina para no quedar detrás del título */
+  --carga-logo-pos: right 28px bottom 28px;
+  --carga-logo: min(32%, 170px);
 }
 
 .b2b-hero-overlay {
