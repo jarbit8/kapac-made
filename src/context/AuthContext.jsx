@@ -5,6 +5,7 @@ import { esCorreoAdmin } from '../config/admins';
 
 const AuthContext = createContext();
 const DISPOSITIVO_ADMIN_KEY = 'kapac_dispositivo_admin';
+const SESION_ADMIN_KEY = 'kapac_sesion_admin';
 
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
@@ -19,6 +20,12 @@ export function AuthProvider({ children }) {
       if (esCorreoAdmin(user?.email)) {
         try { localStorage.setItem(DISPOSITIVO_ADMIN_KEY, '1'); } catch (_) {}
       }
+      // Sesión de admin abierta en este navegador: la próxima vez la tienda se muestra
+      // sin esperar a que Firebase la confirme (tarda ~1 s)
+      try {
+        if (esCorreoAdmin(user?.email)) localStorage.setItem(SESION_ADMIN_KEY, '1');
+        else localStorage.removeItem(SESION_ADMIN_KEY);
+      } catch (_) {}
     });
     return unsub;
   }, []);

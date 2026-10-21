@@ -96,13 +96,18 @@ function AppRoutes() {
 const esDispositivoAdmin = () => {
   try { return localStorage.getItem('kapac_dispositivo_admin') === '1'; } catch (_) { return false; }
 };
+const sesionAdminAbierta = () => {
+  try { return localStorage.getItem('kapac_sesion_admin') === '1'; } catch (_) { return false; }
+};
 
 function CierreGate({ children }) {
   const { cerrado } = useTema();
   const { usuario, cargando } = useAuth();
   const { pathname } = useLocation();
   if (cerrado && !esCorreoAdmin(usuario?.email) && pathname !== '/login') {
-    // En el navegador del admin se espera a la sesión en vez de mostrar "Próximamente"
+    // Si el admin dejó la sesión abierta en este navegador, la tienda sale al instante
+    // y Firebase la confirma por detrás; si no, se espera en vez de mostrar "Próximamente"
+    if (cargando && sesionAdminAbierta()) return children;
     if (cargando && esDispositivoAdmin()) return <Cargando />;
     return <SitioCerrado />;
   }
