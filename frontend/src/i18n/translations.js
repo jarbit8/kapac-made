@@ -101,8 +101,6 @@ const translations = {
     'metodo.yape_desc':     'Escanea el código QR desde tu app Yape',
     'metodo.yape_codigo':   'Yape con código de aprobación',
     'metodo.yape_codigo_desc': 'Ingresa tu celular y el código que te da Yape',
-    'metodo.bitcoin':       'Bitcoin',
-    'metodo.bitcoin_desc':  'Paga con BTC · seguro y descentralizado',
     'metodo.tarjeta':       'Tarjeta de crédito o débito',
     'metodo.tarjeta_desc':  'Visa, Mastercard y American Express',
     'metodo.efectivo':      'PagoEfectivo',
@@ -131,20 +129,6 @@ const translations = {
     'pago.yape.enviando':       'Enviando…',
     'pago.yape.aviso':          'Verificaremos tu pago y te confirmaremos el pedido en breve.',
     'pago.yape.aviso_cod':      'Verificaremos el código en nuestra app de Yape y confirmaremos tu pedido.',
-
-    // ── Pago BTC ──
-    'pago.btc.titulo':      'Pago con Bitcoin',
-    'pago.btc.sub':         'Envía el monto exacto en BTC a la dirección de abajo o escanea el QR.',
-    'pago.btc.monto_nota':  '(el equivalente en BTC al momento de pagar)',
-    'pago.btc.direccion':   'Dirección BTC:',
-    'pago.btc.copiar':      'Copiar',
-    'pago.btc.copiado':     '✓ Copiado',
-    'pago.btc.paso1':       'Abre tu wallet de Bitcoin (Trust Wallet, Muun, etc.)',
-    'pago.btc.paso2':       'Escanea el QR o pega la dirección',
-    'pago.btc.paso3':       'Ingresa el monto equivalente en BTC',
-    'pago.btc.paso4':       'Confirma la transacción y presiona el botón de abajo',
-    'pago.btc.boton':       '₿ Ya pagué con Bitcoin',
-    'pago.btc.aviso':       'Nuestro equipo verificará tu pago en blockchain y actualizará el estado del pedido.',
 
     // ── Pago efectivo ──
     'pago.ef.titulo':       'Paga con PagoEfectivo',
@@ -447,8 +431,6 @@ const translations = {
     'metodo.yape_desc':     'Scan the QR code with your Yape app',
     'metodo.yape_codigo':   'Yape with approval code',
     'metodo.yape_codigo_desc': 'Enter your phone and the code from Yape',
-    'metodo.bitcoin':       'Bitcoin',
-    'metodo.bitcoin_desc':  'Pay with BTC · secure and decentralized',
     'metodo.tarjeta':       'Credit or debit card',
     'metodo.tarjeta_desc':  'Visa, Mastercard and American Express',
     'metodo.efectivo':      'PagoEfectivo',
@@ -477,20 +459,6 @@ const translations = {
     'pago.yape.enviando':       'Sending…',
     'pago.yape.aviso':          'We\'ll verify your payment and confirm your order shortly.',
     'pago.yape.aviso_cod':      'We will verify the code in our Yape app and confirm your order.',
-
-    // ── Pay BTC ──
-    'pago.btc.titulo':      'Pay with Bitcoin',
-    'pago.btc.sub':         'Send the exact amount in BTC to the address below or scan the QR.',
-    'pago.btc.monto_nota':  '(BTC equivalent at payment time)',
-    'pago.btc.direccion':   'BTC address:',
-    'pago.btc.copiar':      'Copy',
-    'pago.btc.copiado':     '✓ Copied',
-    'pago.btc.paso1':       'Open your Bitcoin wallet (Trust Wallet, Muun, etc.)',
-    'pago.btc.paso2':       'Scan the QR or paste the address',
-    'pago.btc.paso3':       'Enter the equivalent amount in BTC',
-    'pago.btc.paso4':       'Confirm the transaction and press the button below',
-    'pago.btc.boton':       '₿ I paid with Bitcoin',
-    'pago.btc.aviso':       'Our team will verify your payment on the blockchain and update the order status.',
 
     // ── Pay cash ──
     'pago.ef.titulo':       'Pay with PagoEfectivo',

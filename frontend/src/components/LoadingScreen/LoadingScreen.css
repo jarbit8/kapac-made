@@ -7,6 +7,9 @@
   inset: 0;
   z-index: 99999;
   --carga-logo: min(46%, 300px);
+  /* blanca, como la carga de las páginas */
+  --carga-fondo: var(--fondo, #ffffff);
+  --carga-brillo: #f3f2ee;
   opacity: 1;
   transition: opacity 0.45s ease;
 }

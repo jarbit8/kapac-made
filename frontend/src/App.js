@@ -9,7 +9,6 @@ import SitioCerrado from './components/SitioCerrado/SitioCerrado';
 import Cargando from './components/Cargando/Cargando';
 import Header from './components/Header/Header';
 import Hero from './components/Hero/Hero';
-import Products from './components/Products/Products';
 import Lifestyle from './components/Lifestyle/Lifestyle';
 import Footer from './components/Footer/Footer';
 import Catalogo from './pages/Catalogo';

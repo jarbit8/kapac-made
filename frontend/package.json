@@ -5,7 +5,6 @@
   "homepage": "https://www.kapac-made.com",
   "dependencies": {
     "firebase": "^12.13.0",
-    "framer-motion": "^12.38.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.15.1",
