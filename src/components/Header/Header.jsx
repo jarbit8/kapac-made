@@ -116,7 +116,8 @@ export default function Header({ transparente = false }) {
       <header className={`header${esSolido ? ' header-solido' : ''}`}>
         <div className="header-container">
           <Link to="/" className={`logo${esAdmin ? ' editable-img-wrap' : ''}`}>
-            <img src={logoSrc} alt="Kapac Made" className={`logo-simbolo${esAdmin ? ' editable-img' : ''}`}
+            {/* key: al pasar a admin se crea otra imagen, así vuelve a marcarse como cargada */}
+            <img key={esAdmin ? 'admin' : 'visita'} src={logoSrc} alt="Kapac Made" className={`logo-simbolo${esAdmin ? ' editable-img' : ''}`}
               style={logoListo ? undefined : { opacity: 0 }} />
             {esAdmin && (
               <>
