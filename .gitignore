@@ -14,7 +14,6 @@ skills-lock.json
 .firebase/
 *.log
 
-# Scripts de mantenimiento: usan credenciales de la CLI de Firebase
-functions/scripts/
+# Firebase
 functions/.env*
 functions/.runtimeconfig.json
