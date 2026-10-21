@@ -247,7 +247,7 @@ img.lm-img-wrap:not(.cargada), img.alma-foto-img-wrap:not(.cargada), .editable-i
 .relacionado-img img:not(.cargada), .carrito-item img:not(.cargada), img.b2b-hero-img:not(.cargada) {
   background:
     url('../assets/images/cargando-logo.png') center / var(--carga-logo, min(46%, 230px)) auto no-repeat,
-    linear-gradient(100deg, #eeece8 40%, #f8f7f4 50%, #eeece8 60%) 0 0 / 250% 100% !important;
+    linear-gradient(100deg, var(--carga-fondo, #eeece8) 40%, var(--carga-brillo, #f8f7f4) 50%, var(--carga-fondo, #eeece8) 60%) 0 0 / 250% 100% !important;
   animation: var(--carga-anim, cargandoBrillo 1.5s linear infinite) !important;
 }
 
@@ -257,7 +257,7 @@ img.lm-img-wrap:not(.cargada), img.alma-foto-img-wrap:not(.cargada), .editable-i
 .hero:not(:has(.cargada)), .zone:not(:has(.cargada)) {
   background:
     url('../assets/images/cargando-logo.png') center / var(--carga-logo) auto no-repeat,
-    linear-gradient(100deg, #eeece8 40%, #f8f7f4 50%, #eeece8 60%) 0 0 / 250% 100% !important;
+    linear-gradient(100deg, var(--carga-fondo, #eeece8) 40%, var(--carga-brillo, #f8f7f4) 50%, var(--carga-fondo, #eeece8) 60%) 0 0 / 250% 100% !important;
   animation: var(--carga-anim, cargandoBrillo 1.5s linear infinite) !important;
 }
 /* Lo que va encima de la foto (degradados, flecha, texto) aparece junto con ella */

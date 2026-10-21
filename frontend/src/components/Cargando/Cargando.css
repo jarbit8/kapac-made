@@ -1,7 +1,7 @@
-/* Bloque de carga: el fondo (brillo + logo) viene de .carga-kapac en index.css */
+/* Carga de página: el logo con el brillo (de .carga-kapac en index.css), sobre el fondo blanco */
 .cargando-box {
-  width: calc(100% - 32px);
+  --carga-fondo: var(--fondo, #ffffff);
+  --carga-brillo: #f3f2ee;
+  width: 100%;
   min-height: 55vh;
-  margin: 24px 16px;
-  border-radius: 6px;
 }
