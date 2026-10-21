@@ -1,10 +1,12 @@
 # Kapac Made
 
+Toda esta carpeta es el repo de GitHub `jarbit8/kapac-made` (público). `marca\`, `material\` y `archivo\` quedan solo en la PC.
+
 Tienda online de mochilas artesanales — www.kapac-made.com
 
 | Carpeta / archivo | Qué hay |
 |---|---|
-| `frontend\` | La página (React). Es el repo de GitHub `jarbit8/kapac-made`; se publica en GitHub Pages. |
+| `frontend\` | La página (React); se publica en GitHub Pages. |
 | `functions\` | Funciones del servidor en Firebase (pagos Culqi, correos, stock, corte de facturación). |
 | `firestore.rules`, `storage.rules` | Reglas de seguridad de la base de datos y de las fotos. |
 | `firebase.json`, `.firebaserc` | Configuración de Firebase (proyecto `kapac-made`). |
