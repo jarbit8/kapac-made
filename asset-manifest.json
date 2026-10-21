@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.0e7bb9f3.css",
-    "main.js": "/static/js/main.96d5400e.js",
+    "main.js": "/static/js/main.729a4b51.js",
     "static/media/proximamente.mp4": "/static/media/proximamente.94d63b428aaae14e819a.mp4",
     "static/media/proximamente-movil.mp4": "/static/media/proximamente-movil.2e96ac2b7bbe90addaec.mp4",
     "static/media/coser1.png": "/static/media/coser1.20835861b4c0f9614448.png",
@@ -24,6 +24,6 @@
   },
   "entrypoints": [
     "static/css/main.0e7bb9f3.css",
-    "static/js/main.96d5400e.js"
+    "static/js/main.729a4b51.js"
   ]
 }
