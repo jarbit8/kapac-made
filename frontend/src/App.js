@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { esCorreoAdmin } from './config/admins';
 import { CartProvider } from './context/CartContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { TextosProvider } from './context/TextosContext';
@@ -12,7 +11,6 @@ import Header from './components/Header/Header';
 import Hero from './components/Hero/Hero';
 import Products from './components/Products/Products';
 import Lifestyle from './components/Lifestyle/Lifestyle';
-import Values from './components/Values/Values';
 import Footer from './components/Footer/Footer';
 import Catalogo from './pages/Catalogo';
 import Alma from './pages/Alma';
@@ -96,18 +94,13 @@ function AppRoutes() {
 const esDispositivoAdmin = () => {
   try { return localStorage.getItem('kapac_dispositivo_admin') === '1'; } catch (_) { return false; }
 };
-const sesionAdminAbierta = () => {
-  try { return localStorage.getItem('kapac_sesion_admin') === '1'; } catch (_) { return false; }
-};
 
 function CierreGate({ children }) {
   const { cerrado } = useTema();
-  const { usuario, cargando } = useAuth();
+  const { cargando, esAdmin } = useAuth();
   const { pathname } = useLocation();
-  if (cerrado && !esCorreoAdmin(usuario?.email) && pathname !== '/login') {
-    // Si el admin dejó la sesión abierta en este navegador, la tienda sale al instante
-    // y Firebase la confirma por detrás; si no, se espera en vez de mostrar "Próximamente"
-    if (cargando && sesionAdminAbierta()) return children;
+  if (cerrado && !esAdmin && pathname !== '/login') {
+    // En el navegador del admin (sin la sesión recordada) se espera en vez de mostrar "Próximamente"
     if (cargando && esDispositivoAdmin()) return <Cargando />;
     return <SitioCerrado />;
   }

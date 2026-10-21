@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { obtenerTextos, guardarTexto } from '../firebase/textos';
 import { traducirEsEn } from '../i18n/traducir';
 import { useAuth } from './AuthContext';
-import { esCorreoAdmin } from '../config/admins';
 
 const TextosContext = createContext({ textos: {}, esAdmin: false, guardar: async () => {} });
 
@@ -16,8 +15,7 @@ export function TextosProvider({ children }) {
   const [textos, setTextos] = useState(textosGuardados || {});
   const [listos, setListos] = useState(textosGuardados !== null);
   const [frescos, setFrescos] = useState(false); // ya respondió Firestore
-  const { usuario } = useAuth();
-  const esAdmin = esCorreoAdmin(usuario?.email);
+  const { esAdmin, cargando } = useAuth();
 
   useEffect(() => {
     obtenerTextos()
@@ -48,7 +46,7 @@ export function TextosProvider({ children }) {
   // textos recién leídos: con los guardados podría pisar una traducción nueva.
   const rellenado = useRef(false);
   useEffect(() => {
-    if (!esAdmin || !frescos || rellenado.current) return;
+    if (!esAdmin || cargando || !frescos || rellenado.current) return;
     const claves = Object.keys(textos).filter((k) => k.endsWith('__es'));
     if (!claves.length) return;
     rellenado.current = true;
@@ -60,7 +58,7 @@ export function TextosProvider({ children }) {
         if (tr) await guardar(`${id}__en`, tr);
       }
     })();
-  }, [esAdmin, textos, frescos]);
+  }, [esAdmin, cargando, textos, frescos]);
 
   return (
     <TextosContext.Provider value={{ textos, listos, esAdmin, guardar }}>

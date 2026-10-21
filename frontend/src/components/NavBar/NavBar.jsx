@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useIdioma } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { esCorreoAdmin } from '../../config/admins';
 import Editable from '../Editable';
 import './NavBar.css';
 
@@ -18,9 +17,8 @@ const IconIg = () => (
 export default function NavBar() {
   const { totalItems } = useCart();
   const { idioma, setIdioma, t } = useIdioma();
-  const { usuario } = useAuth();
+  const { esAdmin } = useAuth();
   const navigate = useNavigate();
-  const esAdmin = esCorreoAdmin(usuario?.email);
   const [menu, setMenu] = useState(false);
 
   const links = [

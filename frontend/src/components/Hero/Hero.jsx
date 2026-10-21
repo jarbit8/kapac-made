@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/Hero.css';
-import videoFallback from '../../assets/videos/ojo.mp4';
 import { obtenerContenido, contenidoGuardado, normalizarMedio } from '../../firebase/contenido';
 import { fotoRapida } from '../../utils/fotos';
 
@@ -24,30 +23,29 @@ export default function Hero() {
     }).catch(() => {});
   }, []);
 
-  const videoLocal = videoFallback;
   const medio = videoCfg ? normalizarMedio(esMobile ? videoCfg.mobile : videoCfg.pc) : null;
-  const usarSubido = medio && medio.url && !fallo;
 
+  // Sin portada (o si no carga) queda el fondo de carga con el logo
   return (
     <section className="hero">
-      {videoCfg !== null && (
-        usarSubido && medio.tipo === 'imagen' ? (
+      {medio && medio.url && !fallo && (
+        medio.tipo === 'imagen' ? (
           <img src={fotoRapida(medio.url)} alt="Kapac Made" className="hero-bg" fetchpriority="high"
             onError={(e) => {
-              // Si falla la copia publicada, se intenta con Storage antes de caer al video
+              // Si falla la copia publicada, se intenta con Storage
               if (e.currentTarget.src !== medio.url) e.currentTarget.src = medio.url;
               else setFallo(true);
             }} />
         ) : (
           <video
-            key={usarSubido ? medio.url : videoLocal}
-            src={usarSubido ? fotoRapida(medio.url) : videoLocal}
+            key={medio.url}
+            src={fotoRapida(medio.url)}
             autoPlay
             loop
             muted
             playsInline
             className="hero-bg"
-            onError={() => { if (usarSubido) setFallo(true); }}
+            onError={() => setFallo(true)}
           />
         )
       )}

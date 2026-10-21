@@ -400,20 +400,30 @@ code {
   }
 }
 
-/* ── Mientras carga una foto se ve el logo con un brillo suave ── */
+/* ── Pantallas de carga: fondo gris claro con un brillo que pasa y el logo al centro.
+   Las fotos sin cargar, las páginas en espera y el splash comparten este estilo. ── */
+.carga-kapac,
 img.lm-img-wrap:not(.cargada), img.alma-foto-img-wrap:not(.cargada), .editable-img:not(.cargada),
 .cat-img-wrap img:not(.cargada), .galeria-img:not(.cargada), .galeria-edit-item img:not(.cargada),
 .relacionado-img img:not(.cargada), .carrito-item img:not(.cargada), img.b2b-hero-img:not(.cargada) {
   background:
-    url('../assets/images/cargando-logo.png') center / min(46%, 230px) auto no-repeat,
+    url('../assets/images/cargando-logo.png') center / var(--carga-logo, min(46%, 230px)) auto no-repeat,
     linear-gradient(100deg, #eeece8 40%, #f8f7f4 50%, #eeece8 60%) 0 0 / 250% 100% !important;
-  animation: cargandoBrillo 1.5s linear infinite !important;
+  animation: var(--carga-anim, cargandoBrillo 1.5s linear infinite) !important;
 }
 
-.hero, .zone {
-  background: #0a0a0a url('../assets/images/cargando-logo-claro.png') center / min(38%, 300px) auto no-repeat !important;
+/* Portada y zone, mientras no llega su foto. Aparte porque usa :has: si un navegador
+   no lo entiende, solo se pierde esta regla y no la de las fotos */
+.hero, .zone { --carga-logo: min(46%, 300px); background-color: #0a0a0a !important; }
+.hero:not(:has(.cargada)), .zone:not(:has(.cargada)) {
+  background:
+    url('../assets/images/cargando-logo.png') center / var(--carga-logo) auto no-repeat,
+    linear-gradient(100deg, #eeece8 40%, #f8f7f4 50%, #eeece8 60%) 0 0 / 250% 100% !important;
+  animation: var(--carga-anim, cargandoBrillo 1.5s linear infinite) !important;
 }
-.hero:has(.cargada), .zone:has(.cargada) { background-image: none !important; }
+/* Lo que va encima de la foto (degradados, flecha, texto) aparece junto con ella */
+.hero:not(:has(.cargada)) :is(.hero-overlay, .hero-flecha),
+.zone:not(:has(.cargada)) :is(.zone-vineta, .zone-txt) { visibility: hidden; }
 
 @keyframes cargandoBrillo {
   from { background-position: center, 120% 0; }
@@ -421,7 +431,5 @@ img.lm-img-wrap:not(.cargada), img.alma-foto-img-wrap:not(.cargada), .editable-i
 }
 
 @media (prefers-reduced-motion: reduce) {
-  img.lm-img-wrap:not(.cargada), img.alma-foto-img-wrap:not(.cargada), .editable-img:not(.cargada),
-  .cat-img-wrap img:not(.cargada), .galeria-img:not(.cargada), .galeria-edit-item img:not(.cargada),
-  .relacionado-img img:not(.cargada), .carrito-item img:not(.cargada), img.b2b-hero-img:not(.cargada) { animation: none !important; }
+  :root { --carga-anim: none; }
 }

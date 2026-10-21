@@ -10,6 +10,13 @@ const SESION_ADMIN_KEY = 'kapac_sesion_admin';
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
+  // Mientras Firebase confirma la sesión se asume la de la visita anterior: así la página
+  // no arranca como visitante para pasar a admin un instante después (parpadeo).
+  // Guardar cambios igual exige la sesión real (lo validan las reglas de Firebase).
+  const [sesionRecordada] = useState(() => {
+    try { return localStorage.getItem(SESION_ADMIN_KEY) === '1'; } catch (_) { return false; }
+  });
+  const esAdmin = cargando ? sesionRecordada : esCorreoAdmin(usuario?.email);
 
   useEffect(() => {
     const unsub = observarUsuario((user) => {
@@ -31,7 +38,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ usuario, cargando }}>
+    <AuthContext.Provider value={{ usuario, cargando, esAdmin }}>
       {children}
     </AuthContext.Provider>
   );
