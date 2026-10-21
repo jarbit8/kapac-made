@@ -233,3 +233,19 @@
   .checkout-grid label.full { grid-column: 1; }
   .step-linea { width: 30px; }
 }
+
+/* Íconos dentro de textos y botones de la compra */
+.step-num .icono { display: block; }
+.checkout-error { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.checkout-btn-continuar { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.recojo-pin { font-size: 0; color: var(--ink); flex-shrink: 0; }
+
+/* Línea de confianza (carrito y método de pago) */
+.compra-seguro {
+  margin: 4px 0 18px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #666;
+  text-align: center;
+}
+.compra-seguro .icono { vertical-align: -3px; margin-right: 4px; }

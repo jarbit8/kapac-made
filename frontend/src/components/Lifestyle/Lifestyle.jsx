@@ -17,9 +17,9 @@ const DEFAULTS_FOTO = {
 
 // Texto de las fotos en formato viejo ({url,titulo,desc}, un solo idioma):
 // se traduce solo al inglés mientras el admin no lo pise con el lápiz.
-function EditableTraducido({ id, as = 'span', className = '', multiline = false, texto, idioma }) {
+function EditableTraducido({ id, as = 'span', className = '', multiline = false, estilo = false, texto, idioma }) {
   const traducido = useTraducido(texto, idioma);
-  return <Editable id={id} as={as} className={className} multiline={multiline}>{traducido}</Editable>;
+  return <Editable id={id} as={as} className={className} multiline={multiline} estilo={estilo}>{traducido}</Editable>;
 }
 
 export default function Lifestyle() {
@@ -73,12 +73,12 @@ export default function Lifestyle() {
               <div className="lm-caption">
                 {esViejo && !defReal ? (
                   <>
-                    <EditableTraducido id={`home_${key}_titulo`} as="span" className="lm-caption-title" texto={tituloDefault} idioma={idioma} />
+                    <EditableTraducido id={`home_${key}_titulo`} as="span" className="lm-caption-title" estilo texto={tituloDefault} idioma={idioma} />
                     <EditableTraducido id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline texto={descDefault} idioma={idioma} />
                   </>
                 ) : (
                   <>
-                    <Editable id={`home_${key}_titulo`} as="span" className="lm-caption-title">{tituloDefault}</Editable>
+                    <Editable id={`home_${key}_titulo`} as="span" className="lm-caption-title" estilo>{tituloDefault}</Editable>
                     <Editable id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline>{descDefault}</Editable>
                   </>
                 )}
@@ -105,12 +105,12 @@ export default function Lifestyle() {
           rel="noopener noreferrer"
           className="lm-footer-txt"
           onClick={(e) => {
-            // Los controles del Editable (lápiz, color, fuente) viven dentro del enlace:
+            // Los controles del Editable (botón Editar y editor) viven dentro del enlace:
             // si el clic viene de ellos no hay que abrir /zone.
             if (e.target.closest('select, input, button, .editable-edit')) e.preventDefault();
           }}
         >
-          <Editable id="home_in_the_zone" as="span">in the zone</Editable>
+          <Editable id="home_in_the_zone" as="span" estilo>in the zone</Editable>
         </a>
       </div>
 

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import ET from '../components/ET';
-import Editable from '../components/Editable';
+import Icono from '../components/Icono';
+import PasosCompra from '../components/PasosCompra';
 import { db } from '../firebase/config';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useIdioma } from '../context/LanguageContext';
@@ -20,6 +20,7 @@ export default function Confirmacion() {
   const [quiereAviso, setQuiereAviso] = useState(false);
   const [emailConfirmado, setEmailConfirmado] = useState(false);
   const [emailInput, setEmailInput] = useState('');
+  const [errorEmail, setErrorEmail] = useState('');
 
   useEffect(() => {
     const cargar = async () => {
@@ -57,9 +58,10 @@ export default function Confirmacion() {
   // Botón Confirmar correo — si el pedido no tenía correo (invitado que no lo dio
   // en el checkout), se guarda el que recién escribió aquí.
   const confirmarEmail = async () => {
+    setErrorEmail('');
     if (!pedido?.email) {
       if (!/\S+@\S+\.\S+/.test(emailInput)) {
-        alert(es ? 'Ingresa un correo válido.' : 'Enter a valid email address.');
+        setErrorEmail(es ? 'Ingresa un correo válido.' : 'Enter a valid email address.');
         return;
       }
       try {
@@ -78,30 +80,23 @@ export default function Confirmacion() {
     await guardarCanal(true);
   };
 
-  const formatoFecha = () => {
-    return new Date().toLocaleDateString(es ? 'es-PE' : 'en-US', {
-      day: '2-digit', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
-  };
+  // Fecha del pedido (la del servidor; si aún no llegó, la de ahora)
+  const fecha = (pedido?.fecha?.toDate ? pedido.fecha.toDate() : new Date()).toLocaleDateString(es ? 'es-PE' : 'en-US', {
+    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
 
-  const estadoLabel = {
-    procesando_pago:  `🔄 ${t('estado.procesando_pago')}`,
-    verificando_pago: `🔍 ${t('estado.verificando_pago')}`,
-    pendiente_envio:  `📦 ${t('estado.pendiente_envio')}`,
-    enviado:          `🚚 ${t('estado.enviado')}`,
-    entregado:        `🎉 ${t('estado.entregado')}`,
-    cancelado:        `❌ ${t('estado.cancelado')}`,
-    pendiente:    `🔄 ${t('estado.procesando_pago')}`,
-    verificando:  `🔄 ${t('estado.procesando_pago')}`,
-    pagado:       `📦 ${t('estado.pendiente_envio')}`,
+  const ESTADOS = {
+    procesando_pago: 'estado.procesando_pago', pendiente: 'estado.procesando_pago', verificando: 'estado.procesando_pago',
+    verificando_pago: 'estado.verificando_pago',
+    pendiente_envio: 'estado.pendiente_envio', pagado: 'estado.pendiente_envio',
+    enviado: 'estado.enviado', entregado: 'estado.entregado', cancelado: 'estado.cancelado',
   };
-
-  const metodoPagoLabel = {
-    yape:    '📱 Yape',
-    tarjeta: `💳 ${es ? 'Tarjeta' : 'Card'}`,
-    efectivo: es ? '💵 Efectivo' : '💵 Cash',
+  const METODOS = {
+    yape: 'Yape', 'yape-codigo': 'Yape',
+    tarjeta: es ? 'Tarjeta' : 'Card',
+    efectivo: 'PagoEfectivo',
   };
+  const pagado = ['pendiente_envio', 'pagado', 'enviado', 'entregado'].includes(pedido?.estado);
 
   if (cargando) {
     return (
@@ -115,72 +110,85 @@ export default function Confirmacion() {
     );
   }
 
+  if (!pedido) {
+    return (
+      <>
+        <Header />
+        <main className="confirmacion-page">
+          <div className="confirmacion-header">
+            <div className="confirmacion-icono"><Icono nombre="alerta" tam={40} /></div>
+            <h1>{t('conf.no_encontrado')}</h1>
+          </div>
+          <div className="confirmacion-acciones">
+            <button onClick={() => navigate('/shop')} className="conf-btn-inicio">{t('conf.volver_tienda')}</button>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Header />
       <main className="confirmacion-page">
+        <PasosCompra actual={3} />
 
-        {/* Encabezado */}
         <div className="confirmacion-header">
-          <div className="confirmacion-icono">🎉</div>
-          <h1><Editable id="conf_titulo" as="span">{es ? '¡Pedido confirmado!' : 'Order confirmed!'}</Editable></h1>
-          <p className="confirmacion-sub">
-            <Editable id="conf_gracias" as="span">{es ? 'Gracias por tu compra en' : 'Thanks for your purchase at'}</Editable> <strong>Kapac Made</strong>.<br />
-            <Editable id="conf_hecho_arequipa" as="span">{es ? 'Hecho en Arequipa, para explorar sin límites.' : 'Made in Arequipa, to explore without limits.'}</Editable>
-          </p>
+          <div className={`confirmacion-icono ${pagado ? 'ok' : 'espera'}`}>
+            <Icono nombre={pagado ? 'checkCirculo' : 'reloj'} tam={44} />
+          </div>
+          <h1>{pagado ? t('conf.confirmado') : t('conf.recibido')}</h1>
+          <p className="confirmacion-sub">{pagado ? t('conf.sub_pagado') : t('conf.sub_verificando')}</p>
         </div>
 
-        {/* Recibo */}
         <div className="confirmacion-recibo">
           <div className="recibo-header">
-            <span className="recibo-titulo"><Editable id="conf_recibo_titulo" as="span">{es ? 'RECIBO DE PEDIDO' : 'ORDER RECEIPT'}</Editable></span>
-            <span className="recibo-fecha">{formatoFecha()}</span>
+            <span className="recibo-titulo">{t('conf.recibo')}</span>
+            <span className="recibo-fecha">{fecha}</span>
           </div>
 
           <div className="recibo-id">
-            <Editable id="conf_num_pedido" as="span">{es ? 'Nº de pedido:' : 'Order #:'}</Editable> <strong>#{pedidoId.slice(0, 8).toUpperCase()}</strong>
+            {t('conf.num')} <strong>#{pedidoId.slice(0, 8).toUpperCase()}</strong>
           </div>
 
-          {/* Productos */}
-          {pedido?.items?.length > 0 && (
+          {pedido.items?.length > 0 && (
             <div className="recibo-items">
-              <div className="recibo-seccion-titulo"><ET k="pedidos.productos" /></div>
+              <div className="recibo-seccion-titulo">{t('pedidos.productos')}</div>
               {pedido.items.map((item, i) => (
                 <div className="recibo-item" key={i}>
                   <span className="recibo-item-nombre">{item.nombre}</span>
                   <span className="recibo-item-qty">x{item.cantidad}</span>
-                  <span className="recibo-item-precio">S/{item.precio * item.cantidad}</span>
+                  <span className="recibo-item-precio">S/{item.precio * item.cantidad}.00</span>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Total */}
           <div className="recibo-total">
-            <span><Editable id="conf_total_pagado" as="span">{es ? 'Total pagado' : 'Total paid'}</Editable></span>
-            <strong>S/{pedido?.total || '—'}.00</strong>
+            <span>{t('conf.total')}</span>
+            <strong>S/{pedido.total ?? '—'}.00</strong>
           </div>
 
-          {/* Método y estado */}
           <div className="recibo-detalles">
             <div className="recibo-detalle">
-              <span className="recibo-detalle-label"><ET k="metodo.titulo" /></span>
-              <span>{metodoPagoLabel[pedido?.metodoPago] || pedido?.metodoPago || '—'}</span>
+              <span className="recibo-detalle-label">{t('admin.metodo_pago')}</span>
+              <span>{METODOS[pedido.metodoPago] || pedido.metodoPago || '—'}</span>
             </div>
             <div className="recibo-detalle">
-              <span className="recibo-detalle-label"><ET k="pedidos.estado" /></span>
-              <span>{estadoLabel[pedido?.estado] || pedido?.estado || '—'}</span>
+              <span className="recibo-detalle-label">{t('pedidos.estado')}</span>
+              <span className={`recibo-estado ${pedido.estado || ''}`}>{ESTADOS[pedido.estado] ? t(ESTADOS[pedido.estado]) : (pedido.estado || '—')}</span>
             </div>
-            {pedido?.envio?.tipo === 'envio' && (
+            {pedido.envio?.tipo === 'envio' && (
               <div className="recibo-detalle">
-                <span className="recibo-detalle-label"><Editable id="conf_dir_envio" as="span">{es ? 'Dirección de envío' : 'Shipping address'}</Editable></span>
+                <span className="recibo-detalle-label">{t('conf.dir_envio')}</span>
                 <span>{pedido.envio.direccion}, {pedido.envio.distrito}</span>
               </div>
             )}
-            {pedido?.envio?.tipo === 'recojo' && (
+            {pedido.envio?.tipo === 'recojo' && (
               <div className="recibo-detalle">
-                <span className="recibo-detalle-label"><Editable id="conf_entrega" as="span">{es ? 'Entrega' : 'Delivery'}</Editable></span>
-                <span><Editable id="conf_recojo_tienda" as="span">{es ? 'Recojo en tienda — Arequipa' : 'Store pickup — Arequipa'}</Editable></span>
+                <span className="recibo-detalle-label">{t('conf.entrega')}</span>
+                <span>{t('checkout.recojo')}</span>
               </div>
             )}
           </div>
@@ -188,63 +196,54 @@ export default function Confirmacion() {
 
         {/* Aviso por correo (opcional) */}
         <div className="confirmacion-canal">
-          <h2><Editable id="conf_canal_titulo" as="span">{es ? '¿Quieres que te avisemos por correo?' : 'Want us to notify you by email?'}</Editable></h2>
-          <p><Editable id="conf_canal_sub" as="span" multiline>{es ? 'Te avisamos cada vez que cambie el estado de tu pedido.' : 'We\'ll notify you every time your order status changes.'}</Editable></p>
+          <h2>{t('conf.aviso_titulo')}</h2>
+          <p>{t('conf.aviso_sub')}</p>
 
           <div className="canal-opciones">
             <button
               className={`canal-opcion ${quiereAviso ? 'seleccionado' : ''}`}
               onClick={toggleAviso}
+              aria-pressed={quiereAviso}
             >
-              <span className="canal-icono">📧</span>
+              <span className="canal-icono"><Icono nombre="correo" tam={22} /></span>
               <div>
-                <strong><ET k="conf.canal_email" /></strong>
-                <span>{pedido?.email || (es ? 'Recibe avisos por correo' : 'Get updates by email')}</span>
+                <strong>{t('conf.canal_email')}</strong>
+                <span>{pedido.email || t('conf.aviso_sin_correo')}</span>
               </div>
               <span className={`canal-check-box ${quiereAviso ? 'on' : ''}`}>
-                {quiereAviso ? '✓' : ''}
+                {quiereAviso && <Icono nombre="check" tam={14} />}
               </span>
             </button>
 
-            {/* Sub-bloque: si no hay correo guardado, pedirlo recién aquí */}
-            {quiereAviso && !emailConfirmado && !pedido?.email && (
+            {quiereAviso && !emailConfirmado && !pedido.email && (
               <div className="canal-email-input">
                 <input
                   type="email"
+                  autoComplete="email"
                   placeholder={es ? 'tucorreo@email.com' : 'youremail@email.com'}
                   value={emailInput}
                   onChange={e => setEmailInput(e.target.value)}
                 />
-                <button className="canal-btn-confirmar" onClick={confirmarEmail}>
-                  <Editable id="conf_guardar_correo" as="span" sinColor>{es ? 'Guardar →' : 'Save →'}</Editable>
-                </button>
+                <button className="canal-btn-confirmar" onClick={confirmarEmail}>{t('conf.aviso_guardar')}</button>
               </div>
             )}
+            {errorEmail && <p className="checkout-error"><Icono nombre="alerta" tam={16} /> {errorEmail}</p>}
 
-            {/* Sub-bloque: confirmar correo ya existente (usuario con cuenta) */}
-            {quiereAviso && !emailConfirmado && pedido?.email && (
-              <button className="canal-btn-confirmar" onClick={confirmarEmail}>
-                <Editable id="conf_confirmar_correo" as="span" sinColor>{es ? 'Confirmar correo →' : 'Confirm email →'}</Editable>
-              </button>
+            {quiereAviso && !emailConfirmado && pedido.email && (
+              <button className="canal-btn-confirmar" onClick={confirmarEmail}>{t('conf.aviso_confirmar')}</button>
             )}
             {quiereAviso && emailConfirmado && (
               <div className="canal-guardado">
-                <span>✓</span> <Editable id="conf_te_avisaremos" as="span">{es ? 'Te avisaremos a' : 'We\'ll notify you at'}</Editable> <strong>{pedido?.email}</strong>
+                <Icono nombre="check" tam={16} /> {t('conf.aviso_ok')} <strong>{pedido.email}</strong>
               </div>
             )}
           </div>
         </div>
 
-        {/* Botones */}
         <div className="confirmacion-acciones">
-          <button onClick={() => navigate('/pedidos')} className="conf-btn-pedidos">
-            <ET k="conf.ver_pedidos" sinColor />
-          </button>
-          <button onClick={() => navigate('/')} className="conf-btn-inicio">
-            <ET k="conf.volver_tienda" sinColor />
-          </button>
+          <button onClick={() => navigate('/pedidos')} className="conf-btn-pedidos">{t('conf.ver_pedidos')}</button>
+          <button onClick={() => navigate('/shop')} className="conf-btn-inicio">{t('conf.volver_tienda')}</button>
         </div>
-
       </main>
       <Footer />
     </>

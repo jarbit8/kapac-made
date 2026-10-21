@@ -158,5 +158,17 @@
       "img cantidad subtotal";
     gap: 12px;
   }
-  .carrito-item img { width: 60px; height: 60px; }
+  .carrito-item img { grid-area: img; width: 60px; height: 60px; align-self: start; }
+  .carrito-item-info { grid-area: info; }
+  .carrito-quitar { grid-area: quitar; justify-self: end; }
+  .carrito-cantidad { grid-area: cantidad; justify-self: start; }
+  .carrito-subtotal { grid-area: subtotal; justify-self: end; }
 }
+
+.carrito-vacio-icono { color: #bbb; margin-bottom: 10px; }
+.carrito-vacio p { font-size: 18px; color: var(--ink); margin: 0 0 6px; }
+.carrito-vacio-sub { display: block; font-size: 14px; color: #777; }
+.carrito-quitar { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; }
+.carrito-quitar:hover { background: #f4f4f4; }
+.carrito-finalizar { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.carrito-resumen .compra-seguro { margin: 0; text-align: right; }

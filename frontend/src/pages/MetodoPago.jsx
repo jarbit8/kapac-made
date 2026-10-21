@@ -2,7 +2,8 @@ import React, { useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import ET from '../components/ET';
+import Icono from '../components/Icono';
+import PasosCompra from '../components/PasosCompra';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
@@ -98,93 +99,51 @@ export default function MetodoPago() {
 
   if (!items.length && !pedidoCreado.current) return <Navigate to="/carrito" replace />;
 
+  const opciones = [
+    { id: 'yape', img: imgYape, alt: 'Yape', titulo: 'metodo.yape', desc: 'metodo.yape_desc' },
+    { id: 'yape-codigo', img: imgYape, alt: 'Yape', titulo: 'metodo.yape_codigo', desc: 'metodo.yape_codigo_desc' },
+    { id: 'tarjeta', img: imgTarjeta, alt: 'Visa, Mastercard, American Express', titulo: 'metodo.tarjeta', desc: 'metodo.tarjeta_desc' },
+    { id: 'efectivo', img: imgEfectivo, alt: 'PagoEfectivo', titulo: 'metodo.efectivo', desc: 'metodo.efectivo_desc' },
+  ];
+
   return (
     <>
       <Header />
       <main className="metodo-page">
-        {/* Indicador de pasos */}
-        <div className="checkout-steps">
-          <div className="step completado">
-            <span className="step-num">✓</span>
-            <span className="step-label"><ET k="steps.entrega" /></span>
-          </div>
-          <div className="step-linea completada" />
-          <div className="step activo">
-            <span className="step-num">2</span>
-            <span className="step-label"><ET k="steps.pago" /></span>
-          </div>
-          <div className="step-linea" />
-          <div className="step">
-            <span className="step-num">3</span>
-            <span className="step-label"><ET k="steps.confirmacion" /></span>
-          </div>
+        <PasosCompra actual={2} />
+
+        <h1>{t('metodo.titulo')}</h1>
+        <p className="metodo-sub">{t('metodo.total')} <strong>S/{total}.00</strong></p>
+
+        <div className="metodo-opciones" role="radiogroup" aria-label={t('metodo.titulo')}>
+          {opciones.map((o) => (
+            <button
+              key={o.id}
+              role="radio"
+              aria-checked={metodo === o.id}
+              className={`metodo-opcion ${metodo === o.id ? 'seleccionada' : ''}`}
+              onClick={() => { setMetodo(o.id); setError(''); }}
+            >
+              <div className="metodo-icono"><img src={o.img} alt={o.alt} style={logoStyle} /></div>
+              <div className="metodo-info">
+                <strong>{t(o.titulo)}</strong>
+                <span>{t(o.desc)}</span>
+              </div>
+              <div className={`opcion-radio ${metodo === o.id ? 'on' : ''}`} />
+            </button>
+          ))}
         </div>
 
-        <h1><ET k="metodo.titulo" /></h1>
-        <p className="metodo-sub"><ET k="metodo.total" /> <strong>S/{total}.00</strong></p>
+        {error && <p className="checkout-error"><Icono nombre="alerta" tam={16} /> {error}</p>}
 
-        <div className="metodo-opciones">
-          {/* Yape — con QR (rápido) */}
-          <button
-            className={`metodo-opcion ${metodo === 'yape' ? 'seleccionada' : ''}`}
-            onClick={() => setMetodo('yape')}
-          >
-            <div className="metodo-icono"><img src={imgYape} alt="Yape" style={logoStyle} /></div>
-            <div className="metodo-info">
-              <strong><ET k="metodo.yape" /></strong>
-              <span><ET k="metodo.yape_desc" /></span>
-            </div>
-            <div className={`opcion-radio ${metodo === 'yape' ? 'on' : ''}`} />
-          </button>
-
-          {/* Yape — con código de aprobación */}
-          <button
-            className={`metodo-opcion ${metodo === 'yape-codigo' ? 'seleccionada' : ''}`}
-            onClick={() => setMetodo('yape-codigo')}
-          >
-            <div className="metodo-icono"><img src={imgYape} alt="Yape" style={logoStyle} /></div>
-            <div className="metodo-info">
-              <strong><ET k="metodo.yape_codigo" /></strong>
-              <span><ET k="metodo.yape_codigo_desc" /></span>
-            </div>
-            <div className={`opcion-radio ${metodo === 'yape-codigo' ? 'on' : ''}`} />
-          </button>
-
-          {/* Tarjeta */}
-          <button
-            className={`metodo-opcion ${metodo === 'tarjeta' ? 'seleccionada' : ''}`}
-            onClick={() => setMetodo('tarjeta')}
-          >
-            <div className="metodo-icono"><img src={imgTarjeta} alt="Tarjeta" style={logoStyle} /></div>
-            <div className="metodo-info">
-              <strong><ET k="metodo.tarjeta" /></strong>
-              <span><ET k="metodo.tarjeta_desc" /></span>
-            </div>
-            <div className={`opcion-radio ${metodo === 'tarjeta' ? 'on' : ''}`} />
-          </button>
-
-          {/* PagoEfectivo */}
-          <button
-            className={`metodo-opcion ${metodo === 'efectivo' ? 'seleccionada' : ''}`}
-            onClick={() => setMetodo('efectivo')}
-          >
-            <div className="metodo-icono"><img src={imgEfectivo} alt="PagoEfectivo" style={logoStyle} /></div>
-            <div className="metodo-info">
-              <strong><ET k="metodo.efectivo" /></strong>
-              <span><ET k="metodo.efectivo_desc" /></span>
-            </div>
-            <div className={`opcion-radio ${metodo === 'efectivo' ? 'on' : ''}`} />
-          </button>
-        </div>
-
-        {error && <p className="checkout-error">{error}</p>}
+        <p className="compra-seguro"><Icono nombre="candado" tam={16} /> {t('metodo.seguro')}</p>
 
         <div className="metodo-acciones">
           <button className="metodo-btn-volver" onClick={() => navigate('/checkout')}>
-            <ET k="metodo.volver" sinColor />
+            <Icono nombre="flechaIzq" tam={17} /> {t('metodo.volver')}
           </button>
           <button className="metodo-btn-confirmar" onClick={confirmar} disabled={procesando}>
-            {procesando ? <ET k="metodo.procesando" sinColor /> : <ET k="metodo.confirmar" sinColor />}
+            {procesando ? t('metodo.procesando') : <>{t('metodo.confirmar')} <Icono nombre="flechaDer" tam={17} /></>}
           </button>
         </div>
       </main>

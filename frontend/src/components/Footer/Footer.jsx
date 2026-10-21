@@ -91,7 +91,7 @@ export default function Footer() {
 
       {/* Newsletter — sin caja, directo sobre el fondo */}
       <div className="footer-news-wrap">
-        <Editable id="footer_news_titulo" as="p" className="footer-news-titulo">NEWS LETTER</Editable>
+        <Editable id="footer_news_titulo" as="p" className="footer-news-titulo" estilo>NEWS LETTER</Editable>
         {paso === 'ok' ? (
           <p className="footer-news-ok-mini">
             <Editable id="footer_news_ok" as="span">{es ? '¡Listo! Ya eres parte de la tribu 🎒' : 'Done! You\'re in the tribe 🎒'}</Editable>

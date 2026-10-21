@@ -2,6 +2,7 @@
   max-width: 560px;
   margin: 0 auto;
   padding: 2rem 1.2rem 4rem;
+  min-height: 60vh;
   font-family: 'Segoe UI', sans-serif;
 }
 
@@ -130,11 +131,14 @@
 .recibo-detalle {
   display: flex;
   justify-content: space-between;
+  gap: 16px;
   font-size: 0.88rem;
   color: #555;
 }
+.recibo-detalle > span:last-child { text-align: right; }
 
 .recibo-detalle-label {
+  flex-shrink: 0;
   color: #999;
   font-size: 0.83rem;
 }
@@ -345,3 +349,12 @@
     gap: 0.3rem;
   }
 }
+
+.confirmacion-icono { font-size: 0; display: flex; justify-content: center; margin-bottom: 12px; }
+.confirmacion-icono.ok { color: #2e7d32; }
+.confirmacion-icono.espera { color: var(--ink); }
+.canal-icono { font-size: 0; color: var(--ink); }
+.canal-check-box.on { color: #fff; }
+.canal-guardado { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.recibo-estado.cancelado { color: #b42318; }
+.recibo-estado.pendiente_envio, .recibo-estado.enviado, .recibo-estado.entregado { color: #2e7d32; }

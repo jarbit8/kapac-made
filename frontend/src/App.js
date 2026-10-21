@@ -31,6 +31,7 @@ import PagoYapeCulqi from './pages/PagoYapeCulqi';
 import Confirmacion from './pages/Confirmacion';
 import Perfil from './pages/Perfil';
 import WhatsApp from './components/WhatsApp/WhatsApp';
+import BarraEdicion from './components/BarraEdicion/BarraEdicion';
 import ScrollToTop from './components/ScrollToTop';
 import NavBar from './components/NavBar/NavBar';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
@@ -154,6 +155,7 @@ function App() {
                 <CierreGate>
                   <AppRoutes />
                   <WhatsApp />
+                  <BarraEdicion />
                 </CierreGate>
               </BrowserRouter>
             </TemaProvider>

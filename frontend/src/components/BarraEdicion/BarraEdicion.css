@@ -1,0 +1,56 @@
+/* Barra de modo edición (solo el admin) */
+.barra-edicion {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 12px;
+  background: var(--clay, #b0532e);
+  color: #fff;
+  font: 600 12px/1 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  letter-spacing: 0.2px;
+}
+
+.barra-edicion-txt {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barra-edicion-salir {
+  flex-shrink: 0;
+  height: 20px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.barra-edicion-salir:hover { background: #fff; color: var(--clay, #b0532e); }
+
+/* La página baja lo que mide la barra, para que no tape el header ni el menú */
+html.con-barra-edicion { --barra-edicion: 30px; }
+html.con-barra-edicion body { padding-top: var(--barra-edicion); }
+html.con-barra-edicion .header,
+html.con-barra-edicion .navbar-sticky { top: var(--barra-edicion); }
+html.con-barra-edicion .zone { top: var(--barra-edicion); }
+
+@media (max-width: 820px) {
+  html.con-barra-edicion .navbar-left { top: calc(56px + var(--barra-edicion)); }
+  .barra-edicion { font-size: 11px; gap: 8px; }
+}
+
+@media (max-width: 560px) {
+  .barra-edicion-extra { display: none; }
+}

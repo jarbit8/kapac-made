@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import ET from '../components/ET';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { obtenerPedidosUsuario } from '../firebase/pedidos';
@@ -45,12 +44,6 @@ export default function Pedidos() {
   };
 
   const estadoLabel = (e) => {
-    const iconos = {
-      procesando_pago: '🔄', verificando_pago: '🔍',
-      pendiente_envio: '📦', enviado: '🚚',
-      entregado: '🎉', cancelado: '❌',
-      pendiente: '🕐', verificando: '🔄', pagado: '📦',
-    };
     const mapa = {
       procesando_pago:  t('estado.procesando_pago'),
       verificando_pago: t('estado.verificando_pago'),
@@ -62,14 +55,14 @@ export default function Pedidos() {
       verificando: t('estado.procesando_pago'),
       pagado:      t('estado.pendiente_envio'),
     };
-    return `${iconos[e] || ''} ${mapa[e] || e}`;
+    return mapa[e] || e;
   };
 
   return (
     <>
       <Header />
       <main className="pedidos-page">
-        <h1><ET k="pedidos.titulo" /></h1>
+        <h1><span>{t('pedidos.titulo')}</span></h1>
 
         {cargando && <Cargando />}
 
@@ -79,15 +72,15 @@ export default function Pedidos() {
 
         {!cargando && !error && pedidos.length === 0 && (
           <div className="pedidos-vacio">
-            <p><ET k="pedidos.vacio" /></p>
-            <button onClick={() => navigate('/shop')}><ET k="pedidos.ver_tienda" sinColor /></button>
+            <p><span>{t('pedidos.vacio')}</span></p>
+            <button onClick={() => navigate('/shop')}><span>{t('pedidos.ver_tienda')}</span></button>
           </div>
         )}
 
         {!cargando && !error && pedidos.map((p) => (
           <div key={p.id} className="pedido-card">
             <div className="pedido-header">
-              <span className="pedido-id"><ET k="pedidos.pedido" /> #{p.id.slice(0, 8)}</span>
+              <span className="pedido-id"><span>{t('pedidos.pedido')}</span> #{p.id.slice(0, 8)}</span>
               <span className={`pedido-estado estado-${p.estado}`}>{estadoLabel(p.estado)}</span>
             </div>
             <p className="pedido-fecha">{formatoFecha(p.fecha)}</p>
@@ -98,7 +91,7 @@ export default function Pedidos() {
                 </li>
               ))}
             </ul>
-            <div className="pedido-total"><ET k="pedidos.total" />: <strong>S/{p.total}.00</strong></div>
+            <div className="pedido-total"><span>{t('pedidos.total')}</span>: <strong>S/{p.total}.00</strong></div>
           </div>
         ))}
       </main>

@@ -24,7 +24,7 @@ export default function Zone() {
     <div className="zone">
       {foto && <img src={fotoRapida(foto)} alt="Kapac Made" className="zone-img" fetchpriority="high" />}
       <div className="zone-vineta" />
-      <p className="zone-txt"><Editable id="zone_txt" as="span">in the zone</Editable></p>
+      <p className="zone-txt"><Editable id="zone_txt" as="span" estilo>in the zone</Editable></p>
     </div>
   );
 }

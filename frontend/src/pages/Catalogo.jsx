@@ -2,8 +2,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import ET from '../components/ET';
-import Editable from '../components/Editable';
 import { obtenerProductos } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useIdioma } from '../context/LanguageContext';
@@ -17,7 +15,7 @@ export default function Catalogo() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
-  const { idioma } = useIdioma();
+  const { t, idioma } = useIdioma();
   const { textos, esAdmin, guardar } = useTextos();
   const colorProductos = textos['catalogo_color'] || '';
 
@@ -74,7 +72,7 @@ export default function Catalogo() {
       <Header />
       <main className="catalogo-page" style={colorProductos ? { '--catalogo-texto': colorProductos } : undefined}>
         <h1 className="catalogo-page-title">
-          <ET k="catalogo.titulo" />
+          <span>{t('catalogo.titulo')}</span>
           {esAdmin && (
             <input
               type="color"
@@ -89,9 +87,9 @@ export default function Catalogo() {
 
         {busqueda && (
           <p className="catalogo-busqueda-info">
-            <Editable id="catalogo_resultados" as="span">{idioma === 'en' ? 'Results for:' : 'Resultados para:'}</Editable> <strong>"{busqueda}"</strong>
+            <span>{idioma === 'en' ? 'Results for:' : 'Resultados para:'}</span> <strong>"{busqueda}"</strong>
             <button onClick={limpiarBusqueda} className="catalogo-limpiar">
-              ✕ <Editable id="catalogo_limpiar" as="span" sinColor>{idioma === 'en' ? 'clear' : 'limpiar'}</Editable>
+              ✕ <span>{idioma === 'en' ? 'clear' : 'limpiar'}</span>
             </button>
           </p>
         )}
@@ -100,7 +98,7 @@ export default function Catalogo() {
         {error && <p style={{ color: 'crimson' }}>{error}</p>}
 
         {!cargando && !error && filtrados.length === 0 && (
-          <p style={{ color: '#666', padding: '40px 0' }}><ET k="catalogo.vacio" /></p>
+          <p style={{ color: '#666', padding: '40px 0' }}><span>{t('catalogo.vacio')}</span></p>
         )}
 
         {!cargando && !error && filtrados.length > 0 && (

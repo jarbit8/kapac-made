@@ -53,7 +53,7 @@ export default function Alma() {
         <div className="alma-wrap">
           <p className="alma-eyebrow">Kapac Made · Arequipa, {es ? 'Perú' : 'Peru'}</p>
 
-          <Editable id="alma_manifiesto" as="h1" className="alma-manifiesto">
+          <Editable id="alma_manifiesto" as="h1" className="alma-manifiesto" estilo>
             {es
               ? 'Mochilas hechas a mano para explorar sin límites.'
               : 'Handmade backpacks built to explore without limits.'}
@@ -70,7 +70,7 @@ export default function Alma() {
               const def = DEFAULTS_BLOQUE[key] || { t: ['', ''], d: ['', ''] };
               return (
                 <section className="alma-bloque" key={key}>
-                  <Editable id={`alma_${key}_titulo`} as="h2">{es ? def.t[0] : def.t[1]}</Editable>
+                  <Editable id={`alma_${key}_titulo`} as="h2" estilo>{es ? def.t[0] : def.t[1]}</Editable>
                   <Editable id={`alma_${key}_texto`} as="p" multiline>{es ? def.d[0] : def.d[1]}</Editable>
                   {esAdmin && (
                     <button type="button" className="alma-bloque-quitar" onClick={() => quitarBloque(key)} title="Quitar">×</button>

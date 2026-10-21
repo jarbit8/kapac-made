@@ -55,7 +55,7 @@ export default function B2B() {
           <div className="b2b-hero-overlay" />
           <div className="b2b-hero-content">
             <p className="b2b-tagline">KAPAC MADE · B2B</p>
-            <Editable id="b2b_hero_titulo" as="h1">{es ? 'Diseñamos para tu empresa' : 'We design for your company'}</Editable>
+            <Editable id="b2b_hero_titulo" as="h1" estilo>{es ? 'Diseñamos para tu empresa' : 'We design for your company'}</Editable>
             <Editable id="b2b_hero_sub" as="p" className="b2b-subtitulo">
               {es ? 'Productos únicos, hechos a tu medida.' : 'Unique products, made for you.'}
             </Editable>
@@ -64,7 +64,7 @@ export default function B2B() {
 
         {/* Propuesta */}
         <section className="b2b-section">
-          <Editable id="b2b_que_titulo" as="h2">{es ? '¿Qué hacemos?' : 'What we do'}</Editable>
+          <Editable id="b2b_que_titulo" as="h2" estilo>{es ? '¿Qué hacemos?' : 'What we do'}</Editable>
           <Editable id="b2b_que_texto" as="p" className="b2b-parrafo" multiline>
             {es
               ? 'En Kapac Made diseñamos y fabricamos productos personalizados para empresas que buscan destacar. Desde mochilas corporativas hasta accesorios únicos, cada pieza combina diseños innovadores y minimalistas con la mejor calidad y funcionalidad del mercado.'
@@ -74,13 +74,13 @@ export default function B2B() {
 
         {/* Beneficios */}
         <section className="b2b-section b2b-beneficios">
-          <Editable id="b2b_beneficios_titulo" as="h2">{es ? '¿Por qué Kapac Made?' : 'Why Kapac Made?'}</Editable>
+          <Editable id="b2b_beneficios_titulo" as="h2" estilo>{es ? '¿Por qué Kapac Made?' : 'Why Kapac Made?'}</Editable>
           <div className="b2b-grid">
             {beneficios.map((key) => {
               const def = DEFAULTS_BENEFICIO[key] || { t: ['', ''], d: ['', ''] };
               return (
                 <div className="b2b-bloque" key={key}>
-                  <Editable id={`b2b_${key}_titulo`} as="h3">{es ? def.t[0] : def.t[1]}</Editable>
+                  <Editable id={`b2b_${key}_titulo`} as="h3" estilo>{es ? def.t[0] : def.t[1]}</Editable>
                   <Editable id={`b2b_${key}_desc`} as="p">{es ? def.d[0] : def.d[1]}</Editable>
                   {esAdmin && (
                     <button type="button" className="b2b-bloque-quitar" onClick={() => quitarBeneficio(key)} title="Quitar">×</button>
@@ -98,7 +98,7 @@ export default function B2B() {
 
         {/* CTA Contacto */}
         <section className="b2b-cta">
-          <Editable id="b2b_cta_titulo" as="h2">{es ? '¿Listos para empezar?' : 'Ready to start?'}</Editable>
+          <Editable id="b2b_cta_titulo" as="h2" estilo>{es ? '¿Listos para empezar?' : 'Ready to start?'}</Editable>
           <Editable id="b2b_cta_texto" as="p">
             {es
               ? 'Cuéntanos sobre tu proyecto y diseñemos algo único para tu empresa.'

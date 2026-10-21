@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useIdioma } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import Editable from '../Editable';
+import Icono from '../Icono';
 import './NavBar.css';
 
 const IconIg = () => (
@@ -16,7 +16,7 @@ const IconIg = () => (
 
 export default function NavBar() {
   const { totalItems } = useCart();
-  const { idioma, setIdioma, t } = useIdioma();
+  const { idioma, setIdioma } = useIdioma();
   const { esAdmin, modoEdicion, setModoEdicion } = useAuth();
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
@@ -57,7 +57,7 @@ export default function NavBar() {
         )}
         {links.map((l) => (
           <Link key={l.to} to={l.to} className="navbar-link" onClick={cerrar}>
-            <Editable id={l.id} as="span" sinColor>{l.label}</Editable>
+            <span>{l.label}</span>
           </Link>
         ))}
 
@@ -72,11 +72,13 @@ export default function NavBar() {
             hasta que se activa la edición */}
         {esAdmin && (
           <>
-            <Link to="/admin" className="navbar-link navbar-admin" onClick={cerrar}>🔒 Admin</Link>
+            <Link to="/admin" className="navbar-link navbar-admin" onClick={cerrar}><Icono nombre="candado" tam={13} /> Admin</Link>
             <button type="button" className={`navbar-link navbar-admin navbar-modo${modoEdicion ? ' activo' : ''}`}
               onClick={() => { setModoEdicion(!modoEdicion); cerrar(); }}
               title={modoEdicion ? 'Ver la página como un visitante' : 'Activar los lápices para editar'}>
-              {modoEdicion ? '👁 Modo visita' : '✏️ Editar'}
+              {modoEdicion
+                ? <><Icono nombre="ojo" tam={13} /> Modo visita</>
+                : <><Icono nombre="lapiz" tam={13} /> Editar</>}
             </button>
           </>
         )}

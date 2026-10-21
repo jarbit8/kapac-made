@@ -140,3 +140,6 @@
   .metodo-page { padding: 40px 16px; }
   .metodo-acciones { flex-direction: column; }
 }
+
+.metodo-btn-volver,
+.metodo-btn-confirmar { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }

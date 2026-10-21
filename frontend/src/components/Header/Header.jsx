@@ -5,6 +5,7 @@ import '../EditableImage.css';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useIdioma } from '../../context/LanguageContext';
+import Icono from '../Icono';
 import { obtenerProductos } from '../../firebase/productos';
 import logoVerde    from '../../assets/images/kapac_made_3.png';
 import logoTerracota from '../../assets/images/kapac_made_1.png';
@@ -125,7 +126,7 @@ export default function Header({ transparente = false }) {
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); logoInputRef.current?.click(); }}
                   disabled={subiendoLogo}
                 >
-                  {subiendoLogo ? 'Subiendo…' : '🖼️ Cambiar logo'}
+                  <Icono nombre="foto" tam={15} /> {subiendoLogo ? 'Subiendo…' : 'Cambiar logo'}
                 </button>
                 <input ref={logoInputRef} type="file" accept="image/*" onChange={cambiarLogo} hidden
                   onClick={(e) => e.stopPropagation()} />

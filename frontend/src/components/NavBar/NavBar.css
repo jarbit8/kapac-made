@@ -67,7 +67,7 @@
   white-space: nowrap;
 }
 .navbar-link:hover { opacity: 0.55; }
-.navbar-admin { font-size: 10px; opacity: 0.8; }
+.navbar-admin { font-size: 10px; opacity: 0.8; display: inline-flex; align-items: center; gap: 5px; }
 .navbar-modo { background: none; border: 0; padding: 0; font-family: inherit; cursor: pointer; }
 .navbar-modo.activo { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
 

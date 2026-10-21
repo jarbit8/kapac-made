@@ -167,8 +167,9 @@
 }
 
 .acceso-icono {
-  font-size: 2rem;
+  display: flex;
   flex-shrink: 0;
+  color: var(--ink);
 }
 
 .perfil-acceso-btn > div {
@@ -189,8 +190,8 @@
 }
 
 .acceso-flecha {
+  display: flex;
   color: #ccc;
-  font-size: 26px;
   transition: transform 0.2s;
 }
 

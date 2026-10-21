@@ -60,6 +60,7 @@
   right: 24px;
   transform: none;
 }
+.b2b-hero .editable-img-wrap.editable-toque .editable-img-btn { pointer-events: auto; }
 
 .b2b-tagline {
   font-family: 'DM Sans', sans-serif;

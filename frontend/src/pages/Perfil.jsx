@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import ET from '../components/ET';
 import Modal from '../components/Modal/Modal';
+import Icono from '../components/Icono';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { cerrarSesion } from '../firebase/auth';
@@ -83,9 +83,9 @@ export default function Perfil() {
       <>
         <Header />
         <main className="perfil-page" style={{ textAlign: 'center', padding: 60 }}>
-          <h2><ET k="perfil.iniciar_msg" /></h2>
+          <h2><span>{t('perfil.iniciar_msg')}</span></h2>
           <button className="perfil-btn-principal" onClick={() => navigate('/login')}>
-            <ET k="perfil.iniciar" sinColor />
+            <span>{t('perfil.iniciar')}</span>
           </button>
         </main>
         <Footer />
@@ -104,26 +104,26 @@ export default function Perfil() {
         <div className="perfil-header">
           <div className="perfil-avatar">{inicial}</div>
           <div className="perfil-info">
-            <h1>{form.nombre || <ET k="perfil.sin_nombre" />}</h1>
+            <h1>{form.nombre || <span>{t('perfil.sin_nombre')}</span>}</h1>
             <p>{usuario.email}</p>
           </div>
         </div>
 
         {/* Formulario */}
         <form className="perfil-form" onSubmit={guardar}>
-          <h2><ET k="perfil.info" /></h2>
-          <p className="perfil-sub"><ET k="perfil.info_sub" /></p>
+          <h2><span>{t('perfil.info')}</span></h2>
+          <p className="perfil-sub"><span>{t('perfil.info_sub')}</span></p>
 
           <div className="perfil-grid">
             <label className="full">
-              <ET k="perfil.nombre" />
+              <span>{t('perfil.nombre')}</span>
               <input
                 value={form.nombre}
                 onChange={e => setForm({ ...form, nombre: e.target.value })}
               />
             </label>
             <label>
-              <ET k="perfil.telefono" />
+              <span>{t('perfil.telefono')}</span>
               <input
                 value={form.telefono}
                 onChange={e => setForm({ ...form, telefono: e.target.value })}
@@ -131,21 +131,21 @@ export default function Perfil() {
               />
             </label>
             <label>
-              <ET k="perfil.distrito" />
+              <span>{t('perfil.distrito')}</span>
               <input
                 value={form.distrito}
                 onChange={e => setForm({ ...form, distrito: e.target.value })}
               />
             </label>
             <label className="full">
-              <ET k="perfil.direccion" />
+              <span>{t('perfil.direccion')}</span>
               <input
                 value={form.direccion}
                 onChange={e => setForm({ ...form, direccion: e.target.value })}
               />
             </label>
             <label className="full">
-              <ET k="perfil.referencia" />
+              <span>{t('perfil.referencia')}</span>
               <input
                 value={form.referencia}
                 onChange={e => setForm({ ...form, referencia: e.target.value })}
@@ -157,7 +157,7 @@ export default function Perfil() {
 
           <div className="perfil-acciones">
             <button type="submit" className="perfil-btn-principal" disabled={guardando}>
-              {guardando ? <ET k="perfil.guardando" sinColor /> : <ET k="perfil.guardar" sinColor />}
+              <span>{guardando ? t('perfil.guardando') : t('perfil.guardar')}</span>
             </button>
           </div>
         </form>
@@ -165,21 +165,21 @@ export default function Perfil() {
         {/* Accesos rápidos */}
         <div className="perfil-accesos">
           <button onClick={() => navigate('/pedidos')} className="perfil-acceso-btn">
-            <span className="acceso-icono">📦</span>
+            <span className="acceso-icono"><Icono nombre="paquete" tam={26} /></span>
             <div>
-              <strong><ET k="perfil.mis_pedidos" sinColor /></strong>
-              <span><ET k="perfil.mis_pedidos_sub" sinColor /></span>
+              <strong><span>{t('perfil.mis_pedidos')}</span></strong>
+              <span><span>{t('perfil.mis_pedidos_sub')}</span></span>
             </div>
-            <span className="acceso-flecha">→</span>
+            <span className="acceso-flecha"><Icono nombre="flechaDer" /></span>
           </button>
 
           <button onClick={() => setModalCerrarSesion(true)} className="perfil-acceso-btn cerrar-sesion">
-            <span className="acceso-icono">🚪</span>
+            <span className="acceso-icono"><Icono nombre="salir" tam={26} /></span>
             <div>
-              <strong><ET k="menu.cerrar_sesion" sinColor /></strong>
+              <strong><span>{t('menu.cerrar_sesion')}</span></strong>
               <span>{usuario.email}</span>
             </div>
-            <span className="acceso-flecha">→</span>
+            <span className="acceso-flecha"><Icono nombre="flechaDer" /></span>
           </button>
         </div>
 
@@ -196,7 +196,7 @@ export default function Perfil() {
         cancelar={t('modal.cerrar')}
         onConfirmar={handleCerrarSesion}
         tipo="peligro"
-        icono="🚪"
+        icono={<Icono nombre="salir" tam={36} />}
       />
     </>
   );

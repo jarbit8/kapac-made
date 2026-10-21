@@ -2,8 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import ET from '../components/ET';
-import Editable from '../components/Editable';
 import { obtenerProducto, obtenerProductos } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useCart } from '../context/CartContext';
@@ -157,7 +155,7 @@ export default function Producto() {
 
             <div className="producto-info">
               <button className="producto-volver" onClick={() => navigate(-1)}>
-                <Editable id="producto_volver" as="span" sinColor>{idioma === 'en' ? '← Back' : '← Volver'}</Editable>
+                <span>{idioma === 'en' ? '← Back' : '← Volver'}</span>
               </button>
 
               {producto.categoria && (
@@ -210,11 +208,11 @@ export default function Producto() {
                 onClick={handleAgregar}
                 disabled={producto.stock <= 0}
               >
-                {agregado ? <ET k="producto.agregado" sinColor /> : <ET k="producto.agregar" sinColor />}
+                <span>{agregado ? t('producto.agregado') : t('producto.agregar')}</span>
               </button>
 
               <button className="producto-ir-carrito" onClick={() => navigate('/carrito')}>
-                <Editable id="producto_ir_carrito" as="span" sinColor>{idioma === 'en' ? 'Go to cart' : 'Ir al carrito'}</Editable>
+                <span>{idioma === 'en' ? 'Go to cart' : 'Ir al carrito'}</span>
               </button>
             </div>
           </div>
@@ -240,7 +238,7 @@ export default function Producto() {
         {/* También te puede gustar */}
         {producto && relacionados.length > 0 && (
           <section className="producto-relacionados">
-            <Editable id="producto_relacionados_titulo" as="h2">{idioma === 'en' ? 'You may also like' : 'También te puede gustar'}</Editable>
+            <h2>{idioma === 'en' ? 'You may also like' : 'También te puede gustar'}</h2>
             <div className="relacionados-grid">
               {relacionados.map((p) => (
                 <Link key={p.id} to={`/producto/${p.id}`} className="relacionado-card">

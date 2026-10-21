@@ -1,4 +1,4 @@
-/* Imagen editable — overlay solo lo ve el admin */
+/* Imagen editable — el botón solo lo ve el admin, en modo edición */
 .editable-img-wrap {
   position: relative;
   overflow: hidden;
@@ -11,16 +11,28 @@
   display: block;
 }
 
+/* Mismo comportamiento que los textos: contorno punteado al pasar el mouse (o con un toque en celular) */
+.editable-img-wrap:hover,
+.editable-img-wrap:focus-within,
+.editable-img-wrap.editable-marcado {
+  outline: 1px dashed rgba(176, 83, 46, 0.7);
+  outline-color: color-mix(in srgb, var(--clay, #b0532e) 70%, transparent);
+  outline-offset: -5px;
+}
+
 .editable-img-btn {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
-  background: rgba(0, 0, 0, 0.55);
+  border-radius: 999px;
+  padding: 8px 14px 8px 12px;
+  background: rgba(0, 0, 0, 0.6);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
@@ -30,9 +42,16 @@
   transition: opacity 0.15s, background 0.15s;
 }
 
-.editable-img-wrap:hover .editable-img-btn {
+.editable-img-wrap:hover .editable-img-btn,
+.editable-img-wrap:focus-within .editable-img-btn,
+.editable-img-wrap.editable-marcado .editable-img-btn {
   opacity: 1;
 }
 
-.editable-img-btn:hover { background: rgba(0, 0, 0, 0.75); }
+/* Sin hover: el botón no responde hasta que el primer toque marca la foto */
+@media (hover: none) {
+  .editable-toque:not(.editable-marcado) .editable-img-btn { pointer-events: none; }
+}
+
+.editable-img-btn:hover { background: rgba(0, 0, 0, 0.8); }
 .editable-img-btn:disabled { opacity: 1; cursor: default; }
