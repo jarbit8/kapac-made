@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { obtenerProductos } from '../firebase/productos';
+import { obtenerProductos, productosGuardados } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
@@ -11,8 +11,8 @@ import Cargando from '../components/Cargando/Cargando';
 import '../styles/Catalogo.css';
 
 export default function Catalogo() {
-  const [productos, setProductos] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const [productos, setProductos] = useState(() => (productosGuardados() || []).filter((p) => p.activo !== false));
+  const [cargando, setCargando] = useState(() => productosGuardados() === null);
   const [error, setError] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const { t, idioma } = useIdioma();
@@ -30,7 +30,8 @@ export default function Catalogo() {
         setCargando(false);
       })
       .catch((e) => {
-        setError(idioma === 'en' ? 'Could not load products.' : 'No se pudieron cargar los productos.');
+        // Sin conexión se quedan los de la visita anterior
+        if (productosGuardados() === null) setError(idioma === 'en' ? 'Could not load products.' : 'No se pudieron cargar los productos.');
         setCargando(false);
         console.error(e);
       });

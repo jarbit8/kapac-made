@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { obtenerContenido, ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT } from '../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT } from '../firebase/contenido';
 
 export const LOGO_CACHE_KEY = 'kapac_logo_v1';
 const ACENTO_CACHE_KEY = 'kapac_acento_v1';
@@ -9,12 +9,14 @@ const CERRADO_CACHE_KEY = 'kapac_cerrado_v1';
 const TemaContext = createContext({ logo: LOGO_DEFAULT, acento: ACENTO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, setTema: () => {} });
 
 export function TemaProvider({ children }) {
+  // Sin cache de una visita anterior, lo que había al publicar
   const [tema, setTema] = useState(() => {
+    const c = contenidoGuardado();
     try {
       return {
-        logo: localStorage.getItem(LOGO_CACHE_KEY) || LOGO_DEFAULT,
-        acento: localStorage.getItem(ACENTO_CACHE_KEY) || ACENTO_DEFAULT,
-        fondo: localStorage.getItem(FONDO_CACHE_KEY) || FONDO_DEFAULT,
+        logo: localStorage.getItem(LOGO_CACHE_KEY) || c?.logo || LOGO_DEFAULT,
+        acento: localStorage.getItem(ACENTO_CACHE_KEY) || c?.acento || ACENTO_DEFAULT,
+        fondo: localStorage.getItem(FONDO_CACHE_KEY) || c?.fondo || FONDO_DEFAULT,
         texto: TEXTO_DEFAULT,
       };
     } catch (_) {
@@ -26,7 +28,7 @@ export function TemaProvider({ children }) {
   // ninguno (que "flashear" el de fábrica y luego cambiarlo). Si ya hay cache
   // de una visita anterior, se muestra al instante.
   const [logoListo, setLogoListo] = useState(() => {
-    try { return localStorage.getItem(LOGO_CACHE_KEY) !== null; } catch (_) { return true; }
+    try { return localStorage.getItem(LOGO_CACHE_KEY) !== null || contenidoGuardado() !== null; } catch (_) { return true; }
   });
 
   // Tienda cerrada al público (pantalla "Próximamente"). Cacheado para que en

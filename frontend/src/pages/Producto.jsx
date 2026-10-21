@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { obtenerProducto, obtenerProductos } from '../firebase/productos';
+import { obtenerProducto, obtenerProductos, productosGuardados } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
@@ -48,9 +48,12 @@ export default function Producto() {
   const { t, idioma } = useIdioma();
   const { textos, esAdmin } = useTextos();
   const specsColor = textos['producto_specs_color'] || '';
-  const [producto, setProducto] = useState(null);
-  const [relacionados, setRelacionados] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  // Del catálogo guardado, para mostrar la ficha sin esperar a Firestore
+  const guardado = () => productosGuardados()?.find((p) => p.id === id && (p.activo !== false || esAdmin)) || null;
+  const otrosGuardados = () => (productosGuardados() || []).filter((p) => p.id !== id && p.activo !== false).slice(0, 3);
+  const [producto, setProducto] = useState(guardado);
+  const [relacionados, setRelacionados] = useState(otrosGuardados);
+  const [cargando, setCargando] = useState(() => !guardado());
   const [error, setError] = useState('');
   const [agregado, setAgregado] = useState(false);
   const [imgIdx, setImgIdx] = useState(0); // carrusel de galería
@@ -66,19 +69,20 @@ export default function Producto() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setCargando(true);
-    setProducto(null);
+    setCargando(!guardado());
+    setProducto(guardado());
+    setRelacionados(otrosGuardados());
     setError('');
     setImgIdx(0);
     obtenerProducto(id)
       .then((p) => {
-        if (!p || (p.activo === false && !esAdmin)) setError(t('producto.no_encontrado'));
+        if (!p || (p.activo === false && !esAdmin)) { setProducto(null); setError(t('producto.no_encontrado')); }
         else setProducto(p);
         setCargando(false);
       })
       .catch((e) => {
         console.error(e);
-        setError(idioma === 'en' ? 'Could not load product.' : 'No se pudo cargar el producto.');
+        if (!guardado()) setError(idioma === 'en' ? 'Could not load product.' : 'No se pudo cargar el producto.');
         setCargando(false);
       });
     // Productos relacionados (otros del catálogo)

@@ -8,10 +8,25 @@ import { db } from './config';
 
 const COLECCION = 'productos';
 
+// Los de la visita anterior o, en la primera visita, los que había al publicar
+// (scripts/fotos.js): la tienda y la ficha se muestran al instante y se
+// actualizan cuando responde Firestore.
+const CACHE_KEY = 'kapac_productos_v1';
+let productosSesion = (() => {
+  try {
+    const p = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if (p) return p;
+  } catch (_) {}
+  return window.__CONTENIDO__?.productos || null;
+})();
+export const productosGuardados = () => productosSesion;
+
 // Obtener TODOS los productos
 export async function obtenerProductos() {
   const snapshot = await getDocs(collection(db, COLECCION));
-  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  productosSesion = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(productosSesion)); } catch (_) {}
+  return productosSesion;
 }
 
 // Obtener UN producto por su ID

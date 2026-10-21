@@ -7,8 +7,13 @@ const TextosContext = createContext({ textos: {}, esAdmin: false, guardar: async
 
 // Textos de la visita anterior: se pintan al instante y Firestore los actualiza después
 const CACHE_KEY = 'kapac_textos_v1';
+// Los de la visita anterior o, en la primera visita, los que había al publicar
 const textosGuardados = (() => {
-  try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (_) { return null; }
+  try {
+    const t = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if (t) return t;
+  } catch (_) {}
+  return window.__CONTENIDO__?.textos || null;
 })();
 
 export function TextosProvider({ children }) {
