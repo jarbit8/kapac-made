@@ -31,7 +31,7 @@ export default function Checkout() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const { items } = useCart();
-  const { t, idioma } = useIdioma();
+  const { idioma } = useIdioma();
   const [modo, setModo] = useState(null); // 'envio' | 'recojo'
   const [form, setForm] = useState({
     nombre: '', telefono: '', direccion: '', distrito: '', referencia: '',

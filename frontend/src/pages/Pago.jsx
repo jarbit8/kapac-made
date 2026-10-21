@@ -18,10 +18,9 @@ export default function Pago() {
   const { metodo, pedidoId } = useParams(); // /pago/:metodo/:pedidoId
   const navigate = useNavigate();
   const { usuario } = useAuth();
-  const { t, idioma } = useIdioma();
-  const [enviado, setEnviado] = useState(false);
+  const { idioma } = useIdioma();
+  const [enviado] = useState(false);
   const [cargando, setCargando] = useState(false);
-  const [copiado, setCopiado] = useState(false);
   const [total, setTotal] = useState(null);
   const [codigoCIP, setCodigoCIP] = useState(null);
   const [vencimientoCIP, setVencimientoCIP] = useState(null);

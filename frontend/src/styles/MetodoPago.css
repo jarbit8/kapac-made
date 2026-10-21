@@ -41,20 +41,6 @@
   margin-bottom: 24px;
 }
 
-.confianza-item {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 13px !important;
-  color: var(--ink-soft, #4a463c);
-  font-weight: 500;
-}
-
-.confianza-item span:first-child {
-  font-size: 16px;
-  line-height: 1;
-}
-
 @media (max-width: 480px) {
   .metodo-confianza { grid-template-columns: 1fr; }
 }
@@ -81,8 +67,6 @@
 
 .metodo-icono { flex-shrink: 0; }
 
-.tarjeta-icono { color: #1a56a0; }
-
 .metodo-info {
   flex: 1;
   display: flex;
@@ -92,16 +76,6 @@
 
 .metodo-info strong { font-size: 15px; color: var(--ink); }
 .metodo-info span { font-size: 13px; color: #888; }
-
-.prox-badge {
-  font-size: 11px;
-  background: #f0f0f0;
-  color: #888;
-  padding: 3px 10px;
-  border-radius: 10px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
 
 /* Radio reutilizado del checkout */
 .opcion-radio {

@@ -17,6 +17,10 @@ export function AuthProvider({ children }) {
     try { return localStorage.getItem(SESION_ADMIN_KEY) === '1'; } catch (_) { return false; }
   });
   const esAdmin = cargando ? sesionRecordada : esCorreoAdmin(usuario?.email);
+  // La página siempre arranca como la ve un visitante; el admin activa la edición con
+  // el botón de la barra (al recargar vuelve a modo visita)
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const puedeEditar = esAdmin && modoEdicion;
 
   useEffect(() => {
     const unsub = observarUsuario((user) => {
@@ -38,7 +42,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ usuario, cargando, esAdmin }}>
+    <AuthContext.Provider value={{ usuario, cargando, esAdmin, modoEdicion, setModoEdicion, puedeEditar }}>
       {children}
     </AuthContext.Provider>
   );

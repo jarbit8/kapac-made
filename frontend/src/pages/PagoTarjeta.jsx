@@ -13,10 +13,10 @@ const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
 export default function PagoTarjeta() {
   const { pedidoId } = useParams();
   const navigate = useNavigate();
-  const { t, idioma } = useIdioma();
+  const { idioma } = useIdioma();
   const [listo, setListo] = useState(false);
   const [procesando, setProcesando] = useState(false);
-  const [pagado, setPagado] = useState(false);
+  const [pagado] = useState(false);
   const [error, setError] = useState('');
   const total = sessionStorage.getItem('pago_total') || '0';
   const totalCentimos = Number(total) * 100; // Culqi usa centimos

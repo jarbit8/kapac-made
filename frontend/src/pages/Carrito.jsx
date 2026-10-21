@@ -4,7 +4,6 @@ import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import ET from '../components/ET';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { nombreProducto } from '../i18n/producto';
 import { imagen } from '../firebase/imagenesProductos';
@@ -12,7 +11,6 @@ import '../styles/Carrito.css';
 
 export default function Carrito() {
   const { items, quitar, cambiarCantidad, totalPrecio } = useCart();
-  const { usuario } = useAuth();
   const { t, idioma } = useIdioma();
   const navigate = useNavigate();
   const finalizar = () => navigate('/checkout');

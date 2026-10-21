@@ -17,7 +17,7 @@ const IconIg = () => (
 export default function NavBar() {
   const { totalItems } = useCart();
   const { idioma, setIdioma, t } = useIdioma();
-  const { esAdmin } = useAuth();
+  const { esAdmin, modoEdicion, setModoEdicion } = useAuth();
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
 
@@ -68,9 +68,17 @@ export default function NavBar() {
           <button className={`navbar-lang ${idioma === 'en' ? 'activo' : ''}`} onClick={() => setIdioma('en')}>EN</button>
         </span>
 
-        {/* Admin — solo para el admin, al final */}
+        {/* Admin — solo para el admin, al final. La página se ve como la ve un visitante
+            hasta que se activa la edición */}
         {esAdmin && (
-          <Link to="/admin" className="navbar-link navbar-admin" onClick={cerrar}>🔒 Admin</Link>
+          <>
+            <Link to="/admin" className="navbar-link navbar-admin" onClick={cerrar}>🔒 Admin</Link>
+            <button type="button" className={`navbar-link navbar-admin navbar-modo${modoEdicion ? ' activo' : ''}`}
+              onClick={() => { setModoEdicion(!modoEdicion); cerrar(); }}
+              title={modoEdicion ? 'Ver la página como un visitante' : 'Activar los lápices para editar'}>
+              {modoEdicion ? '👁 Modo visita' : '✏️ Editar'}
+            </button>
+          </>
         )}
       </div>
 

@@ -13,7 +13,7 @@ const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
 export default function PagoYapeCulqi() {
   const { pedidoId } = useParams();
   const navigate = useNavigate();
-  const { t, idioma } = useIdioma();
+  const { idioma } = useIdioma();
   const [listo, setListo] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState('');

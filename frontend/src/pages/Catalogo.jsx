@@ -6,7 +6,6 @@ import ET from '../components/ET';
 import Editable from '../components/Editable';
 import { obtenerProductos } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
-import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
 import TextoProducto from '../components/TextoProducto';
@@ -18,8 +17,7 @@ export default function Catalogo() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
-  const { agregar } = useCart();
-  const { t, idioma } = useIdioma();
+  const { idioma } = useIdioma();
   const { textos, esAdmin, guardar } = useTextos();
   const colorProductos = textos['catalogo_color'] || '';
 
@@ -41,11 +39,6 @@ export default function Catalogo() {
   }, []);
 
   const TODAS_KEY = '__todas__';
-  // Categorías disponibles (sacadas de los productos)
-  const categorias = useMemo(() => {
-    const set = new Set(productos.map((p) => p.categoria).filter(Boolean));
-    return [TODAS_KEY, ...Array.from(set)];
-  }, [productos]);
 
   // Aplicar búsqueda + filtro + orden
   const filtrados = useMemo(() => {

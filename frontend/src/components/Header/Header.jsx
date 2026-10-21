@@ -49,7 +49,7 @@ export default function Header({ transparente = false }) {
   }, [termino, productos]);
   const navigate = useNavigate();
   const { totalItems } = useCart();
-  const { usuario, esAdmin } = useAuth();
+  const { usuario, puedeEditar: esAdmin } = useAuth();
   const { idioma, setIdioma, t } = useIdioma();
 
   const cerrarBuscador = () => {

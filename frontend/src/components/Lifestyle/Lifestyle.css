@@ -9,35 +9,6 @@
   margin: 0 auto;
 }
 
-/* ── Encabezado ── */
-.lm-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 20px;
-  padding-bottom: 28px;
-  border-bottom: 1px solid rgba(176,83,46,0.25);
-  margin-bottom: 40px;
-}
-
-.lm-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-.lm-frase {
-  font-family: 'Fraunces', serif;
-  font-size: 15px;
-  font-weight: 400;
-  font-style: italic;
-  color: #6b6256;
-  margin: 0;
-  letter-spacing: 0;
-}
-
 /* ── Grid 2×2 ── */
 .lm-grid {
   display: grid;
@@ -60,20 +31,6 @@
   aspect-ratio: 4 / 3;
   object-fit: cover;
   background: #e8e2d8;
-}
-
-.lm-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.55s ease;
-  filter: saturate(0.88);
-}
-
-.lm-item:hover .lm-img {
-  transform: scale(1.03);
-  filter: saturate(1);
 }
 
 /* Misma foto pero renderizada por EditableImage (vista admin) */
@@ -171,7 +128,6 @@
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .lm-section { padding: 52px 20px 72px; }
-  .lm-header { flex-direction: column; gap: 8px; }
   .lm-grid { gap: 1px; }
   .lm-caption { flex-direction: column; gap: 4px; }
 }

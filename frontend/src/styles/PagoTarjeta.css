@@ -63,18 +63,6 @@
   margin-bottom: 24px;
 }
 
-.marca {
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.marca.visa   { background: #1a1f71; color: #fff; }
-.marca.master { background: #eb001b; color: #fff; }
-.marca.amex   { background: #007bc1; color: #fff; }
-
 /* Seguridad */
 .tarjeta-seguro {
   display: flex;

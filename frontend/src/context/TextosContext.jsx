@@ -15,7 +15,8 @@ export function TextosProvider({ children }) {
   const [textos, setTextos] = useState(textosGuardados || {});
   const [listos, setListos] = useState(textosGuardados !== null);
   const [frescos, setFrescos] = useState(false); // ya respondió Firestore
-  const { esAdmin, cargando } = useAuth();
+  // Para los componentes, esAdmin = mostrar los controles de edición (solo en modo edición)
+  const { esAdmin, puedeEditar, cargando } = useAuth();
 
   useEffect(() => {
     obtenerTextos()
@@ -61,7 +62,7 @@ export function TextosProvider({ children }) {
   }, [esAdmin, cargando, textos, frescos]);
 
   return (
-    <TextosContext.Provider value={{ textos, listos, esAdmin, guardar }}>
+    <TextosContext.Provider value={{ textos, listos, esAdmin: puedeEditar, guardar }}>
       {children}
     </TextosContext.Provider>
   );
