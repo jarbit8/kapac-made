@@ -1,61 +1,81 @@
-// Actualiza Firestore: elimina mochila-3 y mochila-4, agrega Gonzalo
-// Uso: node scripts/update-productos.mjs
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, deleteDoc, addDoc, doc } from 'firebase/firestore';
+// Script para actualizar productos reales en Firestore
+// Ejecutar: node scripts/update-productos.mjs
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBS0Ud5y11qOJlF6kGubx7PiX5mnXMRmgw",
-  authDomain: "kapac-made.firebaseapp.com",
-  projectId: "kapac-made",
-  storageBucket: "kapac-made.firebasestorage.app",
-  messagingSenderId: "19638468309",
-  appId: "1:19638468309:web:3ceff7c057d7f3965bec5c",
-};
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { readFileSync } from 'fs';
+import { createRequire } from 'module';
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const require = createRequire(import.meta.url);
 
-const col = collection(db, 'productos');
-const snap = await getDocs(col);
-const productos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+// Usar Application Default Credentials (firebase login ya autenticado)
+initializeApp({ projectId: 'kapac-made' });
+const db = getFirestore();
 
-console.log(`\nProductos actuales en Firestore (${productos.length}):`);
-productos.forEach(p => console.log(`  [${p.id.slice(0,8)}] ${p.nombre} — imagenMochila: ${p.imagenMochila}`));
-
-// Eliminar los que usan mochila-3 o mochila-4
-const aEliminar = productos.filter(p =>
-  p.imagenMochila === 'mochila-3' || p.imagenMochila === 'mochila-4'
-);
-
-if (aEliminar.length === 0) {
-  console.log('\nNo se encontraron productos con mochila-3 o mochila-4. Nada que eliminar.');
-} else {
-  for (const p of aEliminar) {
-    await deleteDoc(doc(db, 'productos', p.id));
-    console.log(`\n🗑️  Eliminado: "${p.nombre}" (${p.id.slice(0,8)})`);
-  }
-}
-
-// Verificar si Gonzalo ya existe
-const yaExiste = productos.some(p => p.imagenMochila === 'gonzalo');
-if (yaExiste) {
-  console.log('\n⚠️  Gonzalo ya existe en la base de datos. No se duplica.');
-} else {
-  const gonzalo = {
+const productos = [
+  {
+    nombre: 'Kapac Explorer',
+    precio: 129,
+    precioOriginal: 149,
+    moneda: 'S/',
+    descripcion: 'Mochila diseñada para explorar sin límites. Fabricada en Arequipa con altos estándares de calidad. Disponible en Verde Militar, Salvia Cyan y Verde Agua. Testeada y certificada para aventuras urbanas y de viaje.',
+    categoria: 'Aventura',
+    imagenMochila: 'mochila-1',
+    imagenContexto: 'foto-1',
+    stock: 10,
+    activo: true,
+    codigo: 'KM-EXP-BK-52-V2',
+  },
+  {
+    nombre: 'Kapac Atoms',
+    precio: 129,
+    precioOriginal: 159,
+    moneda: 'S/',
+    descripcion: 'La mochila más reciente de Kapac Made. Diseño que destaca, hecha en Arequipa con materiales de primera calidad. Perfecta para el uso diario urbano y viajes.',
+    categoria: 'Urbana',
+    imagenMochila: 'mochila-2',
+    imagenContexto: 'foto-2',
+    stock: 10,
+    activo: true,
+    codigo: 'KM-MO-AT001',
+  },
+  {
     nombre: 'Gonzalo',
     precio: 1,
     precioOriginal: null,
     moneda: 'S/',
+    descripcion: 'Edición especial Gonzalo. Una pieza única de Kapac Made para coleccionistas.',
+    categoria: 'Urbana',
     imagenMochila: 'gonzalo',
-    imagenContexto: 'gonzalo',
-    descripcion: 'Edición especial Gonzalo.',
-    stock: 10,
+    imagenContexto: 'foto-1',
+    stock: 1,
     activo: true,
-    categoria: 'Aventura',
-  };
-  const ref = await addDoc(col, gonzalo);
-  console.log(`\n✅ Agregado: "Gonzalo" (${ref.id.slice(0,8)}) — S/1.00`);
+  },
+];
+
+async function actualizarProductos() {
+  console.log('🔄 Obteniendo productos existentes...');
+  const snap = await db.collection('productos').get();
+  const existentes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  console.log(`📦 Encontrados ${existentes.length} productos existentes`);
+
+  for (const producto of productos) {
+    // Buscar por nombre
+    const existente = existentes.find(e =>
+      e.nombre?.toLowerCase().includes(producto.nombre.toLowerCase()) ||
+      producto.nombre.toLowerCase().includes(e.nombre?.toLowerCase())
+    );
+
+    if (existente) {
+      console.log(`✏️  Actualizando: ${producto.nombre} (${existente.id})`);
+      await db.collection('productos').doc(existente.id).update(producto);
+    } else {
+      console.log(`➕ Creando nuevo: ${producto.nombre}`);
+      await db.collection('productos').add(producto);
+    }
+  }
+
+  console.log('✅ Productos actualizados correctamente');
 }
 
-console.log('\n✔ Listo.\n');
-process.exit(0);
+actualizarProductos().catch(console.error);
