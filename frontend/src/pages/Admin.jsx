@@ -9,7 +9,7 @@ import {
 import {
   obtenerTodosPedidos, actualizarEstadoPedido,
 } from '../firebase/pedidos';
-import { obtenerEstadisticas, obtenerVisitasRecientes, banderaPais, nombreRuta } from '../firebase/visitas';
+import { obtenerEstadisticas, obtenerVisitasRecientes, nombreRuta } from '../firebase/visitas';
 import { imagen } from '../firebase/imagenesProductos';
 import { subirImagen, subirMedia, borrarMedia } from '../firebase/almacenamiento';
 import { HERO_CACHE_KEY } from '../components/Hero/Hero';
@@ -22,6 +22,7 @@ import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
 import { useTema, LOGO_CACHE_KEY } from '../context/TemaContext';
 import Cargando from '../components/Cargando/Cargando';
+import Icono from '../components/Icono';
 import '../styles/Admin.css';
 
 // Control reutilizable: muestra la foto actual y un botón para subir otra a Storage.
@@ -80,7 +81,7 @@ function SubirMedia({ valor, onSubido }) {
       {valor?.url
         ? (valor.tipo === 'video'
             ? (noPrev
-                ? <div className="subir-foto-vacio" style={{ color: '#155724' }}>✓ Video guardado<br/>(no se previsualiza)</div>
+                ? <div className="subir-foto-vacio" style={{ color: '#155724' }}>Video guardado<br/>(sin vista previa)</div>
                 : <video src={valor.url} className="subir-foto-prev" muted loop autoPlay playsInline controls
                     onError={() => setNoPrev(true)} />)
             : <img src={valor.url} alt="" className="subir-foto-prev" />)
@@ -89,8 +90,8 @@ function SubirMedia({ valor, onSubido }) {
         {subiendo ? 'Subiendo…' : (valor?.url ? 'Cambiar' : 'Subir imagen o video')}
         <input type="file" accept="image/*,video/*" onChange={onArchivo} disabled={subiendo} hidden />
       </label>
-      {ok && <span style={{ color: '#155724', fontSize: 12, fontWeight: 600 }}>✓ Guardado en la base de datos</span>}
-      {err && <span className="subir-foto-err">⚠️ {err}</span>}
+      {ok && <span className="admin-ok"><Icono nombre="check" tam={14} /> Guardado</span>}
+      {err && <span className="subir-foto-err">{err}</span>}
     </div>
   );
 }
@@ -132,27 +133,28 @@ const VACIO = {
 const ESTADOS_PEDIDO = ['procesando_pago', 'verificando_pago', 'pendiente_envio', 'enviado', 'entregado', 'cancelado'];
 
 const ESTADO_LABELS = {
-  procesando_pago:  '🔄 Procesando pago',
-  verificando_pago: '🔍 Verificando pago',
-  pendiente_envio:  '📦 Pendiente de envío',
-  enviado:         '🚚 Enviado',
-  entregado:       '🎉 Entregado',
-  cancelado:       '❌ Cancelado',
+  procesando_pago:  'Procesando pago',
+  verificando_pago: 'Verificando pago',
+  pendiente_envio:  'Pagado, por enviar',
+  enviado:         'Enviado',
+  entregado:       'Entregado',
+  cancelado:       'Cancelado',
   // viejos
-  pendiente:   '🕐 Pendiente',
-  verificando: '🔄 Procesando pago',
-  pagado:      '📦 Pendiente de envío',
+  pendiente:   'Pendiente',
+  verificando: 'Procesando pago',
+  pagado:      'Pagado, por enviar',
 };
 
-const METODO_PAGO_LABELS = {
-  yape:         '📱 Yape (QR)',
-  'yape-codigo': '📱 Yape (código)',
-  tarjeta:      '💳 Tarjeta',
-  efectivo:     '💵 PagoEfectivo',
+const METODO_PAGO = {
+  yape:          { texto: 'Yape (QR)', icono: 'celular' },
+  'yape-codigo': { texto: 'Yape (código de aprobación)', icono: 'celular' },
+  tarjeta:       { texto: 'Tarjeta', icono: 'tarjeta' },
+  efectivo:      { texto: 'PagoEfectivo', icono: 'billete' },
 };
 
 const ESTADO_COLORES = {
   procesando_pago: { bg: '#fff3cd', color: '#856404' },
+  verificando_pago: { bg: '#fff3cd', color: '#856404' },
   pendiente_envio: { bg: '#d4edda', color: '#155724' },
   enviado:         { bg: '#cce5ff', color: '#004085' },
   entregado:       { bg: '#d1e7dd', color: '#0f5132' },
@@ -205,7 +207,7 @@ export default function Admin() {
           texto: nuevo.texto || prev.texto,
         }));
       } catch (_) {}
-      setMsgContenido('✓ Guardado');
+      setMsgContenido('Cambios guardados');
     } catch (e) {
       setMsgContenido('No se pudo guardar: ' + (e?.message || ''));
       throw e;
@@ -238,8 +240,13 @@ export default function Admin() {
   useEffect(() => { cargar(); cargarPedidos(); cargarStats(); }, []);
 
   const cambiarEstadoPedido = async (pedidoId, nuevoEstado) => {
-    await actualizarEstadoPedido(pedidoId, nuevoEstado);
-    setMsg(`✅ Pedido actualizado a "${nuevoEstado}"`);
+    try {
+      await actualizarEstadoPedido(pedidoId, nuevoEstado);
+    } catch (e) {
+      setMsg(`No se pudo actualizar el pedido: ${e?.message || ''}`);
+      return;
+    }
+    setMsg(`Pedido #${pedidoId.slice(0, 8).toUpperCase()} actualizado: ${ESTADO_LABELS[nuevoEstado] || nuevoEstado}`);
     cargarPedidos();
   };
 
@@ -274,16 +281,16 @@ export default function Admin() {
     try {
       if (editandoId) {
         await actualizarProducto(editandoId, datos);
-        setMsg('✅ Producto actualizado');
+        setMsg('Producto actualizado');
       } else {
         await agregarProducto(datos);
-        setMsg('✅ Producto agregado');
+        setMsg('Producto agregado');
       }
       setForm(VACIO);
       setEditandoId(null);
       cargar();
     } catch (err) {
-      setMsg('❌ ' + err.message);
+      setMsg('No se pudo guardar: ' + err.message);
     }
   };
 
@@ -310,7 +317,7 @@ export default function Admin() {
   const borrar = async (id) => {
     if (!window.confirm('¿Eliminar este producto?')) return;
     await eliminarProducto(id);
-    setMsg('🗑️ Producto eliminado');
+    setMsg('Producto eliminado');
     cargar();
   };
 
@@ -377,7 +384,7 @@ export default function Admin() {
             className={pestana === 'fotos' ? 'activa' : ''}
             onClick={() => { setPestana('fotos'); cargarContenido(); }}
           >
-            📸 Fotos
+            Fotos y diseño
           </button>
           <button
             className={pestana === 'visitas' ? 'activa' : ''}
@@ -396,14 +403,14 @@ export default function Admin() {
             {(guardandoContenido || msgContenido) && (
               <p style={{
                 fontSize: 13, fontWeight: 600, marginTop: -8, marginBottom: 16,
-                color: guardandoContenido ? '#888' : (msgContenido.startsWith('✓') ? '#1a7d3b' : '#c0392b'),
+                color: guardandoContenido ? '#888' : (msgContenido.startsWith('No se pudo') ? '#c0392b' : '#1a7d3b'),
               }}>
                 {guardandoContenido ? 'Guardando…' : msgContenido}
               </p>
             )}
 
             <h3 className="admin-fotos-titulo">Diseño (fondo, navegación y botones)</h3>
-            <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>El color de cada texto se cambia con la pastilla 🎨 al lado de su lápiz ✏️, directo en la página. El logo se cambia pasando el mouse por encima, en la página de inicio. El menú y los botones usan un único color, acá abajo.</p>
+            <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>Los textos, sus colores y las fotos de cada página se cambian en la misma página, con el botón «Editar» del menú. El logo se cambia pasando el mouse sobre él. Aquí: el fondo y el color del menú y los botones.</p>
             <div className="admin-fotos-grid">
               <div className="admin-foto-card">
                 <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Fondo del sitio</label>
@@ -455,10 +462,11 @@ export default function Admin() {
                     color: contenido.cerrado ? '#842029' : '#155724',
                   }}
                 >
-                  {contenido.cerrado ? '🔴 Cerrada — solo tú la ves' : '🟢 Abierta a todo el mundo'}
+                  <span className={`admin-tienda-punto${contenido.cerrado ? ' cerrada' : ''}`} />
+                  {contenido.cerrado ? 'Cerrada: solo tú la ves' : 'Abierta al público'}
                 </button>
                 <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Cerrada: los visitantes ven una pantalla "Próximamente". Tú entras normal con tu cuenta (el candado de abajo a la derecha lleva al login).
+                  Cerrada: los visitantes ven la pantalla «Próximamente». Tú entras con tu cuenta desde kapac-made.com/login.
                 </p>
               </div>
             </div>
@@ -469,29 +477,29 @@ export default function Admin() {
                 <SubirMedia
                   valor={normalizarMedio(contenido.heroVideo?.pc)}
                   onSubido={(media) => persistirContenido({ ...contenido, heroVideo: { ...(contenido.heroVideo || {}), pc: media } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>🖥️ Para computadora (horizontal).</p>
+                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Computadora (horizontal)</p>
               </div>
               <div className="admin-foto-card">
                 <SubirMedia
                   valor={normalizarMedio(contenido.heroVideo?.mobile)}
                   onSubido={(media) => persistirContenido({ ...contenido, heroVideo: { ...(contenido.heroVideo || {}), mobile: media } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>📱 Para celular (vertical).</p>
+                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Celular (vertical)</p>
               </div>
             </div>
 
-            <p style={{ fontSize: 12, color: '#888', marginTop: -8, marginBottom: 16 }}>Las fotos, títulos y descripciones de "estilo de vida" del home se editan directo en la página de inicio (imagen, lápiz ✏️ y +/− ahí mismo).</p>
+            <p style={{ fontSize: 12, color: '#888', marginTop: -8, marginBottom: 16 }}>Las fotos y textos de la página de inicio se editan en la misma página, con el botón «Editar» del menú.</p>
 
             <h3 className="admin-fotos-titulo">Foto épica de "in the zone" (se abre en pestaña nueva)</h3>
             <div className="admin-fotos-grid">
               <div className="admin-foto-card">
                 <SubirFoto valor={slotMedio(contenido.inTheZoneFoto, 'pc')?.url || ''} carpeta="zone"
                   onSubido={(url) => persistirContenido({ ...contenido, inTheZoneFoto: { ...(typeof contenido.inTheZoneFoto === 'object' && (contenido.inTheZoneFoto?.pc || contenido.inTheZoneFoto?.mobile) ? contenido.inTheZoneFoto : {}), pc: { tipo: 'imagen', url } } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>🖥️ Para computadora.</p>
+                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Computadora</p>
               </div>
               <div className="admin-foto-card">
                 <SubirFoto valor={slotMedio(contenido.inTheZoneFoto, 'mobile')?.url || ''} carpeta="zone"
                   onSubido={(url) => persistirContenido({ ...contenido, inTheZoneFoto: { ...(typeof contenido.inTheZoneFoto === 'object' && (contenido.inTheZoneFoto?.pc || contenido.inTheZoneFoto?.mobile) ? contenido.inTheZoneFoto : {}), mobile: { tipo: 'imagen', url } } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>📱 Para celular (vertical).</p>
+                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Celular (vertical)</p>
               </div>
             </div>
 
@@ -500,12 +508,12 @@ export default function Admin() {
               <div className="admin-foto-card">
                 <SubirMedia valor={slotMedio(contenido.footerFondo, 'pc')}
                   onSubido={(media) => persistirContenido({ ...contenido, footerFondo: { ...(typeof contenido.footerFondo === 'object' && (contenido.footerFondo?.pc || contenido.footerFondo?.mobile) ? contenido.footerFondo : {}), pc: media } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>🖥️ Para computadora. Se ve al fondo del pie de página.</p>
+                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Computadora</p>
               </div>
               <div className="admin-foto-card">
                 <SubirMedia valor={slotMedio(contenido.footerFondo, 'mobile')}
                   onSubido={(media) => persistirContenido({ ...contenido, footerFondo: { ...(typeof contenido.footerFondo === 'object' && (contenido.footerFondo?.pc || contenido.footerFondo?.mobile) ? contenido.footerFondo : {}), mobile: media } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>📱 Para celular.</p>
+                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Celular</p>
               </div>
             </div>
 
@@ -542,7 +550,7 @@ export default function Admin() {
               </div>
             </div>
 
-            <h3 style={{ marginTop: 32, marginBottom: 4 }}>🕐 Actividad reciente</h3>
+            <h3 style={{ marginTop: 32, marginBottom: 4 }}>Actividad reciente</h3>
             <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Cada vez que alguien entró al sitio (no cada página que recorrió después).</p>
             <div className="admin-visitas-lista">
               {visitasRecientes.length === 0 && (
@@ -564,17 +572,16 @@ export default function Admin() {
                   else if (diff < 86400) tiempoRelativo = `hace ${Math.floor(diff/3600)} h`;
                   else tiempoRelativo = `hace ${Math.floor(diff/86400)} d`;
                 }
-                const bandera = banderaPais(v.pais);
                 const rutaNombre = nombreRuta(v.ruta);
                 return (
                   <div key={v.id} className="visita-row">
-                    <div className="visita-bandera">{bandera}</div>
+                    <div className="visita-bandera"><Icono nombre="ubicacion" tam={18} /></div>
                     <div className="visita-info">
                       <div className="visita-quien">
                         {v.email ? (
                           <strong>{v.email}</strong>
                         ) : (
-                          <span style={{ color:'#888' }}>👤 Visitante anónimo</span>
+                          <span style={{ color:'#888' }}>Visitante anónimo</span>
                         )}
                       </div>
                       <div className="visita-meta">
@@ -595,7 +602,7 @@ export default function Admin() {
               </button>
             )}
 
-            <h3 style={{ marginTop: 32, marginBottom: 4 }}>📅 Visitas por día</h3>
+            <h3 style={{ marginTop: 32, marginBottom: 4 }}>Visitas por día</h3>
             <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Cuántas veces entraron al sitio cada día.</p>
             <div className="admin-tabla-stats">
               {Object.entries(stats.porDia)
@@ -621,7 +628,7 @@ export default function Admin() {
               )}
             </div>
 
-            <h3 style={{ marginTop: 32, marginBottom: 4 }}>📄 A dónde navegan (rutas)</h3>
+            <h3 style={{ marginTop: 32, marginBottom: 4 }}>Páginas más visitadas</h3>
             <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Qué páginas recorren dentro de una misma visita.</p>
             <div className="admin-tabla-stats">
               {Object.entries(stats.porRuta)
@@ -641,7 +648,7 @@ export default function Admin() {
                 })}
             </div>
 
-            <h3 style={{ marginTop: 32, marginBottom: 16 }}>🌎 Visitantes por país</h3>
+            <h3 style={{ marginTop: 32, marginBottom: 16 }}>Visitantes por país</h3>
             <div className="admin-tabla-stats">
               {Object.entries(stats.porPais)
                 .sort((a, b) => b[1] - a[1])
@@ -650,7 +657,7 @@ export default function Admin() {
                   const ancho = Math.max(8, (n / max) * 100);
                   return (
                     <div key={pais} className="stat-row">
-                      <span className="stat-fecha">{banderaPais(pais)} {pais}</span>
+                      <span className="stat-fecha">{pais}</span>
                       <div className="stat-bar-wrap">
                         <div className="stat-bar" style={{ width: `${ancho}%`, background: '#4caf50' }} />
                       </div>
@@ -663,23 +670,16 @@ export default function Admin() {
             {/* Dispositivos */}
             {stats.porDispositivo && Object.keys(stats.porDispositivo).length > 0 && (
               <>
-                <h3 style={{ marginTop: 32, marginBottom: 16 }}>📱 Dispositivos</h3>
+                <h3 style={{ marginTop: 32, marginBottom: 16 }}>Dispositivos</h3>
                 <div className="admin-tabla-stats">
                   {Object.entries(stats.porDispositivo)
                     .sort((a, b) => b[1] - a[1])
                     .map(([disp, n]) => {
                       const max = Math.max(...Object.values(stats.porDispositivo), 1);
                       const ancho = Math.max(8, (n / max) * 100);
-                      const icono = disp.includes('iPhone') ? '📱' :
-                                    disp.includes('iPad') ? '📱' :
-                                    disp.includes('Android') ? '📱' :
-                                    disp.includes('Móvil') ? '📱' :
-                                    disp.includes('Mac') ? '💻' :
-                                    disp.includes('Windows') ? '💻' :
-                                    disp.includes('Linux') ? '💻' : '🖥️';
                       return (
                         <div key={disp} className="stat-row">
-                          <span className="stat-fecha">{icono} {disp}</span>
+                          <span className="stat-fecha">{disp}</span>
                           <div className="stat-bar-wrap">
                             <div className="stat-bar" style={{ width: `${ancho}%`, background: '#2196f3' }} />
                           </div>
@@ -692,7 +692,7 @@ export default function Admin() {
             )}
 
             <p style={{ marginTop: 30, fontSize: 13, color: '#888', lineHeight: 1.6, background: '#f5f5f5', padding: '14px 18px', borderRadius: 10 }}>
-              🔒 <strong>100% legal en Perú (Ley 29733)</strong> — sin cookies. Los visitantes logueados se identifican
+              <strong>Conforme a la Ley 29733 de Protección de Datos Personales</strong>: sin cookies. Los visitantes logueados se identifican
               por su correo (al cual nos dieron consentimiento al loguearse). Los anónimos quedan como "Desconocido".
               La ubicación (país/ciudad) se obtiene vía servicio externo sin guardar la IP cruda. Esto está informado
               en la página <a href="/legal">/legal</a>.
@@ -710,7 +710,7 @@ export default function Admin() {
                 <span className="admin-resumen-num">{pedidosPendientes.length}</span>
                 <span className="admin-resumen-label">{t('admin.pendientes')}</span>
                 {pedidosVerificando.length > 0 && (
-                  <span className="admin-resumen-alerta">⚠️ {pedidosVerificando.length} {t('admin.verificar')}</span>
+                  <span className="admin-resumen-alerta"><Icono nombre="alerta" tam={14} /> {pedidosVerificando.length} {t(pedidosVerificando.length === 1 ? 'admin.verificar_uno' : 'admin.verificar')}</span>
                 )}
               </div>
               <div className="admin-resumen-card completados" onClick={() => setFiltroPedidos('completados')}>
@@ -726,9 +726,9 @@ export default function Admin() {
             {/* Filtros */}
             <div className="admin-pedidos-filtros">
               {[
-                { key: 'pendientes',  label: `🕐 ${t('admin.filtro_pendientes')} (${pedidosPendientes.length})` },
-                { key: 'completados', label: `🎉 ${t('admin.filtro_completados')} (${pedidosCompletados.length})` },
-                { key: 'cancelados',  label: `❌ ${t('admin.filtro_cancelados')} (${pedidosCancelados.length})` },
+                { key: 'pendientes',  label: `${t('admin.filtro_pendientes')} (${pedidosPendientes.length})` },
+                { key: 'completados', label: `${t('admin.filtro_completados')} (${pedidosCompletados.length})` },
+                { key: 'cancelados',  label: `${t('admin.filtro_cancelados')} (${pedidosCancelados.length})` },
               ].map(f => (
                 <button
                   key={f.key}
@@ -758,7 +758,7 @@ export default function Admin() {
                   <div key={p.id} className="admin-pedido-card">
                     <div className="admin-pedido-top">
                       <div>
-                        <span className="admin-pedido-id">#{p.id.slice(0, 8)}</span>
+                        <span className="admin-pedido-id">#{p.id.slice(0, 8).toUpperCase()}</span>
                         <span className="admin-pedido-email">{p.email}</span>
                       </div>
                       <span
@@ -770,7 +770,8 @@ export default function Admin() {
                     </div>
                     <p className="admin-pedido-fecha">{formatoFecha(p.fecha)}</p>
                     <p className="admin-pedido-metodo">
-                      {METODO_PAGO_LABELS[p.metodoPago] || `❔ ${p.metodoPago || 'Sin método'}`}
+                      <Icono nombre={METODO_PAGO[p.metodoPago]?.icono || 'info'} tam={16} />
+                      {METODO_PAGO[p.metodoPago]?.texto || p.metodoPago || 'Sin método de pago'}
                     </p>
                     <ul className="admin-pedido-items">
                       {p.items?.map((it, i) => (
@@ -779,9 +780,11 @@ export default function Admin() {
                     </ul>
                     {p.envio && (
                       <p className="admin-pedido-envio">
+                        <Icono nombre={p.envio.tipo === 'envio' ? 'camion' : 'tienda'} tam={16} />
                         {p.envio.tipo === 'envio'
-                          ? `📦 ${t('admin.dominio_envio')}: ${p.envio.direccion}, ${p.envio.distrito} · ${p.envio.telefono}`
-                          : `🏠 ${t('admin.recojo')} · ${p.envio.telefono || ''}`}
+                          ? `${t('admin.dominio_envio')}: ${p.envio.direccion}, ${p.envio.distrito}`
+                          : t('admin.recojo')}
+                        {p.envio.telefono ? ` · Tel. ${p.envio.telefono}` : ''}
                       </p>
                     )}
                     {p.metodoPago === 'yape' && p.codigoAprobacion && (
@@ -797,7 +800,7 @@ export default function Admin() {
                         className="admin-pedido-select"
                       >
                         {ESTADOS_PEDIDO.map((est) => (
-                          <option key={est} value={est}>{est}</option>
+                          <option key={est} value={est}>{ESTADO_LABELS[est]}</option>
                         ))}
                       </select>
                     </div>

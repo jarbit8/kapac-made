@@ -347,7 +347,6 @@
   padding: 4px 12px;
   border-radius: 12px;
   font-weight: 600;
-  text-transform: capitalize;
 }
 
 .admin-pedido-fecha {
@@ -828,3 +827,23 @@
     font-size: 13.5px !important;
   }
 }
+
+/* Íconos en línea (sin emojis) */
+.admin-pedido-metodo, .admin-pedido-envio, .admin-resumen-alerta, .admin-ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.admin-pedido-metodo .icono, .admin-pedido-envio .icono { flex-shrink: 0; color: #666; }
+.admin-ok { color: #155724; font-size: 12px; font-weight: 600; }
+.visita-bandera { color: #777; }
+.admin-tienda-punto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #1a7d3b;
+  vertical-align: 1px;
+}
+.admin-tienda-punto.cerrada { background: #b42318; }
