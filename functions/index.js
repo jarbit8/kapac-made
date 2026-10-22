@@ -5,13 +5,16 @@ const { defineSecret } = require('firebase-functions/params');
 const admin = require('firebase-admin');
 const fetch = require('node-fetch');
 const { Resend } = require('resend');
+const { correoPedido, correoCodigo } = require('./correos');
 
 admin.initializeApp();
 
 const culqiSecret  = defineSecret('CULQI_SECRET_KEY');
 const resendSecret = defineSecret('RESEND_API_KEY');
 
-const REMITENTE = 'Kapac Made <onboarding@resend.dev>';
+const REMITENTE = 'Kapac Made <pedidos@kapac-made.com>';
+// Si el cliente responde el correo, le llega aquí (pedidos@ solo envía)
+const RESPONDER_A = 'jarb2299@gmail.com';
 
 // Recalcula el pedido REAL leyendo cada producto desde la base de datos:
 // precio Y nombre salen de la BD, nunca de lo que mandó el cliente. Así no se
@@ -52,117 +55,15 @@ async function permitirIP(req, segundos) {
 }
 
 // ─── Correos para el cliente (Resend) ─────────────────────────────────────────
-const ASUNTOS_EMAIL = {
-  verificando_pago: (id) => `🔍 Verificando tu pago — Pedido #${id}`,
-  pendiente_envio:  (id) => `✅ Pago confirmado — Pedido #${id}`,
-  enviado:          (id) => `🚚 Tu pedido va en camino — #${id}`,
-  entregado:        (id) => `🎉 Pedido entregado — #${id}`,
-  cancelado:        (id) => `❌ Pedido cancelado — #${id}`,
-};
-
-const TITULOS_EMAIL = {
-  verificando_pago: 'Pago recibido, verificando',
-  pendiente_envio:  '¡Pago confirmado!',
-  enviado:          '¡Tu pedido va en camino!',
-  entregado:        '¡Pedido entregado!',
-  cancelado:        'Pedido cancelado',
-};
-
-const MENSAJES_EMAIL = {
-  verificando_pago: 'Recibimos tu pago. Estamos verificándolo y te avisaremos cuando sea confirmado.',
-  pendiente_envio:  'Tu pago fue confirmado exitosamente. Ahora está pendiente de envío — lo prepararemos pronto.',
-  enviado:          'Tu pedido fue enviado y pronto llegará a tu dirección.',
-  entregado:        '¡Gracias por comprar en Kapac Made! Tu pedido fue entregado con éxito.',
-  cancelado:        'Tu pedido fue cancelado. Para más información: +51 997 050 752',
-};
-
-function htmlEmail({ titulo, mensaje, idCorto, total, items, nuevoEstado }) {
-  const itemsHtml = (items || []).map(i =>
-    `<tr><td style="padding:6px 0;color:#555">${i.cantidad}× ${i.nombre}</td><td style="padding:6px 0;text-align:right;color:#111;font-weight:600">S/${i.precio * i.cantidad}.00</td></tr>`
-  ).join('');
-
-  const colorEstado = {
-    verificando_pago: '#856404',
-    pendiente_envio:  '#155724',
-    enviado:          '#004085',
-    entregado:        '#0f5132',
-    cancelado:        '#842029',
-  }[nuevoEstado] || '#111';
-
-  const LOGO_URL = 'https://jarbit8.github.io/kapac-made/kapac_made_3.png';
-
-  return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>Kapac Made</title></head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <div style="max-width:560px;margin:30px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.06)">
-
-    <!-- Header con logo -->
-    <div style="background:#0f0f0f;padding:40px 24px 32px;text-align:center;">
-      <img src="${LOGO_URL}" alt="Kapac Made" width="280" style="max-width:80%;height:auto;display:block;margin:0 auto;filter:brightness(0) invert(1);" />
-      <p style="margin:18px 0 0;color:rgba(255,255,255,0.55);font-size:11px;letter-spacing:3px;text-transform:uppercase;">Arequipa · Perú</p>
-    </div>
-
-    <!-- Contenido -->
-    <div style="padding:36px 30px 28px;">
-      <p style="margin:0 0 10px;font-size:12px;color:${colorEstado};font-weight:700;text-transform:uppercase;letter-spacing:2px;">${nuevoEstado.replace(/_/g,' ')}</p>
-      <h2 style="margin:0 0 18px;font-size:24px;color:#111;font-weight:600;letter-spacing:-0.3px;">${titulo}</h2>
-      <p style="margin:0 0 24px;font-size:15px;color:#555;line-height:1.65;">${mensaje}</p>
-
-      <!-- Tarjeta del pedido -->
-      <div style="background:#fafafa;border:1px solid #eee;border-radius:12px;padding:22px 22px;margin:24px 0;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid #eee;padding-bottom:14px;">
-          <span style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;">Pedido</span>
-          <strong style="font-size:16px;color:#111;letter-spacing:1px;">#${idCorto}</strong>
-        </div>
-        <table style="width:100%;border-collapse:collapse;font-size:14px;">
-          ${itemsHtml}
-        </table>
-        <div style="border-top:1px solid #eee;margin-top:14px;padding-top:14px;display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:13px;color:#777;text-transform:uppercase;letter-spacing:1.5px;">Total</span>
-          <strong style="font-size:20px;color:#111;">S/${total}.00</strong>
-        </div>
-      </div>
-
-      <!-- Contacto -->
-      <div style="margin:30px 0 0;padding:18px 20px;background:#f5f5f5;border-radius:10px;text-align:center;">
-        <p style="margin:0 0 4px;font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;">¿Tienes alguna consulta?</p>
-        <p style="margin:0;font-size:16px;color:#111;font-weight:600;">+51 997 050 752</p>
-      </div>
-    </div>
-
-    <!-- Footer con logo más chico -->
-    <div style="background:#0f0f0f;padding:30px 24px 22px;text-align:center;">
-      <img src="${LOGO_URL}" alt="Kapac Made" width="160" style="max-width:50%;height:auto;display:block;margin:0 auto 14px;filter:brightness(0) invert(1);opacity:0.85;" />
-      <p style="margin:8px 0 4px;color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:2px;">MOCHILAS HECHAS A MANO</p>
-      <p style="margin:0;color:rgba(255,255,255,0.3);font-size:10px;letter-spacing:1px;">© 2025 Kapac Made · Arequipa, Perú</p>
-    </div>
-
-  </div>
-
-  <!-- Pie fuera del card -->
-  <p style="text-align:center;margin:14px 0 30px;font-size:11px;color:#bbb;letter-spacing:0.5px;">
-    Recibiste este correo porque hiciste un pedido en Kapac Made.
-  </p>
-</body>
-</html>`;
-}
-
-async function enviarCorreo({ to, nuevoEstado, idCorto, total, items }) {
+// Las plantillas están en correos.js
+async function enviarCorreo({ to, pedidoId, estado, total, items, envio }) {
+  const correo = correoPedido({ pedidoId, estado, total, items, envio });
+  if (!correo) return;
   try {
     const resend = new Resend(resendSecret.value());
-    const html = htmlEmail({
-      titulo:   TITULOS_EMAIL[nuevoEstado],
-      mensaje:  MENSAJES_EMAIL[nuevoEstado],
-      idCorto, total, items, nuevoEstado,
-    });
-    await resend.emails.send({
-      from: REMITENTE,
-      to: [to],
-      subject: ASUNTOS_EMAIL[nuevoEstado](idCorto),
-      html,
-    });
+    // Resend no lanza el error: lo devuelve (por ejemplo, remitente sin dominio verificado)
+    const { error } = await resend.emails.send({ from: REMITENTE, replyTo: RESPONDER_A, to: [to], subject: correo.asunto, html: correo.html });
+    if (error) console.error('Resend rechazó el correo:', to, error);
   } catch (e) {
     console.error('Error enviando correo:', e);
   }
@@ -179,9 +80,11 @@ exports.notificarCambioEstado = onDocumentUpdated(
     const antes   = event.data.before.data();
     const despues = event.data.after.data();
     const pedidoId = event.params.pedidoId;
-    const idCorto  = pedidoId.slice(0, 8).toUpperCase();
 
-    if (antes.estado === despues.estado) return;
+    // El cliente activa el aviso en la confirmación, cuando el pago con tarjeta o
+    // Yape ya se confirmó: en ese caso se le manda al momento el correo del estado actual.
+    const activoAviso = antes.canalNotificacion !== 'email' && despues.canalNotificacion === 'email';
+    if (antes.estado === despues.estado && !activoAviso) return;
 
     const nuevoEstado = despues.estado;
     const total = despues.total || 0;
@@ -190,7 +93,7 @@ exports.notificarCambioEstado = onDocumentUpdated(
     // Lo hace el servidor con el Admin SDK: los clientes no pueden escribir
     // en productos. Cubre todos los métodos: tarjeta/yape-código (cobrarCulqi),
     // PagoEfectivo (webhook) y yape QR (confirmación manual del admin).
-    if (nuevoEstado === 'pendiente_envio' && !despues.stockDescontado) {
+    if (antes.estado !== despues.estado && nuevoEstado === 'pendiente_envio' && !despues.stockDescontado) {
       const db = admin.firestore();
       try {
         await db.runTransaction(async (tx) => {
@@ -215,13 +118,14 @@ exports.notificarCambioEstado = onDocumentUpdated(
     }
 
     // ── Notificar al CLIENTE por CORREO ─────────────────────────────────────
-    if (despues.canalNotificacion === 'email' && despues.email && MENSAJES_EMAIL[nuevoEstado]) {
+    if (despues.canalNotificacion === 'email' && despues.email) {
       await enviarCorreo({
         to: despues.email,
-        nuevoEstado,
-        idCorto,
+        pedidoId,
+        estado: nuevoEstado,
         total,
         items: despues.items || [],
+        envio: despues.envio,
       });
     }
   }
@@ -388,25 +292,13 @@ exports.enviarCodigoNewsletter = onRequest(
       });
 
       const resend = new Resend(resendSecret.value());
-      await resend.emails.send({
-        from: REMITENTE,
-        to: email,
-        subject: `Tu código de verificación: ${codigo}`,
-        html: `
-          <div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f4efe3;border-radius:14px;color:#1d1b15;">
-            <h1 style="font-size:22px;margin:0 0 8px;color:#1a3a26;">Kapac Made 🎒</h1>
-            <p style="font-size:15px;line-height:1.6;color:#4a463c;margin:0 0 24px;">
-              ¡Casi listo! Usa este código para confirmar tu correo y unirte a la tribu Kapac:
-            </p>
-            <div style="font-size:40px;font-weight:800;letter-spacing:10px;text-align:center;color:#1a3a26;background:#fff;border-radius:12px;padding:20px;border:1px dashed #b0532e;">
-              ${codigo}
-            </div>
-            <p style="font-size:13px;color:#8c8676;margin:24px 0 0;text-align:center;">
-              El código vence en 15 minutos. Si no fuiste tú, ignora este correo.
-            </p>
-          </div>
-        `,
-      });
+      const correo = correoCodigo(codigo);
+      const { error } = await resend.emails.send({ from: REMITENTE, replyTo: RESPONDER_A, to: email, subject: correo.asunto, html: correo.html });
+      if (error) {
+        // Sin esto la página decía "te enviamos el código" aunque no saliera
+        await codRef.delete().catch(() => {});
+        throw new Error(`Resend: ${error.message || error.name}`);
+      }
 
       res.status(200).json({ ok: true });
     } catch (err) {
@@ -626,7 +518,11 @@ exports.culqiWebhook = onRequest(
   async (req, res) => {
     try {
       const evento = req.body || {};
-      const datos  = evento.data || evento.object || {};
+      let datos = evento.data || {};
+      // Culqi manda "data" como texto JSON, no como objeto
+      if (typeof datos === 'string') {
+        try { datos = JSON.parse(datos); } catch { datos = {}; }
+      }
       const orderId = datos.id;
 
       if (!orderId) { res.status(200).send('OK (sin id)'); return; }
