@@ -109,6 +109,21 @@ service cloud.firestore {
       allow write: if esAdmin();
     }
 
+    // ─── LIBRO DE RECLAMACIONES ──────────────────────────────────────────────
+    // Los crea el servidor (número correlativo y correos). El admin solo puede
+    // responder una vez; la hoja del consumidor no se toca ni se borra.
+    match /reclamos/{codigo} {
+      allow read: if esAdmin();
+      allow update: if esAdmin()
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['respuesta', 'fechaRespuesta', 'estado'])
+                    && resource.data.estado == 'pendiente'
+                    && request.resource.data.estado == 'respondido'
+                    && request.resource.data.respuesta is string
+                    && request.resource.data.respuesta.size() > 0
+                    && request.resource.data.respuesta.size() <= 5000;
+    }
+
     // ─── TODO LO DEMÁS ───────────────────────────────────────────────────────
     // Bloqueado por defecto (incluye reseñas, códigos de newsletter, etc.).
     match /{document=**} {

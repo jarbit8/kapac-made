@@ -5,7 +5,7 @@ const { defineSecret } = require('firebase-functions/params');
 const admin = require('firebase-admin');
 const fetch = require('node-fetch');
 const { Resend } = require('resend');
-const { correoPedido, correoCodigo } = require('./correos');
+const { correoPedido, correoCodigo, correoReclamo, correoRespuestaReclamo } = require('./correos');
 
 admin.initializeApp();
 
@@ -51,8 +51,8 @@ function ipCliente(req) {
 
 // Límite por IP: true si se permite, false si llamó hace menos de `segundos`.
 // Usa la colección `limites_ip` (solo accesible por el Admin SDK).
-async function permitirIP(req, segundos) {
-  const ref = admin.firestore().collection('limites_ip').doc(ipCliente(req));
+async function permitirIP(req, segundos, prefijo = '') {
+  const ref = admin.firestore().collection('limites_ip').doc(prefijo + ipCliente(req));
   const snap = await ref.get();
   if (snap.exists && Date.now() - (snap.data().ultimo || 0) < segundos * 1000) return false;
   await ref.set({ ultimo: Date.now() });
@@ -636,6 +636,159 @@ exports.culqiWebhook = onRequest(
     } catch (err) {
       console.error('Error en culqiWebhook:', err);
       res.status(200).send('OK'); // siempre 200 para que Culqi no reintente eternamente
+    }
+  }
+);
+
+// ─── Libro de Reclamaciones ───────────────────────────────────────────────────
+// La hoja la arma el servidor: número correlativo por año, copia por correo al
+// consumidor y aviso a la tienda. Los reclamos no se borran (se guardan 2 años).
+
+// Valida y limpia lo que manda la página. null si falta algo obligatorio.
+function leerReclamo(b) {
+  const linea = (v) => String(v ?? '').trim().replace(/\s+/g, ' ');
+  const parrafo = (v) => String(v ?? '').trim().replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+  const letras = (v) => (v.match(/\p{L}/gu) || []).length;
+  const largo = (v, min, max) => v.length >= min && v.length <= max;
+  const r = {
+    tipo: ['reclamo', 'queja'].includes(b.tipo) ? b.tipo : '',
+    nombre: linea(b.nombre),
+    documentoTipo: ['DNI', 'CE', 'Pasaporte', 'RUC'].includes(b.documentoTipo) ? b.documentoTipo : '',
+    documento: linea(b.documento).toUpperCase(),
+    domicilio: linea(b.domicilio),
+    telefono: linea(b.telefono),
+    email: linea(b.email).toLowerCase(),
+    menorDeEdad: b.menorDeEdad === true,
+    apoderado: b.menorDeEdad === true ? linea(b.apoderado) : '',
+    bienTipo: b.bienTipo === 'servicio' ? 'servicio' : 'producto',
+    bienDescripcion: linea(b.bienDescripcion),
+    monto: b.monto === null || b.monto === undefined || b.monto === '' ? null : Number(b.monto),
+    pedidoId: linea(b.pedidoId),
+    detalle: parrafo(b.detalle),
+    pedido: parrafo(b.pedido),
+    idioma: b.idioma === 'en' ? 'en' : 'es',
+  };
+  const documento = { DNI: /^\d{8}$/, RUC: /^\d{11}$/, CE: /^[A-Z0-9]{6,15}$/, Pasaporte: /^[A-Z0-9]{6,15}$/ }[r.documentoTipo];
+  const valido = r.tipo
+    && largo(r.nombre, 2, 120) && letras(r.nombre) >= 2
+    && documento && documento.test(r.documento)
+    && largo(r.domicilio, 5, 200)
+    && r.telefono.length <= 20
+    && r.email.length <= 120 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email)
+    && (!r.menorDeEdad || (largo(r.apoderado, 2, 120) && letras(r.apoderado) >= 2))
+    && largo(r.bienDescripcion, 3, 300)
+    && (r.monto === null || (Number.isFinite(r.monto) && r.monto >= 0 && r.monto <= 100000))
+    && r.pedidoId.length <= 40
+    && largo(r.detalle, 10, 3000)
+    && largo(r.pedido, 3, 1500);
+  return valido ? r : null;
+}
+
+// 15 días hábiles (lunes a viernes, hora de Lima; los feriados no se descuentan)
+function sumarDiasHabiles(desde, dias) {
+  const d = new Date(desde);
+  let sumados = 0;
+  while (sumados < dias) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    const dia = new Date(d.getTime() - 5 * 3600 * 1000).getUTCDay();
+    if (dia !== 0 && dia !== 6) sumados++;
+  }
+  return d;
+}
+
+async function enviar(para, correo) {
+  const resend = new Resend(resendSecret.value());
+  const { error } = await resend.emails.send({ from: REMITENTE, replyTo: RESPONDER_A, to: [para], subject: correo.asunto, html: correo.html });
+  if (error) throw new Error(`Resend: ${error.message || error.name}`);
+}
+
+exports.registrarReclamo = onRequest(
+  {
+    cors: ['https://jarbit8.github.io', 'https://www.kapac-made.com', 'https://kapac-made.com'],
+    invoker: 'public',
+    region: 'us-central1',
+    secrets: [resendSecret],
+  },
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).json({ ok: false, mensaje: 'Método no permitido' }); return; }
+    const r = leerReclamo(req.body || {});
+    if (!r) { res.status(400).json({ ok: false, mensaje: 'Revisa los datos del formulario.' }); return; }
+
+    try {
+      if (!(await permitirIP(req, 20, 'reclamo_'))) {
+        res.status(429).json({ ok: false, mensaje: 'Demasiados intentos. Espera un momento.' });
+        return;
+      }
+      const db = admin.firestore();
+      const ahora = new Date();
+      const anio = Number(ahora.toLocaleString('en-US', { timeZone: 'America/Lima', year: 'numeric' }));
+      const hoy = ahora.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+      const limite = sumarDiasHabiles(ahora, 15);
+
+      // Número correlativo del año y tope diario (protege la cuota de correos)
+      const codigo = await db.runTransaction(async (tx) => {
+        const contRef = db.collection('contadores').doc('reclamos');
+        const cont = await tx.get(contRef);
+        const c = cont.exists ? cont.data() : {};
+        const delDia = c.dia === hoy ? (c.delDia || 0) : 0;
+        if (delDia >= 50) return null;
+        const n = c.anio === anio ? (c.n || 0) + 1 : 1;
+        const nuevo = `${String(n).padStart(6, '0')}-${anio}`;
+        tx.set(contRef, { anio, n, dia: hoy, delDia: delDia + 1 });
+        tx.create(db.collection('reclamos').doc(nuevo), {
+          ...r,
+          codigo: nuevo,
+          fecha: admin.firestore.Timestamp.fromDate(ahora),
+          fechaLimite: admin.firestore.Timestamp.fromDate(limite),
+          estado: 'pendiente',
+          respuesta: null,
+          fechaRespuesta: null,
+        });
+        return nuevo;
+      });
+      if (!codigo) {
+        res.status(503).json({ ok: false, mensaje: 'El libro no está disponible en este momento. Escríbenos por WhatsApp.' });
+        return;
+      }
+
+      const hoja = { ...r, codigo, fecha: ahora, fechaLimite: limite };
+      const [copia] = await Promise.allSettled([
+        enviar(r.email, correoReclamo(hoja)),
+        enviar(RESPONDER_A, correoReclamo(hoja, { paraTienda: true })),
+      ]);
+      if (copia.status === 'rejected') console.error('No se pudo enviar la copia del reclamo', codigo, copia.reason);
+      await db.collection('reclamos').doc(codigo).update({ copiaEnviada: copia.status === 'fulfilled' });
+
+      res.status(200).json({ ok: true, codigo, fecha: ahora.toISOString(), fechaLimite: limite.toISOString() });
+    } catch (err) {
+      console.error('registrarReclamo error:', err);
+      res.status(500).json({ ok: false, mensaje: 'Error interno del servidor.' });
+    }
+  }
+);
+
+// El admin responde desde el panel: se le manda la respuesta al consumidor
+exports.responderReclamo = onDocumentUpdated(
+  {
+    document: 'reclamos/{codigo}',
+    region: 'us-central1',
+    secrets: [resendSecret],
+  },
+  async (event) => {
+    const antes = event.data.before.data();
+    const despues = event.data.after.data();
+    if (antes.respuesta || !despues.respuesta) return;
+    const r = {
+      ...despues,
+      fecha: despues.fecha.toDate(),
+      fechaRespuesta: despues.fechaRespuesta?.toDate() || new Date(),
+    };
+    try {
+      await enviar(r.email, correoRespuestaReclamo(r));
+      await event.data.after.ref.update({ respuestaEnviada: true });
+    } catch (e) {
+      console.error('No se pudo enviar la respuesta del reclamo', event.params.codigo, e);
+      await event.data.after.ref.update({ respuestaEnviada: false });
     }
   }
 );

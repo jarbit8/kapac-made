@@ -179,4 +179,88 @@ function correoCodigo(codigo) {
   return { asunto: `${codigo} es tu código de Kapac Made`, html: marco({ previa: `Tu código es ${codigo}`, contenido, foto: false }) };
 }
 
-module.exports = { correoPedido, correoCodigo };
+// ─── Libro de Reclamaciones ──────────────────────────────────────────────────
+const EMPRESA = {
+  razonSocial: 'QHAPAQ BRANDS S.A.C.S.',
+  nombreComercial: 'Kapac Made',
+  ruc: '20613661604',
+  domicilio: 'Av. Lambramani Mz. D Lote 3, Urb. Lambramani, Arequipa - Arequipa',
+};
+
+const fechaLima = (d) => new Date(d).toLocaleDateString('es-PE', { timeZone: 'America/Lima', day: '2-digit', month: 'long', year: 'numeric' });
+const parrafos = (t) => html(t).replace(/\n/g, '<br>');
+
+function fila(nombre, valor) {
+  return `<tr>
+    <td valign="top" width="38%" style="padding:10px 12px 10px 0;border-bottom:1px solid ${LINEA};font-size:12px;color:${GRIS};">${nombre}</td>
+    <td valign="top" style="padding:10px 0;border-bottom:1px solid ${LINEA};font-size:14px;line-height:1.5;color:${TINTA};">${valor}</td>
+  </tr>`;
+}
+
+function seccion(titulo, filas) {
+  return `<p style="margin:26px 0 4px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${TINTA};">${titulo}</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:2px solid ${TINTA};">${filas}</table>`;
+}
+
+// La hoja completa: la copia para el consumidor y el aviso para la tienda
+function hojaReclamo(r) {
+  const tipo = r.tipo === 'queja' ? 'Queja' : 'Reclamo';
+  return seccion('Proveedor', [
+      fila('Razón social', html(EMPRESA.razonSocial)),
+      fila('Nombre comercial', html(EMPRESA.nombreComercial)),
+      fila('RUC', EMPRESA.ruc),
+      fila('Domicilio', html(EMPRESA.domicilio)),
+    ].join(''))
+    + seccion('1. Identificación del consumidor', [
+      fila('Nombre', html(r.nombre)),
+      fila(html(r.documentoTipo), html(r.documento)),
+      fila('Domicilio', html(r.domicilio)),
+      r.telefono ? fila('Teléfono', html(r.telefono)) : '',
+      fila('Correo', html(r.email)),
+      r.menorDeEdad ? fila('Padre, madre o apoderado', html(r.apoderado)) : '',
+    ].join(''))
+    + seccion('2. Identificación del bien contratado', [
+      fila('Tipo', r.bienTipo === 'servicio' ? 'Servicio' : 'Producto'),
+      fila('Descripción', html(r.bienDescripcion)),
+      r.monto !== null ? fila('Monto reclamado', soles(r.monto)) : '',
+      r.pedidoId ? fila('N.º de pedido', html(r.pedidoId)) : '',
+    ].join(''))
+    + seccion('3. Detalle de la reclamación', [
+      fila('Tipo', tipo),
+      fila('Detalle', parrafos(r.detalle)),
+      fila('Pedido del consumidor', parrafos(r.pedido)),
+    ].join(''))
+    + `<p style="margin:26px 0 0;font-size:11px;line-height:1.6;color:#9a958c;">Reclamo: disconformidad relacionada con los productos o servicios. Queja: disconformidad no relacionada con los productos o servicios, o malestar o descontento respecto a la atención al público.<br><br>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI. El proveedor deberá dar respuesta al reclamo o queja en un plazo no mayor a quince (15) días hábiles improrrogables.</p>`;
+}
+
+function correoReclamo(r, { paraTienda = false } = {}) {
+  const tipo = r.tipo === 'queja' ? 'queja' : 'reclamo';
+  const mensaje = paraTienda
+    ? `Llegó un${tipo === 'queja' ? 'a' : ''} ${tipo} nuevo${tipo === 'queja' ? 'a' : ''} el ${fechaLima(r.fecha)}. Hay que responder desde el panel (pestaña Reclamos) a más tardar el ${fechaLima(r.fechaLimite)}.`
+    : `Registramos tu ${tipo} el ${fechaLima(r.fecha)}. Esta es tu copia de la hoja de reclamación. Te responderemos a este correo a más tardar el ${fechaLima(r.fechaLimite)}.`;
+  const contenido = `
+    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:${GRIS};">Libro de Reclamaciones</p>
+    <h1 style="margin:0 0 14px;font-size:26px;line-height:1.2;font-weight:700;color:${TINTA};">Hoja de reclamación N.º ${html(r.codigo)}</h1>
+    <p style="margin:0 0 6px;font-size:15px;line-height:1.65;color:#45423d;">${mensaje}</p>
+    ${hojaReclamo(r)}`;
+  return {
+    asunto: paraTienda ? `${tipo === 'queja' ? 'Nueva queja' : 'Nuevo reclamo'} N.º ${r.codigo} · Libro de Reclamaciones` : `Tu ${tipo} N.º ${r.codigo} · Kapac Made`,
+    html: marco({ previa: mensaje, contenido, foto: false }),
+  };
+}
+
+function correoRespuestaReclamo(r) {
+  const tipo = r.tipo === 'queja' ? 'queja' : 'reclamo';
+  const contenido = `
+    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:${GRIS};">Libro de Reclamaciones</p>
+    <h1 style="margin:0 0 14px;font-size:26px;line-height:1.2;font-weight:700;color:${TINTA};">Respuesta a tu ${tipo} N.º ${html(r.codigo)}</h1>
+    <p style="margin:0 0 6px;font-size:15px;line-height:1.65;color:#45423d;">Hola ${html(r.nombre)}, esta es nuestra respuesta del ${fechaLima(r.fechaRespuesta)}.</p>
+    ${seccion('4. Observaciones y acciones adoptadas por el proveedor', fila('Respuesta', parrafos(r.respuesta)))}
+    ${hojaReclamo(r)}`;
+  return {
+    asunto: `Respuesta a tu ${tipo} N.º ${r.codigo} · Kapac Made`,
+    html: marco({ previa: `Respuesta a tu ${tipo} N.º ${r.codigo}`, contenido, foto: false }),
+  };
+}
+
+module.exports = { correoPedido, correoCodigo, correoReclamo, correoRespuestaReclamo };
