@@ -26,17 +26,22 @@ export default function Alma() {
   }, []);
 
   const bloques = contenido ? contenido.almaBloques : [];
+  const vacio = (id, def) => !(textos[`${id}__${idioma}`] ?? def).trim();
   const fotos = contenido ? contenido.almaFotos : [];
 
   const guardarContenidoParcial = async (cambiar) => {
     // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
     // para no perder lo que se haya cambiado desde otro dispositivo.
+    let base;
     try {
-      const base = await obtenerContenido();
+      base = await obtenerContenido();
       const nuevo = { ...base, ...cambiar(base) };
       setContenido(nuevo);
       await guardarContenido(nuevo, base);
-    } catch (_) { /* error silencioso */ }
+    } catch (_) {
+      if (base) setContenido(base);
+      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
   };
 
   const agregarBloque = () => guardarContenidoParcial((b) => ({ almaBloques: [...b.almaBloques, `bloque_${Date.now()}`] }));
@@ -68,10 +73,11 @@ export default function Alma() {
           <div className="alma-bloques">
             {bloques.map((key) => {
               const def = DEFAULTS_BLOQUE[key] || { t: ['', ''], d: ['', ''] };
+              if (!esAdmin && vacio(`alma_${key}_titulo`, es ? def.t[0] : def.t[1]) && vacio(`alma_${key}_texto`, es ? def.d[0] : def.d[1])) return null;
               return (
                 <section className="alma-bloque" key={key}>
-                  <Editable id={`alma_${key}_titulo`} as="h2" estilo>{es ? def.t[0] : def.t[1]}</Editable>
-                  <Editable id={`alma_${key}_texto`} as="p" multiline>{es ? def.d[0] : def.d[1]}</Editable>
+                  <Editable id={`alma_${key}_titulo`} as="h2" estilo placeholder="Agregar título">{es ? def.t[0] : def.t[1]}</Editable>
+                  <Editable id={`alma_${key}_texto`} as="p" multiline placeholder="Agregar texto">{es ? def.d[0] : def.d[1]}</Editable>
                   {esAdmin && (
                     <button type="button" className="alma-bloque-quitar" onClick={() => quitarBloque(key)} title="Quitar">×</button>
                   )}
@@ -105,7 +111,7 @@ export default function Alma() {
                   <div key={key} className={`alma-foto${tamano === 'grande' ? ' alma-foto--hero' : ''}`}>
                     <EditableImage id={`alma_${key}_img`} srcDefault={urlDefault} alt={captionDefault} className="alma-foto-img-wrap" carpeta="alma" />
                     <div className="alma-foto-overlay">
-                      <Editable id={`alma_${key}_caption`} as="p" className="alma-foto-caption">{captionDefault}</Editable>
+                      <Editable id={`alma_${key}_caption`} as="p" className="alma-foto-caption" placeholder="Agregar descripción (opcional)">{captionDefault}</Editable>
                     </div>
                     {esAdmin && (
                       <div className="alma-foto-admin">

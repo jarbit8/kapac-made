@@ -148,3 +148,12 @@
   .footer { padding: 48px 20px 32px; }
   .footer-news-wrap { max-width: 100%; }
 }
+
+/* Cambiar el fondo del pie de página (solo en modo edición) */
+.footer-editar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 3;
+}
+.footer-editar:empty { display: none; }

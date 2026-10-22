@@ -7,7 +7,7 @@ import {
   collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './config';
-import { esCorreoAdmin } from '../config/admins';
+import { esDueno } from '../config/admins';
 
 const COLECCION = 'visitas';
 
@@ -143,11 +143,18 @@ export async function obtenerVisitasRecientes(n = 10) {
     const snap = await getDocs(
       query(collection(db, COLECCION), orderBy('fecha', 'desc'), limit(Math.max(n * 6, 120)))
     );
-    return snap.docs
+    const visitas = snap.docs
       .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((v) => !esCorreoAdmin(v.email))
+      .filter((v) => !esDueno(v.email));
+    // Páginas que vio en esa misma visita, en orden (llegan de la más nueva a la más vieja)
+    const recorridos = {};
+    visitas.forEach((v) => {
+      if (v.sesionId) (recorridos[v.sesionId] = recorridos[v.sesionId] || []).unshift(v.ruta);
+    });
+    return visitas
       .filter((v) => v.entrada)
-      .slice(0, n);
+      .slice(0, n)
+      .map((v) => ({ ...v, recorrido: recorridos[v.sesionId] || [v.ruta] }));
   } catch (e) {
     console.error('Error obteniendo visitas recientes:', e);
     return [];
@@ -168,7 +175,7 @@ export async function obtenerEstadisticas(diasAtras = 30) {
     const visitas = snap.docs
       .map((d) => d.data())
       .filter((v) => (v.dia || '') >= limiteStr)
-      .filter((v) => !esCorreoAdmin(v.email)); // excluir admin
+      .filter((v) => !esDueno(v.email)); // excluir al dueño
 
     const porRuta = {};
     const porPais = {};
@@ -176,7 +183,7 @@ export async function obtenerEstadisticas(diasAtras = 30) {
     const visitantesUnicos = new Set();
     const sesionesPorDia = {}; // dia -> Set(sesionId): cuenta accesos reales, no cada página vista
     const sesionesTotal = new Set();
-    let logueados = 0;
+    const identificados = new Set();
 
     const hoy = new Date().toISOString().slice(0, 10);
 
@@ -184,7 +191,7 @@ export async function obtenerEstadisticas(diasAtras = 30) {
       porRuta[v.ruta]  = (porRuta[v.ruta]  || 0) + 1;
       porPais[v.pais || 'Desconocido'] = (porPais[v.pais || 'Desconocido'] || 0) + 1;
       porDispositivo[v.dispositivo || 'Otro'] = (porDispositivo[v.dispositivo || 'Otro'] || 0) + 1;
-      if (v.email) logueados++;
+      if (v.email) identificados.add(v.email);
 
       // Sesión = 1 entrada real al sitio. Las visitas viejas (sin sesionId) se agrupan
       // por persona+día como aproximación, para no contar cada página que recorrieron.
@@ -202,7 +209,7 @@ export async function obtenerEstadisticas(diasAtras = 30) {
 
     return {
       total: sesionesTotal.size,
-      logueados,
+      logueados: identificados.size,
       visitasHoy: sesionesPorDia[hoy] ? sesionesPorDia[hoy].size : 0,
       visitantesUnicos: visitantesUnicos.size,
       porRuta,
@@ -220,6 +227,11 @@ export async function obtenerEstadisticas(diasAtras = 30) {
 export function nombreRuta(ruta) {
   const mapa = {
     'home':         'Inicio',
+    'proximamente': 'Próximamente (tienda cerrada)',
+    'shop':         'Tienda',
+    'kapac-made':   'Kapac Made (historia)',
+    'info':         'Info y contacto',
+    'zone':         'In the zone',
     'catalogo':     'Catálogo',
     'b2b':          'B2B (empresas)',
     'alma':         'Kapac Made (historia)',

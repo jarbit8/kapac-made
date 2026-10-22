@@ -21,6 +21,14 @@ let productosSesion = (() => {
 })();
 export const productosGuardados = () => productosSesion;
 
+// Tras crear, editar o borrar, la copia guardada se actualiza para que la tienda
+// y la ficha muestren el cambio sin esperar a Firestore
+function actualizarCopia(cambiar) {
+  if (!productosSesion) return;
+  productosSesion = cambiar(productosSesion);
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(productosSesion)); } catch (_) {}
+}
+
 // Obtener TODOS los productos
 export async function obtenerProductos() {
   const snapshot = await getDocs(collection(db, COLECCION));
@@ -39,15 +47,18 @@ export async function obtenerProducto(id) {
 // Agregar un producto (admin)
 export async function agregarProducto(producto) {
   const ref = await addDoc(collection(db, COLECCION), producto);
+  actualizarCopia((lista) => [...lista, { id: ref.id, ...producto }]);
   return ref.id;
 }
 
 // Actualizar un producto (admin)
 export async function actualizarProducto(id, datos) {
   await updateDoc(doc(db, COLECCION, id), datos);
+  actualizarCopia((lista) => lista.map((p) => (p.id === id ? { ...p, ...datos } : p)));
 }
 
 // Eliminar un producto (admin)
 export async function eliminarProducto(id) {
   await deleteDoc(doc(db, COLECCION, id));
+  actualizarCopia((lista) => lista.filter((p) => p.id !== id));
 }

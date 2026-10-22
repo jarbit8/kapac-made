@@ -1,0 +1,213 @@
+/* Edición de la ficha del producto — solo en modo edición */
+
+/* La página fuerza IBM Plex Mono y otros tamaños con !important: los controles de edición mantienen los suyos */
+.producto-page .editable-boton {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  letter-spacing: 0.2px !important;
+}
+
+/* Sin hover, el botón responde solo después del primer toque (el toque pone :hover y el botón tapaba textos cortos) */
+@media (hover: none) {
+  .producto-page .editable-text:not(.editable-marcado) > .editable-boton {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.producto-page .producto-info .editable-vacio,
+.producto-page .producto-tabla .editable-vacio {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.4;
+  text-transform: none !important;
+  color: var(--clay) !important;
+}
+
+.producto-page .editable-edit {
+  font-weight: 400;
+  text-transform: none;
+}
+.producto-page .editable-edit button {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+.producto-page .editable-edit input[type='number'] { max-width: 180px; }
+
+.pe-aviso {
+  color: #c0392b !important;
+  font-size: 12px !important;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+/* Visible en la tienda / Borrador */
+.pe-estado {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 22px;
+}
+
+.pe-estado-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  color: #1d1b15;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.pe-estado-btn:hover { border-color: var(--clay); }
+
+.pe-punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #bbb;
+}
+.pe-estado-btn.visible .pe-punto { background: #6a9a6a; }
+
+.pe-estado-nota {
+  font-size: 12px !important;
+  color: #888 !important;
+}
+
+/* "+ Agregar ..." y "× Quitar", mismo lenguaje que las fotos del inicio */
+.pe-agregar,
+.pe-agregar-foto {
+  border: 1px dashed rgba(176, 83, 46, 0.4);
+  background: none;
+  color: var(--clay);
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.pe-agregar:hover,
+.pe-agregar-foto:hover:not(:disabled) { background: rgba(176, 83, 46, 0.06); }
+.pe-agregar-foto:disabled { cursor: default; opacity: 0.7; }
+
+.pe-agregar {
+  align-self: stretch;
+  padding: 12px;
+  margin-bottom: 28px;
+}
+
+.pe-quitar {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 3px 9px;
+  border: 1px solid #e0a0a0;
+  border-radius: 6px;
+  background: none;
+  color: #c0392b;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+.pe-quitar:hover { background: #fdf0f0; }
+
+.pe-celda { width: 1%; white-space: nowrap; text-align: right; }
+.producto-page .producto-tabla td.pe-celda { width: 1%; }
+
+.pe-eliminar {
+  align-self: flex-start;
+  margin-top: 36px;
+  padding: 9px 16px;
+  border: 1px solid #e0a0a0;
+  border-radius: 6px;
+  background: none;
+  color: #c0392b;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+.pe-eliminar:hover { background: #fdf0f0; }
+
+/* Categoría como lista desplegable */
+.pe-categoria {
+  align-self: flex-start;
+  margin-bottom: 14px;
+  padding: 4px 8px;
+  border: 1px dashed color-mix(in srgb, var(--clay, #b0532e) 60%, transparent);
+  border-radius: 6px;
+  background: none;
+  color: #999;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.pe-categoria:focus { outline: none; border-color: var(--clay); }
+
+/* Fotos */
+.pe-fotos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 12px 10px;
+}
+
+.pe-foto { display: flex; flex-direction: column; gap: 5px; }
+
+.pe-foto-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  padding: 0;
+  border: 1px solid #e3e3e3;
+  background: var(--fondo);
+  overflow: hidden;
+  cursor: pointer;
+}
+.pe-foto.activa .pe-foto-img { border-color: var(--clay); box-shadow: 0 0 0 1px var(--clay); }
+.pe-foto-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.pe-portada {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 2px 6px;
+  background: #111;
+  color: #fff;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase;
+}
+
+.pe-foto-acciones { display: flex; justify-content: space-between; gap: 4px; }
+.pe-foto-acciones button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  color: #444;
+  cursor: pointer;
+}
+.pe-foto-acciones button:hover:not(:disabled) { border-color: var(--clay); color: var(--clay); }
+.pe-foto-acciones button.quitar { color: #c0392b; border-color: #e0a0a0; }
+.pe-foto-acciones button.quitar:hover { background: #fdf0f0; border-color: #e0a0a0; color: #c0392b; }
+.pe-foto-acciones button:disabled { opacity: 0.35; cursor: default; }
+@media (pointer: coarse) {
+  .pe-foto-acciones button { height: 34px; }
+}
+
+.pe-agregar-foto { aspect-ratio: 4 / 5; padding: 6px; font-size: 10px !important; line-height: 1.3; }
+.pe-agregar-foto.grande {
+  width: 100%;
+  font-size: 13px !important;
+}

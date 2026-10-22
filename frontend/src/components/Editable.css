@@ -46,6 +46,22 @@
 
 .editable-boton:hover { filter: brightness(1.08); }
 
+/* Texto opcional todavía vacío: solo lo ve el admin */
+.editable-vacio {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 3px 8px;
+  border: 1px dashed color-mix(in srgb, var(--clay, #b0532e) 60%, transparent);
+  border-radius: 6px;
+  color: var(--clay, #b0532e) !important;
+  font: 500 12px/1.4 system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  white-space: normal !important;
+  cursor: pointer;
+}
+.editable-vacio:hover { background: color-mix(in srgb, var(--clay, #b0532e) 8%, transparent); }
+
 /* Editor */
 .editable-edit {
   display: inline-flex;

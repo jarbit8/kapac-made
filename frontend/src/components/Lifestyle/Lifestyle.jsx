@@ -5,7 +5,8 @@ import EditableImage from '../EditableImage';
 import { useIdioma } from '../../context/LanguageContext';
 import { useTextos } from '../../context/TextosContext';
 import { useTraducido } from '../../i18n/useTraducido';
-import { obtenerContenido, guardarContenido, contenidoGuardado } from '../../firebase/contenido';
+import { obtenerContenido, guardarContenido, contenidoGuardado, cambiarContenido } from '../../firebase/contenido';
+import CambiarMedio from '../CambiarMedio';
 
 // Texto/imagen por defecto de las 4 fotos originales (las nuevas arrancan vacías).
 const DEFAULTS_FOTO = {
@@ -17,9 +18,9 @@ const DEFAULTS_FOTO = {
 
 // Texto de las fotos en formato viejo ({url,titulo,desc}, un solo idioma):
 // se traduce solo al inglés mientras el admin no lo pise con el lápiz.
-function EditableTraducido({ id, as = 'span', className = '', multiline = false, estilo = false, texto, idioma }) {
+function EditableTraducido({ id, as = 'span', className = '', multiline = false, estilo = false, placeholder, texto, idioma }) {
   const traducido = useTraducido(texto, idioma);
-  return <Editable id={id} as={as} className={className} multiline={multiline} estilo={estilo}>{traducido}</Editable>;
+  return <Editable id={id} as={as} className={className} multiline={multiline} estilo={estilo} placeholder={placeholder}>{traducido}</Editable>;
 }
 
 export default function Lifestyle() {
@@ -37,15 +38,24 @@ export default function Lifestyle() {
   const guardarFotos = async (cambiar) => {
     // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
     // para no perder lo que se haya cambiado desde otro dispositivo.
+    let base;
     try {
-      const base = await obtenerContenido();
+      base = await obtenerContenido();
       const nuevo = { ...base, homeFotos: cambiar(base.homeFotos) };
       setContenido(nuevo);
       await guardarContenido(nuevo, base);
-    } catch (_) { /* error silencioso */ }
+    } catch (_) {
+      if (base) setContenido(base);
+      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
   };
 
   const claveDe = (foto, i) => (typeof foto === 'object' && foto !== null) ? `legacy${i}` : foto;
+
+  const cambiarZone = (slot) => (nuevo) => cambiarContenido((b) => {
+    const actual = typeof b.inTheZoneFoto === 'object' && (b.inTheZoneFoto?.pc || b.inTheZoneFoto?.mobile) ? b.inTheZoneFoto : {};
+    return { inTheZoneFoto: { ...actual, [slot]: nuevo } };
+  });
 
   const agregarFoto = () => guardarFotos((f) => [...f, `foto_${Date.now()}`]);
   const quitarFoto = (key) => guardarFotos((f) => f.filter((x, i) => claveDe(x, i) !== key));
@@ -73,13 +83,13 @@ export default function Lifestyle() {
               <div className="lm-caption">
                 {esViejo && !defReal ? (
                   <>
-                    <EditableTraducido id={`home_${key}_titulo`} as="span" className="lm-caption-title" estilo texto={tituloDefault} idioma={idioma} />
-                    <EditableTraducido id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline texto={descDefault} idioma={idioma} />
+                    <EditableTraducido id={`home_${key}_titulo`} as="span" className="lm-caption-title" estilo placeholder="Agregar título (opcional)" texto={tituloDefault} idioma={idioma} />
+                    <EditableTraducido id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline placeholder="Agregar descripción (opcional)" texto={descDefault} idioma={idioma} />
                   </>
                 ) : (
                   <>
-                    <Editable id={`home_${key}_titulo`} as="span" className="lm-caption-title" estilo>{tituloDefault}</Editable>
-                    <Editable id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline>{descDefault}</Editable>
+                    <Editable id={`home_${key}_titulo`} as="span" className="lm-caption-title" estilo placeholder="Agregar título (opcional)">{tituloDefault}</Editable>
+                    <Editable id={`home_${key}_desc`} as="p" className="lm-caption-desc" multiline placeholder="Agregar descripción (opcional)">{descDefault}</Editable>
                   </>
                 )}
                 {esAdmin && (
@@ -112,6 +122,10 @@ export default function Lifestyle() {
         >
           <Editable id="home_in_the_zone" as="span" estilo>in the zone</Editable>
         </a>
+      </div>
+      <div className="lm-zone-editar cambiar-medio-grupo">
+        <CambiarMedio texto="Foto de in the zone · computadora" carpeta="zone" soloFoto alSubir={cambiarZone('pc')} />
+        <CambiarMedio texto="Foto de in the zone · celular" carpeta="zone" soloFoto alSubir={cambiarZone('mobile')} />
       </div>
 
     </section>

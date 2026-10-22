@@ -77,3 +77,15 @@
     padding: 0 24px 50px;
   }
 }
+
+/* Cambiar la foto o el video de fondo (solo en modo edición) */
+.hero-editar {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  z-index: 3;
+}
+.hero-editar:empty { display: none; }
+@media (max-width: 768px) {
+  .hero-editar { left: 14px; bottom: 16px; right: 50px; }
+}

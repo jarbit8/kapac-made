@@ -1,11 +1,12 @@
 // Contexto global de autenticación
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { observarUsuario } from '../firebase/auth';
-import { esCorreoAdmin } from '../config/admins';
+import { esCorreoAdmin, esDueno } from '../config/admins';
 
 const AuthContext = createContext();
 const DISPOSITIVO_ADMIN_KEY = 'kapac_dispositivo_admin';
 const SESION_ADMIN_KEY = 'kapac_sesion_admin';
+const NO_CONTAR_KEY = 'kapac_no_contar';
 
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
@@ -29,7 +30,11 @@ export function AuthProvider({ children }) {
       // Una vez que el admin entra con su cuenta desde este navegador, lo recordamos
       // para no contarlo como visita aunque después navegue sin loguearse.
       if (esCorreoAdmin(user?.email)) {
-        try { localStorage.setItem(DISPOSITIVO_ADMIN_KEY, '1'); } catch (_) {}
+        try {
+          localStorage.setItem(DISPOSITIVO_ADMIN_KEY, '1');
+          // Solo el navegador del dueño deja de contar en Visitas
+          localStorage.setItem(NO_CONTAR_KEY, esDueno(user.email) ? '1' : '0');
+        } catch (_) {}
       }
       // Sesión de admin abierta en este navegador: la próxima vez la tienda se muestra
       // sin esperar a que Firebase la confirme (tarda ~1 s)

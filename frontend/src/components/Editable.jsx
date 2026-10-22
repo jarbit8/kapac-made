@@ -20,7 +20,8 @@ const IconoLapiz = () => (
 // id: clave única · children: texto por defecto · as: etiqueta (p, h2, span...)
 // estilo: permite cambiar color y tipografía desde el editor (solo para títulos de marca)
 // sinColor: ignora el color guardado (para texto dentro de <button>, que sigue el color único de botones)
-export default function Editable({ id, children, as = 'span', className = '', multiline = false, sinColor = false, estilo = false }) {
+// placeholder: texto opcional; vacío, el admin ve el placeholder y el visitante no ve nada
+export default function Editable({ id, children, as = 'span', className = '', multiline = false, sinColor = false, estilo = false, placeholder = '' }) {
   const { textos, listos, esAdmin, guardar } = useTextos();
   const { idioma } = useIdioma();
   const clave = `${id}__${idioma}`;            // override de texto por idioma
@@ -63,7 +64,10 @@ export default function Editable({ id, children, as = 'span', className = '', mu
     return () => document.removeEventListener('pointerdown', fuera);
   }, [marcado]);
 
+  const vacio = placeholder && !valor.trim();
+
   if (!esAdmin) {
+    if (vacio) return null;
     return <Tag ref={elRef} className={className} style={listos ? undefined : { visibility: 'hidden' }}>{valor}</Tag>;
   }
 
@@ -97,8 +101,8 @@ export default function Editable({ id, children, as = 'span', className = '', mu
     await guardar(clave, draft);
     // Se edita en español y el inglés se regenera siempre al guardar,
     // para que no quede una traducción vieja del texto anterior.
-    const traducido = await traducirEsEn(draft);
-    if (traducido) await guardar(`${id}__en`, traducido);
+    const traducido = draft.trim() ? await traducirEsEn(draft) : '';
+    if (traducido || !draft.trim()) await guardar(`${id}__en`, traducido);
     if (estilo) {
       if (colorDraft !== colorPropio) await guardar(claveColor, colorDraft);
       // Escribir la fuente del sitio (o dejarla vacía) vuelve al valor por defecto
@@ -138,6 +142,14 @@ export default function Editable({ id, children, as = 'span', className = '', mu
           <button type="button" onClick={(e) => { e.stopPropagation(); setEditando(false); }} className="editable-cancel">Cancelar</button>
         </span>
       </span>
+    );
+  }
+
+  if (vacio) {
+    return (
+      <Tag ref={elRef} className={`${className} editable-vacio`} onClick={abrir} title="Editar texto">
+        + {placeholder}
+      </Tag>
     );
   }
 

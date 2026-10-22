@@ -2,16 +2,18 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { obtenerProducto, obtenerProductos, productosGuardados } from '../firebase/productos';
+import { obtenerProducto, obtenerProductos, productosGuardados, actualizarProducto, eliminarProducto } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
 import { nombreProducto } from '../i18n/producto';
-import { categoriaLabel } from '../i18n/categorias';
+import { categoriaLabel, CATEGORIAS } from '../i18n/categorias';
 import { useTraducido } from '../i18n/useTraducido';
+import { traducirEsEn } from '../i18n/traducir';
 import TextoProducto from '../components/TextoProducto';
 import Cargando from '../components/Cargando/Cargando';
+import { CampoProducto, EstadoProducto, FotosProducto } from '../components/ProductoEditable';
 import { asegurarFuente, cssFuente } from '../utils/fuentes';
 import '../styles/Producto.css';
 
@@ -95,6 +97,77 @@ export default function Producto() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, esAdmin]);
 
+  // Modo edición: cada cambio se guarda al instante y solo escribe los campos que cambiaron
+  const productoRef = useRef(producto);
+  productoRef.current = producto;
+  const filas = (campo) => (Array.isArray(productoRef.current?.[campo]) ? productoRef.current[campo] : []);
+
+  const guardarCampos = async (cambios, anterior) => {
+    const antes = anterior || {};
+    if (!anterior) Object.keys(cambios).forEach((k) => { antes[k] = productoRef.current[k]; });
+    setProducto((p) => (p ? { ...p, ...cambios } : p));
+    try {
+      await actualizarProducto(id, cambios);
+    } catch (e) {
+      console.error('No se pudo guardar el producto:', e);
+      setProducto((p) => (p ? { ...p, ...antes } : p));
+      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
+  };
+
+  // Nombre y descripción: se guarda el español y se regenera el inglés (si falla, queda vacío)
+  const guardarTexto = async (campo, valor) => {
+    const antes = { [campo]: productoRef.current[campo], [`${campo}En`]: productoRef.current[`${campo}En`] };
+    setProducto((p) => (p ? { ...p, [campo]: valor } : p)); // se ve mientras se traduce
+    let en = '';
+    if (valor) {
+      try { en = (await traducirEsEn(valor)) || ''; } catch (_) {}
+    }
+    await guardarCampos({ [campo]: valor, [`${campo}En`]: en }, antes);
+  };
+
+  const cambiarFila = (campo, i, parte, valor) =>
+    guardarCampos({ [campo]: filas(campo).map((f, k) => (k === i ? { ...f, [parte]: valor } : f)) });
+  const agregarFila = (campo, nueva) => guardarCampos({ [campo]: [...filas(campo), nueva] });
+  const quitarFila = (campo, i) => guardarCampos({ [campo]: filas(campo).filter((_, k) => k !== i) });
+
+  // La primera foto es la portada del catálogo
+  const cambiarFotos = (fotos) => guardarCampos({
+    fotos,
+    imagenMochila: fotos[0] || '',
+    ...(producto.imagenContexto ? { imagenContexto: '' } : {}),
+  });
+
+  const alternarActivo = () => {
+    const activo = producto.activo === false;
+    if (activo && (!(producto.nombre || '').trim() || !producto.precio)) {
+      window.alert('Antes de mostrarlo en la tienda agrega el nombre y el precio.');
+      return;
+    }
+    guardarCampos({ activo });
+  };
+
+  const eliminar = async () => {
+    if (!window.confirm('¿Eliminar este producto?')) return;
+    try {
+      await eliminarProducto(id);
+      navigate('/shop', { replace: true });
+    } catch (e) {
+      console.error('No se pudo eliminar el producto:', e);
+      window.alert('No se pudo eliminar el producto. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
+  };
+
+  const textoStock = producto
+    ? (producto.stock <= 0
+        ? `${t('productos.sin_stock')}`
+        : producto.stock <= 3
+          ? (idioma === 'en' ? `Only ${producto.stock} left!` : `¡Últimas ${producto.stock} unidades!`)
+          : (idioma === 'en'
+              ? `In stock — ${producto.stock} available`
+              : `Disponible — ${producto.stock} en stock`))
+    : '';
+
   const handleAgregar = () => {
     agregar(producto);
     setAgregado(true);
@@ -116,7 +189,13 @@ export default function Producto() {
                 ? producto.fotos
                 : [producto.imagenMochila, producto.imagenContexto]).filter(Boolean);
               const total = imgs.length;
-              if (!total) return <div className="producto-galeria"><div className="galeria-marco" /></div>;
+              if (!total) {
+                return (
+                  <div className="producto-galeria">
+                    {esAdmin ? <FotosProducto fotos={[]} onCambiar={cambiarFotos} /> : <div className="galeria-marco" />}
+                  </div>
+                );
+              }
               const idx = ((imgIdx % total) + total) % total;
               return (
                 <div className="producto-galeria">
@@ -153,32 +232,83 @@ export default function Producto() {
                       ))}
                     </div>
                   )}
+                  {esAdmin && <FotosProducto fotos={imgs} elegida={idx} onElegir={setImgIdx} onCambiar={cambiarFotos} />}
                 </div>
               );
             })()}
 
             <div className="producto-info">
+              {esAdmin && <EstadoProducto activo={producto.activo !== false} onAlternar={alternarActivo} />}
               <button className="producto-volver" onClick={() => navigate(-1)}>
                 <span>{idioma === 'en' ? '← Back' : '← Volver'}</span>
               </button>
 
-              {producto.categoria && (
+              {esAdmin ? (
+                <select
+                  className="pe-categoria"
+                  value={CATEGORIAS.find((c) => c.key === producto.categoria || c.es === producto.categoria)?.key || ''}
+                  onChange={(e) => guardarCampos({ categoria: e.target.value })}
+                >
+                  <option value="">Sin categoría</option>
+                  {CATEGORIAS.map((c) => <option key={c.key} value={c.key}>{idioma === 'en' ? c.key : c.es}</option>)}
+                </select>
+              ) : producto.categoria && (
                 <span className="producto-categoria">{categoriaLabel(producto.categoria, idioma)}</span>
               )}
 
-              <h1>{nombreTraducido}</h1>
+              <h1>
+                {esAdmin
+                  ? <CampoProducto valor={producto.nombre} placeholder="Agregar nombre" onGuardar={(v) => guardarTexto('nombre', v)} />
+                  : nombreTraducido}
+              </h1>
 
               <div className="producto-precios">
-                <span className="producto-precio">{producto.moneda}{producto.precio}.00</span>
-                {producto.precioOriginal && (
-                  <span className="producto-precio-original">{producto.moneda}{producto.precioOriginal}.00</span>
+                {esAdmin ? (
+                  <>
+                    <span className="producto-precio">
+                      <CampoProducto numero valor={producto.precio || ''} mostrar={`${producto.moneda}${producto.precio}.00`}
+                        placeholder="Agregar precio" onGuardar={(v) => guardarCampos({ precio: v })} />
+                    </span>
+                    <span className="producto-precio-original">
+                      <CampoProducto numero opcional valor={producto.precioOriginal || ''} mostrar={`${producto.moneda}${producto.precioOriginal}.00`}
+                        placeholder="Agregar precio anterior" onGuardar={(v) => guardarCampos({ precioOriginal: v || null })} />
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="producto-precio">{producto.moneda}{producto.precio}.00</span>
+                    {producto.precioOriginal && (
+                      <span className="producto-precio-original">{producto.moneda}{producto.precioOriginal}.00</span>
+                    )}
+                  </>
                 )}
               </div>
 
-              <p className="producto-descripcion">{descripcionTraducida}</p>
+              <p className="producto-descripcion">
+                {esAdmin
+                  ? <CampoProducto multiline valor={producto.descripcion} placeholder="Agregar descripción" onGuardar={(v) => guardarTexto('descripcion', v)} />
+                  : descripcionTraducida}
+              </p>
 
               {/* Features */}
-              {Array.isArray(producto.features) && producto.features.some(f => f.titulo) && (
+              {esAdmin ? (
+                <div className="producto-features">
+                  {filas('features').map((f, i) => (
+                    <div key={i} className="producto-feature">
+                      <strong>
+                        <CampoProducto valor={f.titulo} placeholder="Agregar título" onGuardar={(v) => cambiarFila('features', i, 'titulo', v)} />
+                      </strong>
+                      <span>
+                        <CampoProducto valor={f.desc} placeholder="Agregar descripción" onGuardar={(v) => cambiarFila('features', i, 'desc', v)} />
+                      </span>
+                      <button type="button" className="pe-quitar" onClick={() => quitarFila('features', i)}>× Quitar</button>
+                    </div>
+                  ))}
+                  <button type="button" className="pe-agregar" onClick={() => agregarFila('features', { titulo: '', desc: '' })}>
+                    + Agregar característica
+                  </button>
+                </div>
+              ) : Array.isArray(producto.features) && producto.features.some(f => f.titulo) && (
                 <div className="producto-features">
                   {producto.features.filter(f => f.titulo).map((f, i) => (
                     <FeatureFila key={i} titulo={f.titulo} desc={f.desc} idioma={idioma} />
@@ -187,7 +317,28 @@ export default function Producto() {
               )}
 
               {/* Especificaciones */}
-              {Array.isArray(producto.specs) && producto.specs.some(s => s.label && s.valor) && (
+              {esAdmin ? (
+                <>
+                  {filas('specs').length > 0 && (
+                    <table className="producto-tabla">
+                      <tbody>
+                        {filas('specs').map((s, i) => (
+                          <tr key={i}>
+                            <td><CampoProducto valor={s.label} placeholder="Agregar nombre" onGuardar={(v) => cambiarFila('specs', i, 'label', v)} /></td>
+                            <td><CampoProducto valor={s.valor} placeholder="Agregar valor" onGuardar={(v) => cambiarFila('specs', i, 'valor', v)} /></td>
+                            <td className="pe-celda">
+                              <button type="button" className="pe-quitar" onClick={() => quitarFila('specs', i)}>× Quitar</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                  <button type="button" className="pe-agregar" onClick={() => agregarFila('specs', { label: '', valor: '' })}>
+                    + Agregar especificación
+                  </button>
+                </>
+              ) : Array.isArray(producto.specs) && producto.specs.some(s => s.label && s.valor) && (
                 <table className="producto-tabla">
                   <tbody>
                     {producto.specs.filter(s => s.label && s.valor).map((s, i) => (
@@ -198,13 +349,9 @@ export default function Producto() {
               )}
 
               <p className={`producto-stock ${producto.stock > 0 && producto.stock <= 3 ? 'stock-bajo' : ''}`}>
-                {producto.stock <= 0
-                  ? `${t('productos.sin_stock')}`
-                  : producto.stock <= 3
-                    ? (idioma === 'en' ? `Only ${producto.stock} left!` : `¡Últimas ${producto.stock} unidades!`)
-                    : (idioma === 'en'
-                        ? `In stock — ${producto.stock} available`
-                        : `Disponible — ${producto.stock} en stock`)}
+                {esAdmin
+                  ? <CampoProducto numero valor={producto.stock ?? 0} mostrar={textoStock} onGuardar={(v) => guardarCampos({ stock: v })} />
+                  : textoStock}
               </p>
 
               <button
@@ -218,6 +365,8 @@ export default function Producto() {
               <button className="producto-ir-carrito" onClick={() => navigate('/carrito')}>
                 <span>{idioma === 'en' ? 'Go to cart' : 'Ir al carrito'}</span>
               </button>
+
+              {esAdmin && <button type="button" className="pe-eliminar" onClick={eliminar}>Eliminar producto</button>}
             </div>
           </div>
         )}

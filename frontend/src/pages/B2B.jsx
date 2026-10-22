@@ -21,7 +21,7 @@ const DEFAULTS_BENEFICIO = {
 export default function B2B() {
   const { idioma } = useIdioma();
   const es = idioma === 'es';
-  const { esAdmin } = useTextos();
+  const { textos, esAdmin } = useTextos();
 
   const [contenido, setContenido] = useState(contenidoGuardado);
   useEffect(() => {
@@ -29,16 +29,21 @@ export default function B2B() {
   }, []);
 
   const beneficios = contenido ? contenido.b2bBeneficios : [];
+  const vacio = (id, def) => !(textos[`${id}__${idioma}`] ?? def).trim();
 
   const guardarBeneficios = async (cambiar) => {
     // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
     // para no perder lo que se haya cambiado desde otro dispositivo.
+    let base;
     try {
-      const base = await obtenerContenido();
+      base = await obtenerContenido();
       const nuevo = { ...base, b2bBeneficios: cambiar(base.b2bBeneficios) };
       setContenido(nuevo);
       await guardarContenido(nuevo, base);
-    } catch (_) { /* error silencioso */ }
+    } catch (_) {
+      if (base) setContenido(base);
+      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
   };
 
   const agregarBeneficio = () => guardarBeneficios((b) => [...b, `beneficio_${Date.now()}`]);
@@ -78,10 +83,11 @@ export default function B2B() {
           <div className="b2b-grid">
             {beneficios.map((key) => {
               const def = DEFAULTS_BENEFICIO[key] || { t: ['', ''], d: ['', ''] };
+              if (!esAdmin && vacio(`b2b_${key}_titulo`, es ? def.t[0] : def.t[1]) && vacio(`b2b_${key}_desc`, es ? def.d[0] : def.d[1])) return null;
               return (
                 <div className="b2b-bloque" key={key}>
-                  <Editable id={`b2b_${key}_titulo`} as="h3" estilo>{es ? def.t[0] : def.t[1]}</Editable>
-                  <Editable id={`b2b_${key}_desc`} as="p">{es ? def.d[0] : def.d[1]}</Editable>
+                  <Editable id={`b2b_${key}_titulo`} as="h3" estilo placeholder="Agregar título">{es ? def.t[0] : def.t[1]}</Editable>
+                  <Editable id={`b2b_${key}_desc`} as="p" placeholder="Agregar descripción">{es ? def.d[0] : def.d[1]}</Editable>
                   {esAdmin && (
                     <button type="button" className="b2b-bloque-quitar" onClick={() => quitarBeneficio(key)} title="Quitar">×</button>
                   )}

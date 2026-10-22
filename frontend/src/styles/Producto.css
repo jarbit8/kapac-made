@@ -178,6 +178,7 @@
 }
 
 .producto-descripcion {
+  white-space: pre-line;
   font-size: 15px !important;
   line-height: 1.75 !important;
   color: #444 !important;

@@ -129,3 +129,56 @@
 /* La foto del producto se ve completa; lo que sobra queda del color de la página */
 .cat-img-wrap { background: var(--fondo); }
 .catalogo-page-card img { object-fit: contain; }
+
+/* Modo edición: borradores y tile para agregar */
+.catalogo-page-card.borrador { position: relative; }
+.catalogo-page-card.borrador .cat-img-wrap { opacity: 0.55; }
+.catalogo-borrador {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 3px 8px;
+  background: #111;
+  color: #fff;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.cat-sin-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border: 1px dashed #ddd;
+  color: #aaa;
+  font-size: 12px !important;
+}
+
+.catalogo-agregar {
+  align-self: start;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+.catalogo-agregar-caja {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 5;
+  padding: 0 12px;
+  border: 1px dashed rgba(176, 83, 46, 0.4);
+  color: var(--clay);
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-align: center;
+  text-transform: uppercase;
+}
+.catalogo-agregar:hover:not(:disabled) .catalogo-agregar-caja { background: rgba(176, 83, 46, 0.06); }
+.catalogo-agregar:disabled { cursor: default; opacity: 0.7; }

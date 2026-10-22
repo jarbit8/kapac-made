@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { obtenerProductos, productosGuardados } from '../firebase/productos';
+import { obtenerProductos, productosGuardados, agregarProducto } from '../firebase/productos';
 import { imagen } from '../firebase/imagenesProductos';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
@@ -10,8 +10,24 @@ import TextoProducto from '../components/TextoProducto';
 import Cargando from '../components/Cargando/Cargando';
 import '../styles/Catalogo.css';
 
+// Borrador vacío que se crea al agregar un producto en modo edición
+const PRODUCTO_NUEVO = {
+  nombre: '', nombreEn: '',
+  precio: 0, precioOriginal: null, moneda: 'S/',
+  imagenMochila: '', imagenContexto: '',
+  fotos: [],
+  descripcion: '', descripcionEn: '',
+  stock: 0, activo: false, categoria: 'Climbing',
+  galeria: [],
+  features: [],
+  specs: [],
+  estilos: {},
+};
+
 export default function Catalogo() {
-  const [productos, setProductos] = useState(() => (productosGuardados() || []).filter((p) => p.activo !== false));
+  const navigate = useNavigate();
+  const [productos, setProductos] = useState(() => productosGuardados() || []);
+  const [creando, setCreando] = useState(false);
   const [cargando, setCargando] = useState(() => productosGuardados() === null);
   const [error, setError] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,7 +42,7 @@ export default function Catalogo() {
   useEffect(() => {
     obtenerProductos()
       .then((data) => {
-        setProductos(data.filter((p) => p.activo !== false));
+        setProductos(data);
         setCargando(false);
       })
       .catch((e) => {
@@ -41,7 +57,8 @@ export default function Catalogo() {
 
   // Aplicar búsqueda + filtro + orden
   const filtrados = useMemo(() => {
-    let res = [...productos];
+    // Los borradores (activo: false) solo los ve el admin en modo edición
+    let res = productos.filter((p) => p.activo !== false || esAdmin);
 
     if (busqueda.trim()) {
       const q = busqueda.toLowerCase();
@@ -61,7 +78,19 @@ export default function Catalogo() {
     if (orden === 'precio-desc') res.sort((a, b) => b.precio - a.precio);
 
     return res;
-  }, [productos, busqueda, catSel, orden]);
+  }, [productos, busqueda, catSel, orden, esAdmin]);
+
+  const crearProducto = async () => {
+    setCreando(true);
+    try {
+      const id = await agregarProducto(PRODUCTO_NUEVO);
+      navigate(`/producto/${id}`);
+    } catch (e) {
+      console.error('No se pudo crear el producto:', e);
+      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+      setCreando(false);
+    }
+  };
 
   const limpiarBusqueda = () => {
     searchParams.delete('q');
@@ -102,16 +131,19 @@ export default function Catalogo() {
           <p style={{ color: '#666', padding: '40px 0' }}><span>{t('catalogo.vacio')}</span></p>
         )}
 
-        {!cargando && !error && filtrados.length > 0 && (
+        {!cargando && !error && (filtrados.length > 0 || esAdmin) && (
           <div className="catalogo-page-grid">
             {filtrados.map((p) => (
-              <div key={p.id} className="catalogo-page-card">
+              <div key={p.id} className={`catalogo-page-card${p.activo === false ? ' borrador' : ''}`}>
+                {p.activo === false && <span className="catalogo-borrador">Borrador</span>}
                 <Link to={`/producto/${p.id}`} className="cat-img-wrap">
-                  <img src={imagen(p.imagenMochila)} alt={p.nombre} loading="lazy" decoding="async" />
+                  {esAdmin && !p.imagenMochila
+                    ? <span className="cat-sin-foto">Sin foto</span>
+                    : <img src={imagen(p.imagenMochila)} alt={p.nombre} loading="lazy" decoding="async" />}
                 </Link>
                 <div className="catalogo-page-info">
                   <Link to={`/producto/${p.id}`} className="catalogo-page-name">
-                    <TextoProducto texto={p.nombre} idioma={idioma} />
+                    {esAdmin && !p.nombre ? 'Sin nombre' : <TextoProducto texto={p.nombre} idioma={idioma} />}
                   </Link>
                   <div className="catalogo-page-precios">
                     <span className="precio-actual">{p.moneda}{p.precio}.00</span>
@@ -122,6 +154,11 @@ export default function Catalogo() {
                 </div>
               </div>
             ))}
+            {esAdmin && (
+              <button type="button" className="catalogo-agregar" onClick={crearProducto} disabled={creando}>
+                <span className="catalogo-agregar-caja">{creando ? 'Creando…' : '+ Agregar producto'}</span>
+              </button>
+            )}
           </div>
         )}
       </main>

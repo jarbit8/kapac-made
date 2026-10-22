@@ -165,3 +165,40 @@
     padding-top: 52px;
   }
 }
+
+/* Abrir o cerrar la tienda (solo el admin), arriba del logo */
+.header-tienda {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 18px;
+  padding: 0 9px;
+  border: none;
+  border-radius: 999px;
+  background: #d4edda;
+  color: #155724;
+  font: 600 10px/1 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.header-tienda.cerrada { background: #f8d7da; color: #842029; }
+.header-tienda:disabled { cursor: default; }
+.header-tienda-punto {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+/* Con la pastilla, el logo baja un poco para no tocarla */
+.header-tienda + .logo { transform: translate(-50%, 6px); }
+@media (max-width: 768px) {
+  .header-tienda { top: 2px; height: 15px; font-size: 9px; padding: 0 7px; }
+  .header-tienda + .logo { transform: translate(-50%, 8px); }
+}

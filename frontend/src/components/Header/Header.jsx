@@ -10,7 +10,7 @@ import { obtenerProductos } from '../../firebase/productos';
 import logoVerde    from '../../assets/images/kapac_made_3.png';
 import logoTerracota from '../../assets/images/kapac_made_1.png';
 import { useTema, LOGO_CACHE_KEY } from '../../context/TemaContext';
-import { obtenerContenido, guardarContenido } from '../../firebase/contenido';
+import { cambiarContenido } from '../../firebase/contenido';
 import { subirImagen } from '../../firebase/almacenamiento';
 import { fotoRapida } from '../../utils/fotos';
 
@@ -32,7 +32,7 @@ export default function Header({ transparente = false }) {
   // Cargar productos para autocomplete cuando se abre el buscador
   useEffect(() => {
     if (!buscarOpen || productos.length > 0) return;
-    obtenerProductos().then(setProductos).catch(() => {});
+    obtenerProductos().then((p) => setProductos(p.filter((x) => x.activo !== false))).catch(() => {});
   }, [buscarOpen, productos.length]);
 
   // Calcular sugerencias mientras se escribe
@@ -50,7 +50,7 @@ export default function Header({ transparente = false }) {
   }, [termino, productos]);
   const navigate = useNavigate();
   const { totalItems } = useCart();
-  const { usuario, puedeEditar: esAdmin } = useAuth();
+  const { usuario, puedeEditar: esAdmin, esAdmin: administrador } = useAuth();
   const { idioma, setIdioma, t } = useIdioma();
 
   const cerrarBuscador = () => {
@@ -89,7 +89,7 @@ export default function Header({ transparente = false }) {
   };
 
   const esSolido = !transparente || scrolled;
-  const { logo, logoListo, setTema } = useTema();
+  const { logo, logoListo, setTema, cerrado, setCerrado } = useTema();
   const logoSrc  = fotoRapida(logo) || logoTerracota; // logo del admin o el de la marca
 
   // El logo se cambia acá mismo (antes vivía en la pestaña Fotos del admin).
@@ -101,12 +101,31 @@ export default function Header({ transparente = false }) {
     setSubiendoLogo(true);
     try {
       const url = await subirImagen(file, 'logo');
-      const c = await obtenerContenido();
-      await guardarContenido({ ...c, logo: url }, c);
+      await cambiarContenido(() => ({ logo: url }));
       setTema((prev) => ({ ...prev, logo: url }));
       try { localStorage.setItem(LOGO_CACHE_KEY, url); } catch (_) {}
-    } catch (_) { /* error silencioso */ }
+    } catch (_) {
+      window.alert('No se pudo cambiar el logo. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
     setSubiendoLogo(false);
+  };
+
+  const [cambiandoTienda, setCambiandoTienda] = useState(false);
+  const cambiarTienda = async () => {
+    const abrir = cerrado;
+    const pregunta = abrir
+      ? '¿Seguro que quieres ABRIR la tienda? Todos podrán ver la página y comprar.'
+      : '¿Seguro que quieres CERRAR la tienda? Los visitantes verán la pantalla «Próximamente».';
+    if (!window.confirm(pregunta)) return;
+    setCambiandoTienda(true);
+    try {
+      await cambiarContenido(() => ({ cerrado: !abrir }));
+      setCerrado(!abrir);
+      try { localStorage.setItem('kapac_cerrado_v1', abrir ? '0' : '1'); } catch (_) {}
+    } catch (_) {
+      window.alert('No se pudo cambiar. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
+    setCambiandoTienda(false);
   };
 
   return (
@@ -114,6 +133,13 @@ export default function Header({ transparente = false }) {
       {/* Header — siempre solo el logo centrado, sin hamburger ni carrito */}
       <header className={`header${esSolido ? ' header-solido' : ''}`}>
         <div className="header-container">
+          {administrador && (
+            <button type="button" className={`header-tienda${cerrado ? ' cerrada' : ''}`} onClick={cambiarTienda} disabled={cambiandoTienda}
+              title={cerrado ? 'Abrir la tienda al público' : 'Cerrar la tienda al público'}>
+              <span className="header-tienda-punto" />
+              {cambiandoTienda ? 'Guardando…' : (cerrado ? 'Tienda cerrada' : 'Tienda abierta')}
+            </button>
+          )}
           <Link to="/" className={`logo${esAdmin ? ' editable-img-wrap' : ''}`}>
             {/* key: al pasar a admin se crea otra imagen, así vuelve a marcarse como cargada */}
             <img key={esAdmin ? 'admin' : 'visita'} src={logoSrc} alt="Kapac Made" className={`logo-simbolo${esAdmin ? ' editable-img' : ''}`}

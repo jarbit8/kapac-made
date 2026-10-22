@@ -10,7 +10,7 @@ import '../styles/Contacto.css';
 export default function Contacto() {
   const { idioma } = useIdioma();
   const es = idioma === 'es';
-  const { esAdmin } = useTextos();
+  const { textos, esAdmin } = useTextos();
 
   const [contenido, setContenido] = useState(contenidoGuardado);
   useEffect(() => {
@@ -18,16 +18,21 @@ export default function Contacto() {
   }, []);
 
   const extras = contenido ? contenido.infoExtra : [];
+  const vacio = (id) => !(textos[`${id}__${idioma}`] ?? '').trim();
 
   const guardarExtras = async (cambiar) => {
     // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
     // para no perder lo que se haya cambiado desde otro dispositivo.
+    let base;
     try {
-      const base = await obtenerContenido();
+      base = await obtenerContenido();
       const nuevo = { ...base, infoExtra: cambiar(base.infoExtra) };
       setContenido(nuevo);
       await guardarContenido(nuevo, base);
-    } catch (_) { /* error silencioso */ }
+    } catch (_) {
+      if (base) setContenido(base);
+      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
   };
 
   const agregarExtra = () => guardarExtras((e) => [...e, `campo_${Date.now()}`]);
@@ -96,10 +101,10 @@ export default function Contacto() {
           </section>
 
           {/* Campos adicionales que agregue el admin */}
-          {extras.map((key) => (
+          {extras.map((key) => (!esAdmin && vacio(`info_${key}_titulo`) && vacio(`info_${key}_texto`)) ? null : (
             <section className="info-bloque info-bloque-extra" key={key}>
-              <Editable id={`info_${key}_titulo`} as="h2" estilo>{es ? 'Nuevo campo' : 'New field'}</Editable>
-              <Editable id={`info_${key}_texto`} as="p" multiline>{es ? 'Escribe aquí el contenido.' : 'Write the content here.'}</Editable>
+              <Editable id={`info_${key}_titulo`} as="h2" estilo placeholder="Agregar título"></Editable>
+              <Editable id={`info_${key}_texto`} as="p" multiline placeholder="Agregar texto"></Editable>
               {esAdmin && (
                 <button type="button" className="info-bloque-quitar" onClick={() => quitarExtra(key)} title="Quitar">× Quitar campo</button>
               )}

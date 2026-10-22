@@ -127,3 +127,9 @@
   .legal-lista li,
   .legal-contacto p { font-size: 19px !important; }
 }
+
+.legal-contacto-linea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/Footer.css';
 import { useIdioma } from '../../context/LanguageContext';
 import { pedirCodigo, confirmarCodigo } from '../../firebase/newsletter';
-import { obtenerContenido, contenidoGuardado, medioDispositivo } from '../../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, medioDispositivo, slotMedio, cambiarContenido } from '../../firebase/contenido';
 import Editable from '../Editable';
+import CambiarMedio from '../CambiarMedio';
 import { fotoRapida } from '../../utils/fotos';
 
 /* ─── Iconos SVG (sociales) ─────────────────────────────────────────────── */
@@ -39,6 +40,15 @@ export default function Footer() {
   }, []);
 
   const fondo = medioDispositivo(fondoCfg, esMobile);
+
+  const cambiarFondo = (slot) => async (nuevo) => {
+    const c = await cambiarContenido((b) => {
+      const actual = b.footerFondo?.pc || b.footerFondo?.mobile ? b.footerFondo : {};
+      return { footerFondo: { ...actual, [slot]: nuevo } };
+    });
+    setFondoCfg(c.footerFondo);
+    setVideoFallo(false);
+  };
 
   const handlePedirCodigo = async (e) => {
     e.preventDefault();
@@ -81,6 +91,13 @@ export default function Footer() {
         <div className="footer-bg" style={{ backgroundImage: `url('${fotoRapida(fondo.url)}')` }} />
       ) : null}
       <div className="footer-overlay" />
+
+      <div className="footer-editar cambiar-medio-grupo">
+        <CambiarMedio texto="Fondo · computadora" carpeta="fondos"
+          anterior={slotMedio(fondoCfg, 'pc')?.url} alSubir={cambiarFondo('pc')} />
+        <CambiarMedio texto="Fondo · celular" carpeta="fondos"
+          anterior={slotMedio(fondoCfg, 'mobile')?.url} alSubir={cambiarFondo('mobile')} />
+      </div>
 
       {/* Instagram centrado */}
       <div className="footer-ig">

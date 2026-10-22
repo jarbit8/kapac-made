@@ -32,10 +32,17 @@ export function TemaProvider({ children }) {
   });
 
   // Tienda cerrada al público (pantalla "Próximamente"). Cacheado para que en
-  // visitas repetidas aplique al instante; si no se sabe todavía, se asume cerrada.
+  // visitas repetidas aplique al instante; en la primera, lo que había al publicar,
+  // y si no se sabe, se asume cerrada.
   const [cerrado, setCerrado] = useState(() => {
-    try { return localStorage.getItem(CERRADO_CACHE_KEY) !== '0'; } catch (_) { return true; }
+    try {
+      const guardado = localStorage.getItem(CERRADO_CACHE_KEY);
+      if (guardado !== null) return guardado !== '0';
+    } catch (_) {}
+    const c = contenidoGuardado();
+    return c ? c.cerrado === true : true;
   });
+  const [cerradoListo, setCerradoListo] = useState(false); // ya respondió Firestore
 
   // Aplica el acento/fondo cacheados ANTES de pintar (useLayoutEffect corre
   // sincrónico, antes de que el navegador muestre el frame), para no destellar
@@ -63,10 +70,11 @@ export function TemaProvider({ children }) {
         localStorage.setItem(CERRADO_CACHE_KEY, c.cerrado === true ? '1' : '0');
       } catch (_) {}
       setLogoListo(true);
-    }).catch(() => setLogoListo(true)); // sin conexión: se mantiene lo de la visita anterior
+    }).catch(() => setLogoListo(true)) // sin conexión: se mantiene lo de la visita anterior
+      .finally(() => setCerradoListo(true));
   }, []);
 
-  return <TemaContext.Provider value={{ ...tema, logoListo, cerrado, setCerrado, setTema }}>{children}</TemaContext.Provider>;
+  return <TemaContext.Provider value={{ ...tema, logoListo, cerrado, cerradoListo, setCerrado, setTema }}>{children}</TemaContext.Provider>;
 }
 
 export const useTema = () => useContext(TemaContext);

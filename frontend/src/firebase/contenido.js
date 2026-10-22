@@ -148,3 +148,10 @@ export async function guardarContenido(nuevo, anterior = {}) {
   await updateDoc(REF(), cambios);
   recordar({ ...(contenidoSesion || nuevo), ...cambios });
 }
+
+// Cambia campos sobre lo último de Firestore y no sobre la copia de la página
+export async function cambiarContenido(cambiar) {
+  const base = await obtenerContenido();
+  await guardarContenido({ ...base, ...cambiar(base) }, base);
+  return contenidoSesion;
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import Editable from '../components/Editable';
+import Icono from '../components/Icono';
 import { useIdioma } from '../context/LanguageContext';
 import '../styles/Legal.css';
 
@@ -191,8 +192,8 @@ export default function Legal() {
           <section className="legal-section legal-contacto">
             <h2><Editable id="legal_contacto_titulo" as="span">{es ? 'Contacto' : 'Contact'}</Editable></h2>
             <p><Editable id="legal_contacto_intro" as="span">{es ? 'Para consultas, reclamos o cualquier duda:' : 'For inquiries, complaints or any questions:'}</Editable></p>
-            <p><Editable id="legal_contacto_tel" as="span">📞 +51 997 050 752 (WhatsApp)</Editable></p>
-            <p><Editable id="legal_contacto_lugar" as="span">{es ? '📍 Arequipa, Perú' : '📍 Arequipa, Peru'}</Editable></p>
+            <p className="legal-contacto-linea"><Icono nombre="celular" tam={16} /><Editable id="legal_contacto_tel" as="span">+51 997 050 752 (WhatsApp)</Editable></p>
+            <p className="legal-contacto-linea"><Icono nombre="ubicacion" tam={16} /><Editable id="legal_contacto_lugar" as="span">{es ? 'Arequipa, Perú' : 'Arequipa, Peru'}</Editable></p>
           </section>
 
           <p className="legal-actualizado">

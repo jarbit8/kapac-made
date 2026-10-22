@@ -10,3 +10,12 @@ export const ADMINS = [
 // Compara sin distinguir mayúsculas/minúsculas.
 export const esCorreoAdmin = (email) =>
   !!email && ADMINS.includes(String(email).toLowerCase());
+
+// Quien programa el sitio: sus visitas no se cuentan (las de Cristhian sí)
+export const DUENO = 'jarb2299@gmail.com';
+export const esDueno = (email) => !!email && String(email).toLowerCase() === DUENO;
+
+// Nombre que se muestra en Visitas para las cuentas conocidas
+export const NOMBRES = {
+  'cristhiandccapa@gmail.com': 'Cristhian',
+};

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/Hero.css';
-import { obtenerContenido, contenidoGuardado, normalizarMedio } from '../../firebase/contenido';
+import { obtenerContenido, contenidoGuardado, normalizarMedio, cambiarContenido } from '../../firebase/contenido';
 import { fotoRapida } from '../../utils/fotos';
-
-// Clave compartida con Admin.jsx para sincronizar el cache del hero.
-export const HERO_CACHE_KEY = 'kapac_hero_v1';
+import CambiarMedio from '../CambiarMedio';
 
 export default function Hero() {
   const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
@@ -24,6 +22,12 @@ export default function Hero() {
   }, []);
 
   const medio = videoCfg ? normalizarMedio(esMobile ? videoCfg.mobile : videoCfg.pc) : null;
+
+  const cambiarFondo = (slot) => async (nuevo) => {
+    const c = await cambiarContenido((b) => ({ heroVideo: { ...(b.heroVideo || {}), [slot]: nuevo } }));
+    setVideoCfg(c.heroVideo);
+    setFallo(false);
+  };
 
   // Sin portada (o si no carga) queda el fondo de carga con el logo
   return (
@@ -50,6 +54,13 @@ export default function Hero() {
         )
       )}
       <div className="hero-overlay" />
+
+      <div className="hero-editar cambiar-medio-grupo">
+        <CambiarMedio texto="Foto o video · computadora" carpeta="fondos"
+          anterior={normalizarMedio(videoCfg?.pc)?.url} alSubir={cambiarFondo('pc')} />
+        <CambiarMedio texto="Foto o video · celular" carpeta="fondos"
+          anterior={normalizarMedio(videoCfg?.mobile)?.url} alSubir={cambiarFondo('mobile')} />
+      </div>
 
       <div className="hero-content hero-content-center">
       </div>

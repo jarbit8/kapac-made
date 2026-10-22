@@ -117,6 +117,30 @@ exports.notificarCambioEstado = onDocumentUpdated(
       }
     }
 
+    // ── Devolver el stock si se cancela un pedido que ya lo había descontado ──
+    if (antes.estado !== despues.estado && nuevoEstado === 'cancelado' && despues.stockDescontado) {
+      const db = admin.firestore();
+      try {
+        await db.runTransaction(async (tx) => {
+          const pedidoRef = event.data.after.ref;
+          const pedidoSnap = await tx.get(pedidoRef);
+          if (!pedidoSnap.data()?.stockDescontado) return; // ya lo devolvió otra ejecución
+          const itemsPedido = pedidoSnap.data()?.items || [];
+          const refs = itemsPedido.map((i) => db.collection('productos').doc(i.id));
+          const snaps = await Promise.all(refs.map((r) => tx.get(r)));
+          snaps.forEach((s, idx) => {
+            if (!s.exists) return;
+            const actual = Number(s.data().stock);
+            if (!Number.isFinite(actual)) return;
+            tx.update(refs[idx], { stock: actual + (parseInt(itemsPedido[idx].cantidad, 10) || 0) });
+          });
+          tx.update(pedidoRef, { stockDescontado: false });
+        });
+      } catch (e) {
+        console.error('No se pudo devolver el stock del pedido', pedidoId, e);
+      }
+    }
+
     // ── Notificar al CLIENTE por CORREO ─────────────────────────────────────
     if (despues.canalNotificacion === 'email' && despues.email) {
       await enviarCorreo({

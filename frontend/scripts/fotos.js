@@ -26,13 +26,16 @@ async function leerFirestore() {
     if (!r.ok) throw new Error(`${ruta}: ${r.status}`);
     const texto = await r.text();
     docs[ruta] = JSON.parse(texto);
-    for (const u of texto.match(/https:\/\/firebasestorage\.googleapis\.com\/[^"\\\s]+/g) || []) urls.add(u);
   }
   const contenido = {
     sitio: valor({ mapValue: docs['contenido/sitio'] }),
     textos: valor({ mapValue: docs['contenido/textos'] }),
-    productos: (docs['productos?pageSize=300'].documents || []).map((d) => ({ id: d.name.split('/').pop(), ...valor({ mapValue: d }) })),
+    // Los borradores no van en la página publicada
+    productos: (docs['productos?pageSize=300'].documents || [])
+      .map((d) => ({ id: d.name.split('/').pop(), ...valor({ mapValue: d }) }))
+      .filter((p) => p.activo !== false),
   };
+  for (const u of JSON.stringify(contenido).match(/https:\/\/firebasestorage\.googleapis\.com\/[^"\\\s]+/g) || []) urls.add(u);
   return { urls: [...urls], contenido };
 }
 

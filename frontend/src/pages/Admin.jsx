@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import { useAuth } from '../context/AuthContext';
-import { esCorreoAdmin } from '../config/admins';
+import { esCorreoAdmin, NOMBRES } from '../config/admins';
 import {
   obtenerProductos, agregarProducto, actualizarProducto, eliminarProducto,
 } from '../firebase/productos';
@@ -11,16 +11,9 @@ import {
 } from '../firebase/pedidos';
 import { obtenerEstadisticas, obtenerVisitasRecientes, nombreRuta } from '../firebase/visitas';
 import { imagen } from '../firebase/imagenesProductos';
-import { subirImagen, subirMedia, borrarMedia } from '../firebase/almacenamiento';
-import { HERO_CACHE_KEY } from '../components/Hero/Hero';
-import {
-  obtenerContenido, guardarContenido,
-  HOME_FOTOS_DEFAULT, GALERIA_PRODUCTO_DEFAULT, FOOTER_FONDO_DEFAULT, IN_THE_ZONE_DEFAULT, HERO_VIDEO_DEFAULT,
-  ACENTO_DEFAULT, LOGO_DEFAULT, FONDO_DEFAULT, TEXTO_DEFAULT, ALMA_FOTOS_DEFAULT, B2B_BENEFICIOS_DEFAULT, normalizarMedio, slotMedio,
-} from '../firebase/contenido';
+import { subirImagen } from '../firebase/almacenamiento';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
-import { useTema, LOGO_CACHE_KEY } from '../context/TemaContext';
 import Cargando from '../components/Cargando/Cargando';
 import Icono from '../components/Icono';
 import '../styles/Admin.css';
@@ -50,47 +43,6 @@ function SubirFoto({ valor, onSubido, carpeta = 'varios', prevStyle, vaciStyle }
         {subiendo ? 'Subiendo…' : (valor ? 'Cambiar foto' : 'Subir foto')}
         <input type="file" accept="image/*" onChange={onArchivo} disabled={subiendo} hidden />
       </label>
-      {err && <span className="subir-foto-err">{err}</span>}
-    </div>
-  );
-}
-
-// Control para fondos: acepta imagen O video. Reporta { tipo, url }.
-function SubirMedia({ valor, onSubido }) {
-  const [subiendo, setSubiendo] = useState(false);
-  const [err, setErr] = useState('');
-  const [ok, setOk] = useState(false);
-  const [noPrev, setNoPrev] = useState(false); // el navegador no puede previsualizar el video
-  const onArchivo = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setErr(''); setOk(false); setNoPrev(false); setSubiendo(true);
-    const urlAnterior = valor?.url || '';
-    try {
-      const media = await subirMedia(file, 'fondos');
-      await onSubido(media);
-      borrarMedia(urlAnterior); // borra el archivo viejo de Storage (fire-and-forget)
-      setOk(true);
-    } catch (ex) {
-      setErr(ex?.message || 'No se pudo subir');
-    }
-    setSubiendo(false);
-  };
-  return (
-    <div className="subir-foto">
-      {valor?.url
-        ? (valor.tipo === 'video'
-            ? (noPrev
-                ? <div className="subir-foto-vacio" style={{ color: '#155724' }}>Video guardado<br/>(sin vista previa)</div>
-                : <video src={valor.url} className="subir-foto-prev" muted loop autoPlay playsInline controls
-                    onError={() => setNoPrev(true)} />)
-            : <img src={valor.url} alt="" className="subir-foto-prev" />)
-        : <div className="subir-foto-vacio">Sin fondo</div>}
-      <label className="subir-foto-btn">
-        {subiendo ? 'Subiendo…' : (valor?.url ? 'Cambiar' : 'Subir imagen o video')}
-        <input type="file" accept="image/*,video/*" onChange={onArchivo} disabled={subiendo} hidden />
-      </label>
-      {ok && <span className="admin-ok"><Icono nombre="check" tam={14} /> Guardado</span>}
       {err && <span className="subir-foto-err">{err}</span>}
     </div>
   );
@@ -130,7 +82,21 @@ const VACIO = {
   estilos: {},
 };
 
-const ESTADOS_PEDIDO = ['procesando_pago', 'verificando_pago', 'pendiente_envio', 'enviado', 'entregado', 'cancelado'];
+const ESTADOS_PEDIDO = ['procesando_pago', 'verificando_pago', 'pendiente_envio', 'enviado', 'entregado'];
+// Estados viejos → su equivalente, para saber desde dónde puede avanzar
+const ESTADO_EQUIVALENTE = { pendiente: 'verificando_pago', verificando: 'procesando_pago', pagado: 'pendiente_envio' };
+
+// Solo se avanza o se cancela: volver atrás le mandaría otra vez el correo al cliente.
+// "Procesando pago" lo pone el sistema mientras el cliente paga.
+const estadosPosibles = (estado) => {
+  if (estado === 'cancelado') return ['cancelado'];
+  const i = ESTADOS_PEDIDO.indexOf(ESTADO_EQUIVALENTE[estado] || estado);
+  const siguientes = ESTADOS_PEDIDO.slice(Math.max(i + 1, 1));
+  return [estado, ...siguientes, ...(estado === 'entregado' ? [] : ['cancelado'])];
+};
+
+const etiquetaEstado = (estado, pedido) =>
+  estado === 'enviado' && pedido.envio?.tipo !== 'envio' ? 'Listo para recoger' : (ESTADO_LABELS[estado] || estado);
 
 const ESTADO_LABELS = {
   procesando_pago:  'Procesando pago',
@@ -168,7 +134,6 @@ const ESTADO_COLORES = {
 export default function Admin() {
   const { usuario, cargando } = useAuth();
   const { t } = useIdioma();
-  const { setTema, setCerrado } = useTema();
   const { textos, guardar: guardarTextoGlobal } = useTextos();
   const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
@@ -180,42 +145,6 @@ export default function Admin() {
   const [form, setForm] = useState(VACIO);
   const [editandoId, setEditandoId] = useState(null);
   const [msg, setMsg] = useState('');
-
-  // Contenido editable (fotos de home + galería de producto)
-  const [contenido, setContenido] = useState({ homeFotos: HOME_FOTOS_DEFAULT, galeriaProducto: GALERIA_PRODUCTO_DEFAULT, footerFondo: FOOTER_FONDO_DEFAULT, inTheZoneFoto: IN_THE_ZONE_DEFAULT, heroVideo: HERO_VIDEO_DEFAULT, almaFotos: ALMA_FOTOS_DEFAULT, acento: ACENTO_DEFAULT, logo: LOGO_DEFAULT, fondo: FONDO_DEFAULT, texto: TEXTO_DEFAULT, b2bBeneficios: B2B_BENEFICIOS_DEFAULT, cerrado: false });
-  const [guardandoContenido, setGuardandoContenido] = useState(false);
-  const [msgContenido, setMsgContenido] = useState('');
-
-  const cargarContenido = () => {
-    obtenerContenido().then(setContenido).catch(() => {});
-  };
-
-  // Guarda un objeto de contenido en Firestore y refleja el estado.
-  const persistirContenido = async (nuevo) => {
-    const anterior = contenido;
-    setContenido(nuevo);
-    setGuardandoContenido(true); setMsgContenido('');
-    try {
-      await guardarContenido(nuevo, anterior);
-      try { localStorage.setItem(HERO_CACHE_KEY, JSON.stringify(nuevo.heroVideo || null)); } catch (_) {}
-      try {
-        if (nuevo.logo) localStorage.setItem(LOGO_CACHE_KEY, nuevo.logo);
-        setTema((prev) => ({
-          ...prev,
-          logo: nuevo.logo || prev.logo,
-          fondo: nuevo.fondo || prev.fondo,
-          texto: nuevo.texto || prev.texto,
-        }));
-      } catch (_) {}
-      setMsgContenido('Cambios guardados');
-    } catch (e) {
-      setMsgContenido('No se pudo guardar: ' + (e?.message || ''));
-      throw e;
-    } finally {
-      setGuardandoContenido(false);
-    }
-  };
-
 
   const cargar = async () => {
     setProductos(await obtenerProductos());
@@ -239,14 +168,19 @@ export default function Admin() {
 
   useEffect(() => { cargar(); cargarPedidos(); cargarStats(); }, []);
 
-  const cambiarEstadoPedido = async (pedidoId, nuevoEstado) => {
+  const cambiarEstadoPedido = async (p, nuevoEstado) => {
+    const numero = `#${p.id.slice(0, 8).toUpperCase()}`;
+    const etiqueta = etiquetaEstado(nuevoEstado, p);
+    const correo = p.canalNotificacion === 'email' && p.email ? '\n\nSe le avisará al cliente por correo.' : '';
+    const stock = nuevoEstado === 'cancelado' && p.stockDescontado ? '\nEl stock de este pedido vuelve a la tienda.' : '';
+    if (!window.confirm(`¿Cambiar el pedido ${numero} a «${etiqueta}»?${correo}${stock}`)) return;
     try {
-      await actualizarEstadoPedido(pedidoId, nuevoEstado);
+      await actualizarEstadoPedido(p.id, nuevoEstado);
     } catch (e) {
       setMsg(`No se pudo actualizar el pedido: ${e?.message || ''}`);
       return;
     }
-    setMsg(`Pedido #${pedidoId.slice(0, 8).toUpperCase()} actualizado: ${ESTADO_LABELS[nuevoEstado] || nuevoEstado}`);
+    setMsg(`Pedido ${numero} actualizado: ${etiqueta}`);
     cargarPedidos();
   };
 
@@ -381,144 +315,12 @@ export default function Admin() {
             )}
           </button>
           <button
-            className={pestana === 'fotos' ? 'activa' : ''}
-            onClick={() => { setPestana('fotos'); cargarContenido(); }}
-          >
-            Fotos y diseño
-          </button>
-          <button
             className={pestana === 'visitas' ? 'activa' : ''}
             onClick={() => { setPestana('visitas'); cargarStats(); }}
           >
             {t('admin.tab_visitas')}
           </button>
         </div>
-
-        {/* ====== SECCIÓN FOTOS (home + galería de producto) ====== */}
-        {pestana === 'fotos' && (
-          <div className="admin-fotos">
-            <p className="admin-fotos-intro">
-              Sube las fotos del sitio. Cada cambio se <b>guarda solo</b> al subir, quitar o salir de un campo de texto.
-            </p>
-            {(guardandoContenido || msgContenido) && (
-              <p style={{
-                fontSize: 13, fontWeight: 600, marginTop: -8, marginBottom: 16,
-                color: guardandoContenido ? '#888' : (msgContenido.startsWith('No se pudo') ? '#c0392b' : '#1a7d3b'),
-              }}>
-                {guardandoContenido ? 'Guardando…' : msgContenido}
-              </p>
-            )}
-
-            <h3 className="admin-fotos-titulo">Diseño (fondo, navegación y botones)</h3>
-            <p style={{ fontSize: 12, color: '#888', marginBottom: 16, marginTop: -8 }}>Los textos, sus colores y las fotos de cada página se cambian en la misma página, con el botón «Editar» del menú. El logo se cambia pasando el mouse sobre él. Aquí: el fondo y el color del menú y los botones.</p>
-            <div className="admin-fotos-grid">
-              <div className="admin-foto-card">
-                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Fondo del sitio</label>
-                <input
-                  type="color"
-                  value={contenido.fondo || FONDO_DEFAULT}
-                  onChange={(e) => {
-                    const color = e.target.value;
-                    document.documentElement.style.setProperty('--fondo', color);
-                    persistirContenido({ ...contenido, fondo: color });
-                  }}
-                  style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
-                />
-                <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Color de fondo de todas las páginas.
-                </p>
-              </div>
-
-              <div className="admin-foto-card">
-                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Navegación y botones</label>
-                <input
-                  type="color"
-                  value={contenido.acento || ACENTO_DEFAULT}
-                  onChange={(e) => {
-                    const color = e.target.value;
-                    document.documentElement.style.setProperty('--clay', color);
-                    persistirContenido({ ...contenido, acento: color });
-                  }}
-                  style={{ width: 64, height: 44, border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer', background: 'none' }}
-                />
-                <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Un solo color para el menú (Shop, Kapac Made, B2B, Info, Admin) y todos los botones del sitio.
-                </p>
-              </div>
-
-              <div className="admin-foto-card">
-                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Tienda pública</label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const cerrado = !contenido.cerrado;
-                    persistirContenido({ ...contenido, cerrado });
-                    setCerrado(cerrado);
-                    try { localStorage.setItem('kapac_cerrado_v1', cerrado ? '1' : '0'); } catch (_) {}
-                  }}
-                  style={{
-                    padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13,
-                    background: contenido.cerrado ? '#f8d7da' : '#d4edda',
-                    color: contenido.cerrado ? '#842029' : '#155724',
-                  }}
-                >
-                  <span className={`admin-tienda-punto${contenido.cerrado ? ' cerrada' : ''}`} />
-                  {contenido.cerrado ? 'Cerrada: solo tú la ves' : 'Abierta al público'}
-                </button>
-                <p style={{ fontSize: '12px', color: '#888', margin: '8px 0 0' }}>
-                  Cerrada: los visitantes ven la pantalla «Próximamente». Tú entras con tu cuenta desde kapac-made.com/login.
-                </p>
-              </div>
-            </div>
-
-            <h3 className="admin-fotos-titulo">Imagen o video principal (Hero — pantalla de inicio)</h3>
-            <div className="admin-fotos-grid">
-              <div className="admin-foto-card">
-                <SubirMedia
-                  valor={normalizarMedio(contenido.heroVideo?.pc)}
-                  onSubido={(media) => persistirContenido({ ...contenido, heroVideo: { ...(contenido.heroVideo || {}), pc: media } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Computadora (horizontal)</p>
-              </div>
-              <div className="admin-foto-card">
-                <SubirMedia
-                  valor={normalizarMedio(contenido.heroVideo?.mobile)}
-                  onSubido={(media) => persistirContenido({ ...contenido, heroVideo: { ...(contenido.heroVideo || {}), mobile: media } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Celular (vertical)</p>
-              </div>
-            </div>
-
-            <p style={{ fontSize: 12, color: '#888', marginTop: -8, marginBottom: 16 }}>Las fotos y textos de la página de inicio se editan en la misma página, con el botón «Editar» del menú.</p>
-
-            <h3 className="admin-fotos-titulo">Foto épica de "in the zone" (se abre en pestaña nueva)</h3>
-            <div className="admin-fotos-grid">
-              <div className="admin-foto-card">
-                <SubirFoto valor={slotMedio(contenido.inTheZoneFoto, 'pc')?.url || ''} carpeta="zone"
-                  onSubido={(url) => persistirContenido({ ...contenido, inTheZoneFoto: { ...(typeof contenido.inTheZoneFoto === 'object' && (contenido.inTheZoneFoto?.pc || contenido.inTheZoneFoto?.mobile) ? contenido.inTheZoneFoto : {}), pc: { tipo: 'imagen', url } } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Computadora</p>
-              </div>
-              <div className="admin-foto-card">
-                <SubirFoto valor={slotMedio(contenido.inTheZoneFoto, 'mobile')?.url || ''} carpeta="zone"
-                  onSubido={(url) => persistirContenido({ ...contenido, inTheZoneFoto: { ...(typeof contenido.inTheZoneFoto === 'object' && (contenido.inTheZoneFoto?.pc || contenido.inTheZoneFoto?.mobile) ? contenido.inTheZoneFoto : {}), mobile: { tipo: 'imagen', url } } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Celular (vertical)</p>
-              </div>
-            </div>
-
-            <h3 className="admin-fotos-titulo">Fondo del pie de página (imagen o video)</h3>
-            <div className="admin-fotos-grid">
-              <div className="admin-foto-card">
-                <SubirMedia valor={slotMedio(contenido.footerFondo, 'pc')}
-                  onSubido={(media) => persistirContenido({ ...contenido, footerFondo: { ...(typeof contenido.footerFondo === 'object' && (contenido.footerFondo?.pc || contenido.footerFondo?.mobile) ? contenido.footerFondo : {}), pc: media } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Computadora</p>
-              </div>
-              <div className="admin-foto-card">
-                <SubirMedia valor={slotMedio(contenido.footerFondo, 'mobile')}
-                  onSubido={(media) => persistirContenido({ ...contenido, footerFondo: { ...(typeof contenido.footerFondo === 'object' && (contenido.footerFondo?.pc || contenido.footerFondo?.mobile) ? contenido.footerFondo : {}), mobile: media } })} />
-                <p style={{ fontSize: '12px', color: '#888', margin: 0 }}>Celular</p>
-              </div>
-            </div>
-
-          </div>
-        )}
 
         {/* ====== SECCIÓN VISITAS ====== */}
         {pestana === 'visitas' && (
@@ -542,7 +344,7 @@ export default function Admin() {
               <div className="contador-card" style={{ borderTop: '4px solid #4caf50' }}>
                 <span className="contador-num">{stats.logueados}</span>
                 <span className="contador-label">Identificados</span>
-                <span className="contador-sub">entraron con su cuenta</span>
+                <span className="contador-sub">personas que entraron con su cuenta</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #f57c00' }}>
                 <span className="contador-num">{Object.keys(stats.porPais).length}</span>
@@ -579,7 +381,7 @@ export default function Admin() {
                     <div className="visita-info">
                       <div className="visita-quien">
                         {v.email ? (
-                          <strong>{v.email}</strong>
+                          <strong>{NOMBRES[v.email] ? `${NOMBRES[v.email]} · ${v.email}` : v.email}</strong>
                         ) : (
                           <span style={{ color:'#888' }}>Visitante anónimo</span>
                         )}
@@ -587,6 +389,7 @@ export default function Admin() {
                       <div className="visita-meta">
                         {v.ciudad && v.ciudad !== 'Desconocida' ? `${v.ciudad}, ` : ''}{v.pais || '—'} · {v.dispositivo} · {v.navegador}
                       </div>
+                      <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>
                     </div>
                     <div className="visita-ruta">
                       <span className="visita-pagina">{rutaNombre}</span>
@@ -765,7 +568,7 @@ export default function Admin() {
                         className="admin-pedido-estado"
                         style={{ background: col.bg, color: col.color }}
                       >
-                        {ESTADO_LABELS[p.estado] || p.estado}
+                        {etiquetaEstado(p.estado, p)}
                       </span>
                     </div>
                     <p className="admin-pedido-fecha">{formatoFecha(p.fecha)}</p>
@@ -796,11 +599,12 @@ export default function Admin() {
                       <strong>Total: S/{p.total}.00</strong>
                       <select
                         value={p.estado}
-                        onChange={(e) => cambiarEstadoPedido(p.id, e.target.value)}
+                        onChange={(e) => cambiarEstadoPedido(p, e.target.value)}
                         className="admin-pedido-select"
+                        disabled={p.estado === 'cancelado'}
                       >
-                        {ESTADOS_PEDIDO.map((est) => (
-                          <option key={est} value={est}>{ESTADO_LABELS[est]}</option>
+                        {estadosPosibles(p.estado).map((est) => (
+                          <option key={est} value={est}>{etiquetaEstado(est, p)}</option>
                         ))}
                       </select>
                     </div>

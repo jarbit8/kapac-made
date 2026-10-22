@@ -49,7 +49,12 @@
     <meta name="twitter:image" content="https://www.kapac-made.com/og-kapac.jpg" />
     <script>
       if (location.hash.indexOf('#/') === 0) history.replaceState(null, '', location.hash.slice(1));
-      try { if (localStorage.getItem('kapac_cerrado_v1') !== '0' && localStorage.getItem('kapac_dispositivo_admin') !== '1') document.documentElement.classList.add('cerrado'); } catch (e) {}
+      // Tienda cerrada: lo de la visita anterior o, en la primera, lo que había al publicar
+      try {
+        var k = localStorage.getItem('kapac_cerrado_v1'), s = window.__CONTENIDO__ && window.__CONTENIDO__.sitio;
+        var cerrada = k !== null ? k !== '0' : !(s && s.cerrado !== true);
+        if (cerrada && localStorage.getItem('kapac_dispositivo_admin') !== '1') document.documentElement.classList.add('cerrado');
+      } catch (e) {}
       // Portada de la visita anterior: empieza a bajar antes de que cargue la app
       try {
         var c = JSON.parse(localStorage.getItem('kapac_contenido_v1')) || (window.__CONTENIDO__ && window.__CONTENIDO__.sitio);
