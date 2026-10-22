@@ -10,6 +10,8 @@ import {
   obtenerTodosPedidos, actualizarEstadoPedido,
 } from '../firebase/pedidos';
 import { obtenerEstadisticas, obtenerVisitasRecientes, nombreRuta } from '../firebase/visitas';
+import { obtenerReclamos, responderReclamo } from '../firebase/reclamos';
+import { diasHabilesHasta } from '../utils/diasHabiles';
 import { imagen } from '../firebase/imagenesProductos';
 import { subirImagen } from '../firebase/almacenamiento';
 import { useIdioma } from '../context/LanguageContext';
@@ -141,10 +143,16 @@ export default function Admin() {
   const [stats, setStats] = useState({ total: 0, logueados: 0, porRuta: {}, porDia: {}, porPais: {} });
   const [visitasRecientes, setVisitasRecientes] = useState([]);
   const [visitasLimite, setVisitasLimite] = useState(10);
-  const [pestana, setPestana] = useState('productos'); // 'productos' | 'pedidos' | 'visitas'
+  const [pestana, setPestana] = useState('productos'); // 'productos' | 'pedidos' | 'visitas' | 'reclamos'
   const [form, setForm] = useState(VACIO);
   const [editandoId, setEditandoId] = useState(null);
   const [msg, setMsg] = useState('');
+  const [reclamos, setReclamos] = useState([]);
+  const [reclamosError, setReclamosError] = useState('');
+  const [filtroReclamos, setFiltroReclamos] = useState('pendientes'); // 'pendientes' | 'respondidos'
+  const [reclamoAbierto, setReclamoAbierto] = useState(null);
+  const [respuesta, setRespuesta] = useState('');
+  const [respondiendo, setRespondiendo] = useState(false);
 
   const cargar = async () => {
     setProductos(await obtenerProductos());
@@ -166,7 +174,50 @@ export default function Admin() {
     setVisitasRecientes(await obtenerVisitasRecientes(nuevoLimite));
   };
 
-  useEffect(() => { cargar(); cargarPedidos(); cargarStats(); }, []);
+  const cargarReclamos = async () => {
+    try {
+      setReclamos(await obtenerReclamos());
+      setReclamosError('');
+    } catch (e) {
+      console.error(e);
+      setReclamosError(`No se pudieron cargar los reclamos: ${e?.message || ''}`);
+    }
+  };
+
+  useEffect(() => { cargar(); cargarPedidos(); cargarStats(); cargarReclamos(); }, []);
+
+  const abrirReclamo = (id) => {
+    setReclamoAbierto(reclamoAbierto === id ? null : id);
+    setRespuesta('');
+  };
+
+  const enviarRespuesta = async (r) => {
+    const texto = respuesta.trim();
+    if (texto.length < 10) {
+      setMsg('Escribe la respuesta al consumidor (mínimo 10 caracteres).');
+      return;
+    }
+    if (!window.confirm(`Se enviará por correo a ${r.email} y no se podrá editar.`)) return;
+    setRespondiendo(true);
+    try {
+      await responderReclamo(r.id, texto);
+      setMsg(`Reclamo ${r.codigo} respondido`);
+      setRespuesta('');
+      await cargarReclamos();
+    } catch (e) {
+      setMsg(`No se pudo guardar la respuesta: ${e?.message || ''}`);
+    }
+    setRespondiendo(false);
+  };
+
+  // Días hábiles que quedan para responder; en rojo si son 3 o menos o ya venció
+  const plazoReclamo = (r) => {
+    if (r.estado === 'respondido' || !r.fechaLimite?.toDate) return null;
+    const n = diasHabilesHasta(r.fechaLimite.toDate());
+    const dias = (v) => `${v} día${v === 1 ? '' : 's'} hábil${v === 1 ? '' : 'es'}`;
+    const texto = n < 0 ? `Vencido hace ${dias(-n)}` : n === 0 ? 'Vence hoy' : `Quedan ${dias(n)}`;
+    return { texto, urgente: n <= 3 };
+  };
 
   const cambiarEstadoPedido = async (p, nuevoEstado) => {
     const numero = `#${p.id.slice(0, 8).toUpperCase()}`;
@@ -193,6 +244,8 @@ export default function Admin() {
   };
 
   const pedidosVerificando = pedidos.filter(p => ['verificando_pago', 'verificando'].includes(p.estado));
+  const reclamosPendientes = reclamos.filter((r) => r.estado !== 'respondido');
+  const reclamosRespondidos = reclamos.filter((r) => r.estado === 'respondido');
 
   const ESTADOS_PENDIENTE = ['verificando_pago', 'pendiente_envio', 'enviado', 'pendiente', 'verificando', 'pagado'];
   const pedidosPendientes  = pedidos.filter(p => ESTADOS_PENDIENTE.includes(p.estado));
@@ -319,6 +372,15 @@ export default function Admin() {
             onClick={() => { setPestana('visitas'); cargarStats(); }}
           >
             {t('admin.tab_visitas')}
+          </button>
+          <button
+            className={pestana === 'reclamos' ? 'activa' : ''}
+            onClick={() => { setPestana('reclamos'); cargarReclamos(); }}
+          >
+            {t('admin.tab_reclamos')}
+            {reclamosPendientes.length > 0 && (
+              <span className="admin-badge">{reclamosPendientes.length}</span>
+            )}
           </button>
         </div>
 
@@ -608,6 +670,117 @@ export default function Admin() {
                         ))}
                       </select>
                     </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        )}
+
+        {/* ====== SECCIÓN RECLAMOS ====== */}
+        {pestana === 'reclamos' && (
+          <div className="admin-pedidos">
+            <div className="admin-pedidos-filtros">
+              {[
+                { key: 'pendientes', label: `Pendientes (${reclamosPendientes.length})` },
+                { key: 'respondidos', label: `Respondidos (${reclamosRespondidos.length})` },
+              ].map((f) => (
+                <button
+                  key={f.key}
+                  className={`admin-filtro-btn ${filtroReclamos === f.key ? 'activo' : ''}`}
+                  onClick={() => setFiltroReclamos(f.key)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {reclamosError && <p className="admin-reclamo-error">{reclamosError}</p>}
+
+            {(() => {
+              const lista = filtroReclamos === 'pendientes' ? reclamosPendientes : reclamosRespondidos;
+              if (!reclamosError && lista.length === 0) return (
+                <p style={{ color: '#888', fontSize: 14, marginTop: 20 }}>
+                  {filtroReclamos === 'pendientes' ? 'No hay reclamos pendientes.' : 'Aún no has respondido ningún reclamo.'}
+                </p>
+              );
+
+              return lista.map((r) => {
+                const pendiente = r.estado !== 'respondido';
+                const col = pendiente ? { bg: '#fff3cd', color: '#856404' } : { bg: '#d4edda', color: '#155724' };
+                const plazo = plazoReclamo(r);
+                const abierto = reclamoAbierto === r.id;
+                return (
+                  <div key={r.id} className="admin-pedido-card">
+                    <div className="admin-pedido-top">
+                      <div>
+                        <span className="admin-pedido-id">{r.codigo}</span>
+                        <span className="admin-pedido-email">{r.tipo === 'queja' ? 'Queja' : 'Reclamo'}</span>
+                      </div>
+                      <span className="admin-pedido-estado" style={{ background: col.bg, color: col.color }}>
+                        {pendiente ? 'Pendiente' : 'Respondido'}
+                      </span>
+                    </div>
+                    <p className="admin-pedido-fecha">{formatoFecha(r.fecha)} · {r.nombre} · {r.email}</p>
+                    {plazo && <p className={`admin-reclamo-plazo${plazo.urgente ? ' urgente' : ''}`}>{plazo.texto}</p>}
+                    <button type="button" className="admin-filtro-btn" onClick={() => abrirReclamo(r.id)}>
+                      {abierto ? 'Cerrar' : (pendiente ? 'Ver y responder' : 'Ver')}
+                    </button>
+
+                    {abierto && (
+                      <div className="admin-reclamo-detalle">
+                        <dl>
+                          {[
+                            ['Consumidor', r.nombre],
+                            ['Documento', `${r.documentoTipo} ${r.documento}`],
+                            ['Domicilio', r.domicilio],
+                            ['Teléfono', r.telefono],
+                            ['Correo', r.email],
+                            ['Padre, madre o apoderado', r.menorDeEdad ? r.apoderado : ''],
+                            ['Bien contratado', r.bienTipo === 'servicio' ? 'Servicio' : 'Producto'],
+                            ['Descripción', r.bienDescripcion],
+                            ['Monto reclamado', typeof r.monto === 'number' ? `S/ ${r.monto.toFixed(2)}` : ''],
+                            ['N.º de pedido', r.pedidoId],
+                            ['Tipo', r.tipo === 'queja' ? 'Queja' : 'Reclamo'],
+                            ['Detalle', r.detalle],
+                            ['Pedido del consumidor', r.pedido],
+                            ['Idioma', r.idioma === 'en' ? 'Inglés' : 'Español'],
+                            ['Fecha límite', r.fechaLimite?.toDate ? r.fechaLimite.toDate().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' }) : ''],
+                          ].filter(([, v]) => v).map(([k, v]) => (
+                            <div className="admin-reclamo-fila" key={k}>
+                              <dt>{k}</dt>
+                              <dd>{v}</dd>
+                            </div>
+                          ))}
+                        </dl>
+
+                        {pendiente ? (
+                          <div className="admin-reclamo-responder">
+                            <label htmlFor={`respuesta-${r.id}`}>Respuesta al consumidor</label>
+                            <textarea
+                              id={`respuesta-${r.id}`}
+                              rows={6}
+                              maxLength={3000}
+                              value={respuesta}
+                              onChange={(e) => setRespuesta(e.target.value)}
+                            />
+                            <button
+                              type="button"
+                              className="admin-reclamo-enviar"
+                              onClick={() => enviarRespuesta(r)}
+                              disabled={respondiendo}
+                            >
+                              {respondiendo ? 'Enviando…' : 'Enviar respuesta'}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="admin-reclamo-responder">
+                            <p className="admin-reclamo-respuesta-fecha">Respondido el {formatoFecha(r.fechaRespuesta)}</p>
+                            <p className="admin-reclamo-respuesta">{r.respuesta}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               });

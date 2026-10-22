@@ -1,0 +1,470 @@
+/* ====== Libro de Reclamaciones ====== */
+.libro-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.libro-hero {
+  padding: 100px 0 36px;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 28px;
+}
+
+.libro-hero h1 {
+  font-family: var(--font-display) !important;
+  font-size: clamp(32px, 4.6vw, 48px);
+  font-weight: 500;
+  font-style: normal !important;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 10px;
+  line-height: 1.08;
+}
+
+.libro-sub {
+  font-size: 16px !important;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+/* Datos en pares etiqueta / valor (proveedor y hoja) */
+.libro-datos {
+  display: grid;
+  gap: 0;
+}
+
+.libro-fila {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.libro-fila:last-child { border-bottom: none; }
+
+.libro-fila dt {
+  color: #888;
+}
+
+.libro-fila dd {
+  color: var(--ink);
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.libro-proveedor {
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 10px 24px;
+  margin-bottom: 28px;
+}
+
+/* Bloques del formulario */
+.libro-bloque {
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.libro-bloque h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.libro-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.libro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.libro-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.libro-campo.completo { grid-column: 1 / -1; }
+
+.libro-campo label,
+.libro-etiqueta {
+  font-size: 13px;
+  color: #555;
+}
+
+.libro-campo input,
+.libro-campo select,
+.libro-campo textarea {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.libro-campo textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.libro-campo input:focus,
+.libro-campo select:focus,
+.libro-campo textarea:focus { border-color: var(--ink); }
+
+.libro-campo.con-error input,
+.libro-campo.con-error select,
+.libro-campo.con-error textarea { border-color: crimson; }
+
+.libro-error {
+  color: crimson;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.libro-contador {
+  align-self: flex-end;
+  font-size: 11.5px;
+  color: #aaa;
+}
+
+/* Opciones (producto / servicio, reclamo / queja) */
+.libro-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.libro-opcion {
+  position: relative;
+  cursor: pointer;
+}
+
+.libro-opcion input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.libro-opcion span {
+  display: block;
+  padding: 11px 22px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.libro-opcion:hover span { border-color: #bbb; }
+
+.libro-opcion input:checked + span {
+  border-color: var(--ink);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+.libro-opcion input:focus-visible + span { outline: 2px solid var(--clay); outline-offset: 2px; }
+
+.libro-definicion {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #777;
+}
+
+/* Interruptor "Soy menor de edad" (opcional) */
+.libro-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+}
+
+.libro-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.libro-switch-pista {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #ccc;
+  transition: background 0.2s;
+}
+
+.libro-switch-pista::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.libro-switch input:checked + .libro-switch-pista { background: #111; }
+.libro-switch input:checked + .libro-switch-pista::after { transform: translateX(20px); }
+.libro-switch input:focus-visible + .libro-switch-pista { outline: 2px solid var(--clay); outline-offset: 2px; }
+
+.libro-switch + .libro-grid { margin-top: 16px; }
+
+/* Envío */
+.libro-error-general {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: crimson;
+  font-size: 13px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.libro-enviar {
+  width: 100%;
+  padding: 15px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.libro-enviar:hover:not(:disabled) { background: #333; }
+.libro-enviar:disabled { opacity: 0.6; cursor: default; }
+
+.libro-leyendas {
+  margin-top: 24px;
+}
+
+.libro-leyendas p {
+  font-size: 12.5px !important;
+  line-height: 1.6;
+  color: #777;
+  margin-bottom: 8px;
+}
+
+/* Pantalla de éxito */
+.libro-exito {
+  text-align: center;
+  padding: 36px 0 28px;
+  color: #2e7d32;
+}
+
+.libro-exito h2 {
+  font-family: var(--font-display) !important;
+  font-size: clamp(26px, 3.4vw, 34px);
+  font-weight: 500;
+  color: var(--ink);
+  margin: 12px 0 14px;
+}
+
+.libro-exito p {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.libro-exito-codigo strong {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: #f4f4f4;
+  color: var(--ink);
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.libro-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.libro-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 26px;
+  background: #111;
+  color: #fff;
+  border: 1px solid #111;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.libro-boton:hover { background: #333; }
+
+.libro-boton.secundario {
+  background: #fff;
+  color: var(--ink);
+  border-color: #ccc;
+}
+
+.libro-boton.secundario:hover { background: #f6f6f6; }
+
+/* Hoja registrada */
+.libro-hoja {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.libro-hoja h3 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 24px 0 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #ddd;
+}
+
+.libro-hoja-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #111;
+  margin-bottom: 8px;
+}
+
+.libro-hoja-titulo {
+  font-family: var(--font-display) !important;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.libro-hoja-sub {
+  font-size: 13px;
+  color: #777;
+}
+
+.libro-hoja-codigo {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.libro-hoja-codigo span {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.libro-hoja-codigo strong {
+  font-size: 22px;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 600px) {
+  .libro-page { padding: 0 16px 60px; }
+  .libro-hero { padding: 80px 0 28px; }
+  .libro-bloque { padding: 20px 16px; }
+  .libro-proveedor { padding: 6px 16px; }
+  .libro-hoja { padding: 20px 16px; }
+  .libro-grid { grid-template-columns: 1fr; }
+  .libro-fila { grid-template-columns: 1fr; gap: 2px; padding: 8px 0; }
+  .libro-hoja-cab { flex-direction: column; }
+  .libro-hoja-codigo { text-align: left; }
+  .libro-acciones { flex-direction: column; }
+}
+
+/* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
+@media (pointer: coarse) {
+  .libro-boton { min-height: 44px; }
+}
+
+/* Al imprimir sale solo la hoja registrada */
+@media print {
+  header.header,
+  nav.navbar-sticky,
+  footer.footer,
+  .navbar-anuncio,
+  .navbar-backdrop,
+  .barra-edicion,
+  .wa-float,
+  .libro-no-imprimir { display: none !important; }
+
+  html, body { background: #fff !important; padding-top: 0 !important; }
+  .libro-page { max-width: none; padding: 0; }
+  .libro-hoja {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .libro-hoja h3,
+  .libro-fila { break-inside: avoid; }
+  .libro-fila { grid-template-columns: 150px 1fr; padding: 3px 0; font-size: 11.5px; }
+  .libro-hoja h3 { margin: 12px 0 3px; font-size: 11px; }
+  .libro-hoja-titulo { font-size: 20px; }
+  .libro-leyendas { margin-top: 14px; }
+  .libro-leyendas p { font-size: 10.5px !important; margin-bottom: 4px; }
+  @page { margin: 14mm; }
+}

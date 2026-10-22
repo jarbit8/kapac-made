@@ -67,6 +67,25 @@
 }
 .info-redes a:hover { opacity: 0.6; }
 
+.info-bloque .info-libro-enlace { margin-top: 16px; }
+
+.info-libro-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  color: var(--ink) !important;
+  font-size: 12px !important;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.info-libro-boton:hover { background: var(--ink); color: #fff !important; }
+
 /* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
 @media (pointer: coarse) {
   .info-redes a { position: relative; }

@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import Editable from '../components/Editable';
+import Icono from '../components/Icono';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
 import { obtenerContenido, contenidoGuardado, guardarContenido } from '../firebase/contenido';
 import '../styles/Contacto.css';
 
 export default function Contacto() {
-  const { idioma } = useIdioma();
+  const { t, idioma } = useIdioma();
   const es = idioma === 'es';
   const { textos, esAdmin } = useTextos();
 
@@ -96,8 +98,11 @@ export default function Contacto() {
           <section className="info-bloque">
             <Editable id="info_libro_titulo" as="h2" estilo>{es ? 'Libro de reclamaciones' : 'Complaints book'}</Editable>
             <Editable id="info_libro_texto" as="p" multiline>{es
-              ? 'Conforme a la normativa peruana, ponemos a tu disposición nuestro Libro de Reclamaciones. Para registrar una queja o reclamo, escríbenos a contacto@qhapaqbrands.com o al WhatsApp +51 997 050 752 y te guiaremos en el proceso.'
-              : 'In accordance with Peruvian regulations, we provide our Complaints Book. To register a complaint, email contacto@qhapaqbrands.com or WhatsApp +51 997 050 752 and we will guide you through the process.'}</Editable>
+              ? 'Conforme a la normativa peruana, ponemos a tu disposición nuestro Libro de Reclamaciones virtual. Puedes registrar tu reclamo o queja en línea y recibirás una copia por correo; te responderemos en un plazo máximo de quince (15) días hábiles.'
+              : 'In accordance with Peruvian regulations, we provide our virtual Complaints Book. You can register your claim or complaint online and you will receive a copy by email; we will respond within a maximum of fifteen (15) business days.'}</Editable>
+            <p className="info-libro-enlace">
+              <Link to="/libro-reclamaciones" className="info-libro-boton"><Icono nombre="libro" tam={16} /> {t('libro.ir')}</Link>
+            </p>
           </section>
 
           {/* Campos adicionales que agregue el admin */}

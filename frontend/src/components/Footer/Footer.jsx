@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import '../../styles/Footer.css';
 import { useIdioma } from '../../context/LanguageContext';
 import { pedirCodigo, confirmarCodigo } from '../../firebase/newsletter';
@@ -6,6 +7,8 @@ import { mensajeServidor } from '../../i18n/mensajes';
 import { obtenerContenido, contenidoGuardado, medioDispositivo, slotMedio, cambiarContenido } from '../../firebase/contenido';
 import Editable from '../Editable';
 import CambiarMedio from '../CambiarMedio';
+import Icono from '../Icono';
+import { EMPRESA } from '../../config/empresa';
 import { fotoRapida } from '../../utils/fotos';
 
 /* ─── Iconos SVG (sociales) ─────────────────────────────────────────────── */
@@ -182,7 +185,11 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="footer-bottom-mini">
+        <Link to="/libro-reclamaciones" className="footer-libro">
+          <Icono nombre="libro" tam={16} /> {t('libro.titulo')}
+        </Link>
         <span className="footer-copy-mini">© Kapac Made</span>
+        <span className="footer-empresa">{EMPRESA.razonSocial} · RUC {EMPRESA.ruc}</span>
         <span className="footer-powered">Powered by jarbit</span>
       </div>
 

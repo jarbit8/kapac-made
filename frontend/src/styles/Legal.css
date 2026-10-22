@@ -133,3 +133,20 @@
   align-items: center;
   gap: 8px;
 }
+
+.legal-enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.legal-enlace:hover { opacity: 0.7; }
+
+/* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
+@media (pointer: coarse) {
+  .legal-enlace { position: relative; }
+  .legal-enlace::after { content: ''; position: absolute; inset: -10px -6px; }
+}

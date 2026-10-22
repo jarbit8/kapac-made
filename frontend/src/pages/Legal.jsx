@@ -1,13 +1,15 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import Editable from '../components/Editable';
 import Icono from '../components/Icono';
 import { useIdioma } from '../context/LanguageContext';
+import { EMPRESA } from '../config/empresa';
 import '../styles/Legal.css';
 
 export default function Legal() {
-  const { idioma } = useIdioma();
+  const { t, idioma } = useIdioma();
   const es = idioma === 'es';
 
   return (
@@ -186,6 +188,16 @@ export default function Legal() {
                 ? 'Este sitio web se rige por las leyes de la República del Perú. Cualquier controversia relacionada con el uso de este sitio o las compras realizadas se someterá a los tribunales competentes de Arequipa, Perú.'
                 : 'This website is governed by the laws of the Republic of Peru. Any dispute related to the use of this site or purchases made shall be submitted to the competent courts of Arequipa, Peru.'}</Editable>
             </p>
+          </section>
+
+          {/* ── Datos del proveedor ── */}
+          <section className="legal-section legal-contacto">
+            <h2><Editable id="legal_proveedor_titulo" as="span">{t('legal.proveedor_titulo')}</Editable></h2>
+            <p><strong>{t('libro.razon_social')}:</strong> {EMPRESA.razonSocial}</p>
+            <p><strong>{t('libro.nombre_comercial')}:</strong> {EMPRESA.nombreComercial}</p>
+            <p><strong>{t('libro.ruc')}:</strong> {EMPRESA.ruc}</p>
+            <p><strong>{t('libro.domicilio_proveedor')}:</strong> {EMPRESA.domicilio}</p>
+            <p><Link to="/libro-reclamaciones" className="legal-enlace"><Icono nombre="libro" tam={18} /> {t('libro.titulo')}</Link></p>
           </section>
 
           {/* ── Contacto ── */}

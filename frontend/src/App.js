@@ -29,6 +29,7 @@ import PagoTarjeta from './pages/PagoTarjeta';
 import PagoYapeCulqi from './pages/PagoYapeCulqi';
 import Confirmacion from './pages/Confirmacion';
 import Perfil from './pages/Perfil';
+import LibroReclamaciones from './pages/LibroReclamaciones';
 import WhatsApp from './components/WhatsApp/WhatsApp';
 import BarraEdicion from './components/BarraEdicion/BarraEdicion';
 import ScrollToTop from './components/ScrollToTop';
@@ -72,6 +73,7 @@ function AppRoutes() {
       <Route path="/alma"     element={<Navigate to="/kapac-made" replace />} />
       <Route path="/contacto" element={<Navigate to="/info" replace />} />
       <Route path="/legal"    element={<><NavBar /><Legal /></>} />
+      <Route path="/libro-reclamaciones" element={<><NavBar /><LibroReclamaciones /></>} />
       <Route path="/admin"    element={<><NavBar /><Admin /></>} />
       <Route path="/login"    element={<><NavBar /><Login /></>} />
       <Route path="/carrito"  element={<><NavBar /><Carrito /></>} />

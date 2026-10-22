@@ -23,6 +23,8 @@ const EN = {
   'Demasiados intentos. Pide un código nuevo.': 'Too many attempts. Request a new code.',
   'Código incorrecto.': 'Wrong code.',
   'Error verificando el código.': 'Error verifying the code.',
+  'Revisa los datos del formulario.': 'Check the information in the form.',
+  'El libro no está disponible en este momento. Escríbenos por WhatsApp.': 'The complaints book is not available right now. Message us on WhatsApp.',
 };
 
 export function mensajeServidor(mensaje, idioma, generico) {
