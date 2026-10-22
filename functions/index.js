@@ -20,7 +20,7 @@ const RESPONDER_A = 'jarb2299@gmail.com';
 // precio Y nombre salen de la BD, nunca de lo que mandó el cliente. Así no se
 // puede ni pagar de menos ni listar un producto distinto al que se cobra.
 // Devuelve { centimos, items } ya saneados.
-async function recalcularPedido(items) {
+async function recalcularPedido(items, { revisarStock = true } = {}) {
   const db = admin.firestore();
   let soles = 0;
   const limpios = [];
@@ -33,7 +33,7 @@ async function recalcularPedido(items) {
     const cant = Math.min(Math.max(parseInt(it.cantidad, 10) || 0, 1), 99);
     if (!(precio > 0)) throw new Error('Precio inválido: ' + it.id);
     const stock = Number(prod.stock);
-    if (Number.isFinite(stock) && cant > stock) throw new Error('Sin stock suficiente: ' + (prod.nombre || it.id));
+    if (revisarStock && Number.isFinite(stock) && cant > stock) throw new Error('Sin stock suficiente: ' + (prod.nombre || it.id));
     soles += precio * cant;
     limpios.push({ id: it.id, nombre: prod.nombre || '', precio, cantidad: cant });
   }
@@ -42,12 +42,17 @@ async function recalcularPedido(items) {
   return { centimos, items: limpios };
 }
 
+// IP real del cliente: Google agrega la verdadera al FINAL de x-forwarded-for;
+// lo que viene antes lo puede inventar cualquiera.
+function ipCliente(req) {
+  const ip = (req.headers['x-forwarded-for'] || '').split(',').pop().trim() || req.ip || 'na';
+  return (ip.replace(/[^\w.:-]/g, '_').slice(0, 60)) || 'na';
+}
+
 // Límite por IP: true si se permite, false si llamó hace menos de `segundos`.
 // Usa la colección `limites_ip` (solo accesible por el Admin SDK).
 async function permitirIP(req, segundos) {
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip || 'na';
-  const id = (ip.replace(/[^\w.:-]/g, '_').slice(0, 60)) || 'na';
-  const ref = admin.firestore().collection('limites_ip').doc(id);
+  const ref = admin.firestore().collection('limites_ip').doc(ipCliente(req));
   const snap = await ref.get();
   if (snap.exists && Date.now() - (snap.data().ultimo || 0) < segundos * 1000) return false;
   await ref.set({ ultimo: Date.now() });
@@ -87,7 +92,22 @@ exports.notificarCambioEstado = onDocumentUpdated(
     if (antes.estado === despues.estado && !activoAviso) return;
 
     const nuevoEstado = despues.estado;
-    const total = despues.total || 0;
+    let total = despues.total || 0;
+    let items = despues.items || [];
+
+    // Yape con QR: el cliente avisa que pagó y el admin compara con lo que le llegó.
+    // El total y los items los mandó el navegador, así que se rehacen con la base
+    // para que el admin y el correo vean el precio real.
+    if (antes.estado !== despues.estado && nuevoEstado === 'verificando_pago') {
+      try {
+        const real = await recalcularPedido(items, { revisarStock: false });
+        total = real.centimos / 100;
+        items = real.items;
+        await event.data.after.ref.update({ total, items });
+      } catch (e) {
+        console.error('No se pudo recalcular el pedido', pedidoId, e.message);
+      }
+    }
 
     // ── Descontar stock al confirmarse el pago (una sola vez por pedido) ────
     // Lo hace el servidor con el Admin SDK: los clientes no pueden escribir
@@ -141,16 +161,17 @@ exports.notificarCambioEstado = onDocumentUpdated(
       }
     }
 
-    // ── Notificar al CLIENTE por CORREO ─────────────────────────────────────
-    if (despues.canalNotificacion === 'email' && despues.email) {
+    // ── Notificar al CLIENTE por CORREO (una vez por estado) ────────────────
+    if (despues.canalNotificacion === 'email' && despues.email && despues.ultimoAviso !== nuevoEstado) {
       await enviarCorreo({
         to: despues.email,
         pedidoId,
         estado: nuevoEstado,
         total,
-        items: despues.items || [],
+        items,
         envio: despues.envio,
       });
+      await event.data.after.ref.update({ ultimoAviso: nuevoEstado });
     }
   }
 );
@@ -192,8 +213,13 @@ exports.cobrarCulqi = onRequest(
         return;
       }
       const pedido = pedidoSnap.data();
-      if (pedido.estado === 'pendiente_envio' || pedido.culqiChargeId) {
-        res.status(409).json({ ok: false, mensaje: 'Este pedido ya fue pagado.' });
+      if (pedido.estado !== 'procesando_pago' || pedido.culqiChargeId) {
+        res.status(409).json({ ok: false, mensaje: 'Este pedido ya fue pagado o cancelado.' });
+        return;
+      }
+      // Tope de intentos por pedido: frena a quien prueba tarjetas robadas una tras otra.
+      if ((pedido.intentosCobro || 0) >= 5) {
+        res.status(429).json({ ok: false, mensaje: 'Demasiados intentos con este pedido. Vuelve al carrito y empieza de nuevo.' });
         return;
       }
       // Pedido recalculado desde los productos reales (anti-fraude).
@@ -223,6 +249,7 @@ exports.cobrarCulqi = onRequest(
       const culqiData = await culqiRes.json();
 
       if (culqiData.object === 'error') {
+        await pedidoRef.update({ intentosCobro: admin.firestore.FieldValue.increment(1) });
         res.status(400).json({ ok: false, mensaje: culqiData.user_message || 'Tarjeta rechazada.' });
         return;
       }
@@ -279,8 +306,7 @@ exports.enviarCodigoNewsletter = onRequest(
       }
 
       // Límite por IP: 1 envío cada 30s desde la misma IP (frena el flood de un atacante).
-      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip || 'na';
-      const ipRef = db.collection('limites_ip').doc(ip.replace(/[^\w.:-]/g, '_').slice(0, 60) || 'na');
+      const ipRef = db.collection('limites_ip').doc(ipCliente(req));
       const ipSnap = await ipRef.get();
       if (ipSnap.exists && Date.now() - (ipSnap.data().ultimo || 0) < 30 * 1000) {
         res.status(429).json({ ok: false, mensaje: 'Demasiados intentos. Espera un momento.' });
@@ -417,6 +443,11 @@ exports.crearOrdenCulqi = onRequest(
       // Si el pedido ya tiene un código vigente, se reutiliza (recargas de página)
       // en vez de crear otra orden en Culqi.
       const ped = pedidoSnap.data();
+      // verificando_pago: el cliente ya generó su CIP y vuelve a la página a verlo
+      if (!['procesando_pago', 'verificando_pago'].includes(ped.estado)) {
+        res.status(409).json({ ok: false, mensaje: 'Este pedido ya fue pagado o cancelado.' });
+        return;
+      }
 
       // El invitado no tiene email en su sesión anónima: se toma el que dejó
       // en el checkout (guardado en el pedido) para no rechazar la compra.
@@ -564,13 +595,18 @@ exports.culqiWebhook = onRequest(
       }
 
       // Buscar el pedido por el id de orden Culqi confirmado.
-      const snap = await admin.firestore().collection('pedidos').get();
-      let target = null;
-      snap.forEach(d => { if (d.data().culqiOrderId === orderId) target = d; });
+      const snap = await admin.firestore().collection('pedidos').where('culqiOrderId', '==', orderId).limit(1).get();
+      const target = snap.docs[0];
 
       if (!target) {
         console.log('Pedido no encontrado para orden Culqi', orderId);
         res.status(200).send('OK (pedido no encontrado)');
+        return;
+      }
+      // Avisos repetidos (o reenviados por alguien) no reviven un pedido cancelado
+      // ni vuelven a descontar stock.
+      if (!['procesando_pago', 'verificando_pago'].includes(target.data().estado)) {
+        res.status(200).send('OK (ya procesado)');
         return;
       }
 

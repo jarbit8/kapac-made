@@ -26,35 +26,39 @@ service cloud.firestore {
     // ─── PEDIDOS ─────────────────────────────────────────────────────────────
     // Crear: un usuario autenticado crea UN pedido a su propio nombre.
     // Leer: solo el dueño o el admin.
-    // Actualizar: el dueño puede tocar su pedido PERO no el total ni los items
-    //   (eso impide manipular el precio); el admin puede todo.
+    // Actualizar: el dueño solo lo justo para pagar y recibir avisos; el admin todo.
     // Borrar: solo el admin.
     match /pedidos/{pedidoId} {
-      // Un pedido SIEMPRE nace en 'procesando_pago': el cliente no puede crearlo
-      // ya marcado como pagado/enviado. El total no puede ser negativo y los
-      // items deben ser una lista. Marcar pagado lo hace el servidor (Admin SDK).
+      // Un pedido SIEMPRE nace en 'procesando_pago' y solo con los campos del
+      // checkout: los del servidor (stockDescontado, culqiOrderId, códigos de
+      // pago...) no los puede poner el cliente. Marcar pagado lo hace el servidor.
       allow create: if request.auth != null
+                    && request.resource.data.keys().hasOnly(['usuarioId', 'email', 'nombre', 'items', 'total',
+                                                             'estado', 'metodoPago', 'envio', 'esInvitado', 'fecha'])
                     && request.resource.data.usuarioId == request.auth.uid
                     && request.resource.data.total is number
                     && request.resource.data.total >= 0
                     && request.resource.data.items is list
+                    && request.resource.data.items.size() <= 50
                     && request.resource.data.estado == 'procesando_pago';
 
       allow read: if request.auth != null
                   && (resource.data.usuarioId == request.auth.uid || esAdmin());
 
-      // El dueño puede tocar su pedido pero NO el total/items, y NO puede
-      // ascender el estado a "pagado/enviado/entregado": solo dejarlo igual o
-      // pasarlo a verificando_pago / cancelado. Marcar pagado lo hace el
-      // servidor (Cloud Function, Admin SDK) o el admin.
+      // El dueño solo puede avisar que ya pagó (procesando_pago → verificando_pago),
+      // activar o quitar el aviso por correo y poner su correo si no lo dejó.
+      // Ni el total, ni los items, ni cancelar, ni campos del servidor.
       allow update: if esAdmin()
                     || (request.auth != null
                         && resource.data.usuarioId == request.auth.uid
-                        && request.resource.data.usuarioId == resource.data.usuarioId
-                        && request.resource.data.total == resource.data.total
-                        && request.resource.data.items == resource.data.items
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['estado', 'canalNotificacion', 'email'])
                         && (request.resource.data.estado == resource.data.estado
-                            || request.resource.data.estado in ['verificando_pago', 'cancelado']));
+                            || (resource.data.estado == 'procesando_pago'
+                                && request.resource.data.estado == 'verificando_pago'))
+                        && (request.resource.data.get('email', null) == resource.data.get('email', null)
+                            || resource.data.get('email', null) in [null, ''])
+                        && request.resource.data.get('canalNotificacion', null) in [null, 'email']);
 
       allow delete: if esAdmin();
     }
@@ -73,10 +77,20 @@ service cloud.firestore {
 
     // ─── VISITAS (contador anónimo, sin datos personales) ────────────────────
     // Cualquiera puede registrar una visita nueva; nadie puede alterar ni
-    // borrar las existentes. Solo el admin lee las estadísticas.
+    // borrar las existentes. Solo el admin lee las estadísticas. El correo y el
+    // uid tienen que ser los de la sesión: nadie registra visitas a nombre de otro.
     match /visitas/{docId} {
       allow read: if esAdmin();
-      allow create: if true;
+      allow create: if request.resource.data.keys().hasOnly(['fecha', 'dia', 'ruta', 'sesionId', 'entrada', 'email',
+                                                             'uid', 'pais', 'ciudad', 'dispositivo', 'navegador'])
+                    && (request.resource.data.get('email', null) == null
+                        || (request.auth != null && request.auth.token.email == request.resource.data.email))
+                    && (request.resource.data.get('uid', null) == null
+                        || (request.auth != null && request.auth.uid == request.resource.data.uid))
+                    && request.resource.data.get('ruta', '') is string
+                    && request.resource.data.get('ruta', '').size() <= 60
+                    && request.resource.data.get('sesionId', '') is string
+                    && request.resource.data.get('sesionId', '').size() <= 80;
       allow update, delete: if false;
     }
 
