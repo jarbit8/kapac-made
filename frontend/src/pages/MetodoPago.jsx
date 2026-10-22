@@ -80,6 +80,7 @@ export default function MetodoPago() {
       // (los clientes no tienen permiso para escribir en productos).
       pedidoCreado.current = true;
       vaciar();
+      sessionStorage.removeItem('checkout_envio');
       sessionStorage.setItem('pago_total', total);
 
       if (metodo === 'yape' || metodo === 'yape-codigo') {
@@ -91,13 +92,16 @@ export default function MetodoPago() {
       }
     } catch (e) {
       console.error(e);
-      setError('Hubo un error. Intenta de nuevo.');
+      setError(t('metodo.error'));
     }
 
     setProcesando(false);
   };
 
-  if (!items.length && !pedidoCreado.current) return <Navigate to="/carrito" replace />;
+  if (!pedidoCreado.current) {
+    if (!items.length) return <Navigate to="/carrito" replace />;
+    if (!sessionStorage.getItem('checkout_envio')) return <Navigate to="/checkout" replace />;
+  }
 
   const opciones = [
     { id: 'yape', img: imgYape, alt: 'Yape', titulo: 'metodo.yape', desc: 'metodo.yape_desc' },

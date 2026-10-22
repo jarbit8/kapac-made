@@ -136,6 +136,12 @@
 }
 .producto-volver:hover { opacity: 0.7; }
 
+/* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
+@media (pointer: coarse) {
+  .producto-volver { position: relative; }
+  .producto-volver::after { content: ''; position: absolute; inset: -14px -10px; }
+}
+
 .producto-categoria {
   align-self: flex-start;
   font-size: 11px !important;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { registrar, iniciarSesion, iniciarSesionGoogle, cerrarSesion } from '../firebase/auth';
+import { registrar, iniciarSesion, iniciarSesionGoogle, enviarRecuperacion, cerrarSesion } from '../firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { useTema } from '../context/TemaContext';
@@ -18,6 +18,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [aviso, setAviso] = useState('');
   const [cargando, setCargando] = useState(false);
   const [redirigir, setRedirigir] = useState(false);
   const navigate = useNavigate();
@@ -70,9 +71,30 @@ export default function Login() {
     return mapa[code] || fallback;
   };
 
+  // Siempre el mismo aviso, exista o no la cuenta
+  const handleOlvide = async () => {
+    setError('');
+    setAviso('');
+    const correo = email.trim();
+    if (!correo) {
+      setError(t('login.olvide_escribe'));
+      return;
+    }
+    setCargando(true);
+    try {
+      await enviarRecuperacion(correo);
+      setAviso(t('login.olvide_enviado'));
+    } catch (err) {
+      if (err.code === 'auth/user-not-found') setAviso(t('login.olvide_enviado'));
+      else setError(traducirError(err.code));
+    }
+    setCargando(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setAviso('');
     setCargando(true);
     try {
       if (modoActual === 'login') {
@@ -105,6 +127,7 @@ export default function Login() {
       <>
         <Header />
         <main className="login-page">
+          <h1 className="solo-lector">{t('menu.mi_cuenta')}</h1>
           <div className="login-card login-logueado">
             <div className="login-avatar-grande">
               {(usuario.displayName || usuario.email || '?').charAt(0).toUpperCase()}
@@ -139,18 +162,19 @@ export default function Login() {
     <>
       <Header />
       <main className="login-page">
+        <h1 className="solo-lector">{t('menu.iniciar_sesion')}</h1>
         <div className="login-card">
           <div className="login-tabs">
             <button
               className={modoActual === 'login' ? 'activo' : ''}
-              onClick={() => { setModo('login'); setError(''); }}
+              onClick={() => { setModo('login'); setError(''); setAviso(''); }}
             >
               <span>{t('menu.iniciar_sesion')}</span>
             </button>
             {!cerrado && (
               <button
                 className={modoActual === 'registro' ? 'activo' : ''}
-                onClick={() => { setModo('registro'); setError(''); }}
+                onClick={() => { setModo('registro'); setError(''); setAviso(''); }}
               >
                 <span>{t('login.crear_cuenta')}</span>
               </button>
@@ -160,6 +184,9 @@ export default function Login() {
           <form className="login-form" onSubmit={handleSubmit}>
             <input
               type="email"
+              name="email"
+              autoComplete="email"
+              aria-label={t('login.email')}
               placeholder={t('login.email')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -167,15 +194,24 @@ export default function Login() {
             />
             <input
               type="password"
+              name="password"
+              autoComplete={modoActual === 'login' ? 'current-password' : 'new-password'}
+              aria-label={t('login.password')}
               placeholder={t('login.password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
             {error && <p className="login-error">{error}</p>}
+            {aviso && <p className="login-aviso">{aviso}</p>}
             <button type="submit" className="login-btn" disabled={cargando}>
               <span>{cargando ? (idioma === 'en' ? 'Loading...' : 'Cargando...') : (modoActual === 'login' ? t('login.entrar') : t('login.crear_cuenta'))}</span>
             </button>
+            {modoActual === 'login' && (
+              <button type="button" className="login-olvide" onClick={handleOlvide} disabled={cargando}>
+                {t('login.olvide')}
+              </button>
+            )}
           </form>
 
           <div className="login-divider"><span><span>{t('login.o')}</span></span></div>

@@ -10,23 +10,40 @@ import { useIdioma } from '../context/LanguageContext';
 import { obtenerPerfil } from '../firebase/perfil';
 import '../styles/Checkout.css';
 
+const limpiar = (v) => v.trim().replace(/\s+/g, ' ');
+const letras = (v) => (v.match(/\p{L}/gu) || []).length;
+
+// Celular peruano: acepta espacios, guiones y +51 al escribir, guarda solo los 9 dígitos
+const telefono9 = (v) => {
+  const d = v.replace(/\D/g, '');
+  return d.length === 11 && d.startsWith('51') ? d.slice(2) : d;
+};
+
+const leerGuardado = () => {
+  try { return JSON.parse(sessionStorage.getItem('checkout_envio')) || null; } catch { return null; }
+};
+
 export default function Checkout() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const { items } = useCart();
   const { t, idioma } = useIdioma();
-  const [modo, setModo] = useState(null); // 'envio' | 'recojo'
+  // Al volver desde el pago se recuperan los datos ya escritos
+  const [guardado] = useState(leerGuardado);
+  const [modo, setModo] = useState(guardado?.tipo || null); // 'envio' | 'recojo'
   const [form, setForm] = useState({
     nombre: '', telefono: '', direccion: '', distrito: '', referencia: '',
+    ...(guardado?.tipo === 'envio' ? guardado : {}),
   });
   const [formRecojo, setFormRecojo] = useState({
     nombre: '', telefono: '',
+    ...(guardado?.tipo === 'recojo' ? { nombre: guardado.nombre, telefono: guardado.telefono } : {}),
   });
   const [error, setError] = useState('');
 
   // Autocompletar con datos del perfil guardado
   useEffect(() => {
-    if (!usuario) return;
+    if (!usuario || guardado) return;
     const cargar = async () => {
       const datos = await obtenerPerfil(usuario.uid);
       if (datos) {
@@ -48,7 +65,12 @@ export default function Checkout() {
       }
     };
     cargar();
-  }, [usuario]);
+  }, [usuario, guardado]);
+
+  const elegir = (m) => {
+    setModo(m);
+    setError('');
+  };
 
   const continuar = () => {
     setError('');
@@ -58,37 +80,30 @@ export default function Checkout() {
       return;
     }
 
+    const envio = modo === 'envio';
+    const campos = envio ? form : formRecojo;
+    const nombre = limpiar(campos.nombre);
+    const telefono = campos.telefono.trim();
+    const direccion = envio ? limpiar(form.direccion) : 'Recojo en Arequipa';
+    const distrito = envio ? limpiar(form.distrito) : '';
+
+    if (!nombre || !telefono || (envio && (!direccion || !distrito))) {
+      if (envio) setError(idioma === 'en' ? 'Please fill in all required fields (*).' : 'Por favor completa todos los campos obligatorios (*).');
+      else setError(idioma === 'en' ? 'Please enter your name and phone number.' : 'Por favor completa tu nombre y teléfono.');
+      return;
+    }
+    if (letras(nombre) < 2 || nombre.length > 80) return setError(t('checkout.err_nombre'));
+    if (!/^\d{9}$/.test(telefono9(telefono))) return setError(t('checkout.err_telefono'));
+    if (envio && (letras(direccion) < 3 || direccion.length < 5 || direccion.length > 150)) return setError(t('checkout.err_direccion'));
+    if (envio && (letras(distrito) < 3 || distrito.length > 60)) return setError(t('checkout.err_distrito'));
+
     // El correo ya no se pide aquí: se ofrece como opción después del pago
     // (pantalla de Confirmación), para no frenar la compra a quien no quiere darlo.
     sessionStorage.setItem('checkout_email', usuario ? usuario.email : '');
-
-    if (modo === 'envio') {
-      if (!form.nombre || !form.telefono || !form.direccion || !form.distrito) {
-        setError(idioma === 'en' ? 'Please fill in all required fields (*).' : 'Por favor completa todos los campos obligatorios (*).');
-        return;
-      }
-      sessionStorage.setItem('checkout_nombre', form.nombre);
-      sessionStorage.setItem('checkout_envio', JSON.stringify({
-        tipo: 'envio',
-        nombre: form.nombre,
-        telefono: form.telefono,
-        direccion: form.direccion,
-        distrito: form.distrito,
-        referencia: form.referencia,
-      }));
-    } else {
-      if (!formRecojo.nombre || !formRecojo.telefono) {
-        setError(idioma === 'en' ? 'Please enter your name and phone number.' : 'Por favor completa tu nombre y teléfono.');
-        return;
-      }
-      sessionStorage.setItem('checkout_nombre', formRecojo.nombre);
-      sessionStorage.setItem('checkout_envio', JSON.stringify({
-        tipo: 'recojo',
-        nombre: formRecojo.nombre,
-        telefono: formRecojo.telefono,
-        direccion: 'Recojo en Arequipa',
-      }));
-    }
+    sessionStorage.setItem('checkout_nombre', nombre);
+    sessionStorage.setItem('checkout_envio', JSON.stringify(envio
+      ? { tipo: 'envio', nombre, telefono: telefono9(telefono), direccion, distrito, referencia: limpiar(form.referencia) }
+      : { tipo: 'recojo', nombre, telefono: telefono9(telefono), direccion }));
 
     navigate('/metodo-pago');
   };
@@ -106,7 +121,7 @@ export default function Checkout() {
         <div className="checkout-opciones">
           <button
             className={`checkout-opcion ${modo === 'envio' ? 'seleccionada' : ''}`}
-            onClick={() => setModo('envio')}
+            onClick={() => elegir('envio')}
           >
             <div className="opcion-icono"><Icono nombre="camion" tam={30} /></div>
             <div className="opcion-info">
@@ -118,7 +133,7 @@ export default function Checkout() {
 
           <button
             className={`checkout-opcion ${modo === 'recojo' ? 'seleccionada' : ''}`}
-            onClick={() => setModo('recojo')}
+            onClick={() => elegir('recojo')}
           >
             <div className="opcion-icono"><Icono nombre="tienda" tam={30} /></div>
             <div className="opcion-info">
@@ -134,34 +149,38 @@ export default function Checkout() {
             <h2>{t('checkout.envio_titulo')}</h2>
             <div className="checkout-grid">
               <label>
-                {t('checkout.nombre')} <span className="req">*</span>
+                <span>{t('checkout.nombre')} <span className="req">*</span></span>
                 <input
                   autoComplete="name"
+                  maxLength={80}
                   value={form.nombre}
                   onChange={e => setForm({ ...form, nombre: e.target.value })}
                 />
               </label>
               <label>
-                {t('checkout.telefono')} <span className="req">*</span>
+                <span>{t('checkout.telefono')} <span className="req">*</span></span>
                 <input
                   type="tel"
                   autoComplete="tel"
+                  maxLength={16}
                   placeholder="987 654 321"
                   value={form.telefono}
                   onChange={e => setForm({ ...form, telefono: e.target.value })}
                 />
               </label>
               <label className="full">
-                {t('checkout.direccion')} <span className="req">*</span>
+                <span>{t('checkout.direccion')} <span className="req">*</span></span>
                 <input
                   autoComplete="street-address"
+                  maxLength={150}
                   value={form.direccion}
                   onChange={e => setForm({ ...form, direccion: e.target.value })}
                 />
               </label>
               <label>
-                {t('checkout.distrito')} <span className="req">*</span>
+                <span>{t('checkout.distrito')} <span className="req">*</span></span>
                 <input
+                  maxLength={60}
                   value={form.distrito}
                   onChange={e => setForm({ ...form, distrito: e.target.value })}
                 />
@@ -169,6 +188,7 @@ export default function Checkout() {
               <label>
                 {t('checkout.referencia')}
                 <input
+                  maxLength={150}
                   value={form.referencia}
                   onChange={e => setForm({ ...form, referencia: e.target.value })}
                 />
@@ -189,18 +209,20 @@ export default function Checkout() {
             <h2>{t('checkout.contacto_titulo')}</h2>
             <div className="checkout-grid">
               <label>
-                {t('checkout.nombre')} <span className="req">*</span>
+                <span>{t('checkout.nombre')} <span className="req">*</span></span>
                 <input
                   autoComplete="name"
+                  maxLength={80}
                   value={formRecojo.nombre}
                   onChange={e => setFormRecojo({ ...formRecojo, nombre: e.target.value })}
                 />
               </label>
               <label>
-                {t('checkout.telefono')} <span className="req">*</span>
+                <span>{t('checkout.telefono')} <span className="req">*</span></span>
                 <input
                   type="tel"
                   autoComplete="tel"
+                  maxLength={16}
                   placeholder="987 654 321"
                   value={formRecojo.telefono}
                   onChange={e => setFormRecojo({ ...formRecojo, telefono: e.target.value })}

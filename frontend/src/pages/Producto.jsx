@@ -46,7 +46,7 @@ function cssEstilosProducto(estilos) {
 export default function Producto() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { agregar } = useCart();
+  const { agregar, items } = useCart();
   const { t, idioma } = useIdioma();
   const { textos, esAdmin } = useTextos();
   const specsColor = textos['producto_specs_color'] || '';
@@ -58,6 +58,7 @@ export default function Producto() {
   const [cargando, setCargando] = useState(() => !guardado());
   const [error, setError] = useState('');
   const [agregado, setAgregado] = useState(false);
+  const [maximo, setMaximo] = useState(false);
   const [imgIdx, setImgIdx] = useState(0); // carrusel de galería
   const touchX = useRef(0); // para deslizar (swipe)
   const nombreTraducido = useTraducido(producto?.nombre, idioma);
@@ -169,6 +170,13 @@ export default function Producto() {
     : '';
 
   const handleAgregar = () => {
+    const enCarrito = items.find((i) => i.id === producto.id)?.cantidad || 0;
+    if (enCarrito >= Number(producto.stock ?? 99)) {
+      setAgregado(false);
+      setMaximo(true);
+      setTimeout(() => setMaximo(false), 2500);
+      return;
+    }
     agregar(producto);
     setAgregado(true);
     setTimeout(() => setAgregado(false), 2000);
@@ -239,7 +247,7 @@ export default function Producto() {
 
             <div className="producto-info">
               {esAdmin && <EstadoProducto activo={producto.activo !== false} onAlternar={alternarActivo} />}
-              <button className="producto-volver" onClick={() => navigate(-1)}>
+              <button className="producto-volver" onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate('/shop'))}>
                 <span>{idioma === 'en' ? '← Back' : '← Volver'}</span>
               </button>
 
@@ -359,7 +367,7 @@ export default function Producto() {
                 onClick={handleAgregar}
                 disabled={producto.stock <= 0}
               >
-                <span>{agregado ? t('producto.agregado') : t('producto.agregar')}</span>
+                <span>{agregado ? t('producto.agregado') : maximo ? t('producto.maximo') : t('producto.agregar')}</span>
               </button>
 
               <button className="producto-ir-carrito" onClick={() => navigate('/carrito')}>

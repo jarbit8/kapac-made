@@ -4,9 +4,12 @@ import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import Icono from '../components/Icono';
 import PasosCompra from '../components/PasosCompra';
+import PedidoNoDisponible from '../components/PedidoNoDisponible';
+import usePedidoPago from '../hooks/usePedidoPago';
 import { actualizarEstadoPedido } from '../firebase/pedidos';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
+import { mensajeServidor } from '../i18n/mensajes';
 import qrImg from '../assets/images/qr.jpeg';
 import imgYape from '../assets/images/yape.avif';
 import imgEfectivo from '../assets/images/pago efectivo.avif';
@@ -20,35 +23,30 @@ export default function Pago() {
   const { usuario } = useAuth();
   const { t, idioma } = useIdioma();
   const [cargando, setCargando] = useState(false);
-  const [total, setTotal] = useState(null);
+  const { total, estado } = usePedidoPago(pedidoId, metodo === 'efectivo' ? 'procesando_pago,verificando_pago' : 'procesando_pago');
   const [codigoCIP, setCodigoCIP] = useState(null);
   const [vencimientoCIP, setVencimientoCIP] = useState(null);
   const [qrCIP, setQrCIP] = useState('');
   const [urlPe, setUrlPe] = useState('');
-  const [errorCIP, setErrorCIP] = useState('');
+  const [errorCIP, setErrorCIP] = useState(null);
   const [copiadoCIP, setCopiadoCIP] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const guardado = sessionStorage.getItem('pago_total');
-    if (guardado) setTotal(guardado);
-  }, []);
 
   // Generar código PagoEfectivo automáticamente al entrar
   const generandoCIP = useRef(false);
   useEffect(() => {
-    if (metodo !== 'efectivo' || !total || !usuario || codigoCIP) return;
+    if (metodo !== 'efectivo' || estado !== 'listo' || !total || !usuario || codigoCIP) return;
     if (generandoCIP.current) return;
     generandoCIP.current = true;
     const generar = async (reintento) => {
       setCargando(true);
-      setErrorCIP('');
+      setErrorCIP(null);
       try {
         const resp = await fetch(CREAR_ORDEN_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            amount: Number(total) * 100, // céntimos
+            amount: Math.round(Number(total) * 100), // céntimos
             pedidoId,
             email: usuario.email || sessionStorage.getItem('checkout_email') || '',
             nombre: usuario.displayName || sessionStorage.getItem('checkout_nombre') || '',
@@ -64,17 +62,17 @@ export default function Pago() {
           setTimeout(() => generar(true), 6000);
           return;
         } else {
-          setErrorCIP(data.mensaje || 'No se pudo generar el código.');
+          setErrorCIP({ mensaje: data.mensaje });
         }
       } catch (e) {
         console.error(e);
-        setErrorCIP('Error de conexión. Intenta de nuevo.');
+        setErrorCIP({ conexion: true });
       }
       setCargando(false);
       generandoCIP.current = false;
     };
     generar(false);
-  }, [metodo, total, usuario, codigoCIP, pedidoId]);
+  }, [metodo, estado, total, usuario, codigoCIP, pedidoId]);
 
   const copiarCIP = () => {
     if (!codigoCIP) return;
@@ -128,6 +126,22 @@ export default function Pago() {
     </ol>
   );
 
+  if (estado === 'noexiste' || estado === 'cerrado') {
+    return (
+      <>
+        <Header />
+        <main className="pago-page">
+          <PasosCompra actual={2} />
+          {volver}
+          <div className="pago-card">
+            <PedidoNoDisponible estado={estado} pedidoId={pedidoId} claseError="pago-error" claseBoton="pago-btn-pague" />
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Header />
@@ -151,7 +165,7 @@ export default function Pago() {
               <img src={qrImg} alt="QR Yape Kapac Made" className="pago-qr" />
               {pasos(['pago.yape.paso1', 'pago.yape.paso2', 'pago.yape.paso3', 'pago.yape.paso4'])}
               {error && <p className="pago-error"><Icono nombre="alerta" tam={16} /> {error}</p>}
-              <button className="pago-btn-pague" onClick={yaPague} disabled={cargando}>
+              <button className="pago-btn-pague" onClick={yaPague} disabled={cargando || estado !== 'listo'}>
                 {cargando ? t('pago.yape.enviando') : <><Icono nombre="check" tam={18} /> {t('pago.yape.boton')}</>}
               </button>
               <p className="pago-aviso"><Icono nombre="info" tam={16} /> {t('pago.yape.aviso')}</p>
@@ -182,7 +196,7 @@ export default function Pago() {
                 <div className="codigo-cip-error">
                   <Icono nombre="alerta" tam={18} />
                   <div>
-                    {errorCIP}
+                    {errorCIP.conexion ? t('pago.err_conexion') : mensajeServidor(errorCIP.mensaje, idioma, t('pago.err_codigo'))}
                     <small>{t('pago.ef.error_falla')}</small>
                   </div>
                 </div>

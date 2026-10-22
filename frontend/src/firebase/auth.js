@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signInAnonymously,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
@@ -22,6 +23,11 @@ export function iniciarSesion(email, password) {
 // Iniciar sesión con Google
 export function iniciarSesionGoogle() {
   return signInWithPopup(auth, googleProvider);
+}
+
+// Enviar el enlace para cambiar la contraseña
+export function enviarRecuperacion(email) {
+  return sendPasswordResetEmail(auth, email);
 }
 
 // Login anónimo para invitados (guest checkout)

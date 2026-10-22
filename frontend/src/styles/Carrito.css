@@ -172,3 +172,21 @@
 .carrito-quitar:hover { background: #f4f4f4; }
 .carrito-finalizar { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .carrito-resumen .compra-seguro { margin: 0; text-align: right; }
+
+/* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
+@media (pointer: coarse) {
+  .carrito-cantidad button,
+  .carrito-quitar,
+  .carrito-vaciar { position: relative; }
+
+  .carrito-cantidad button::after,
+  .carrito-quitar::after,
+  .carrito-vaciar::after {
+    content: '';
+    position: absolute;
+  }
+
+  .carrito-cantidad button::after { inset: -8px; }
+  .carrito-quitar::after { inset: -7px; }
+  .carrito-vaciar::after { inset: -13px -10px; }
+}

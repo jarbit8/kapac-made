@@ -147,6 +147,28 @@
   margin: -4px 0 4px;
 }
 
+.login-aviso {
+  color: #2d5a3d;
+  font-size: 13px;
+  margin: -4px 0 4px;
+}
+
+.login-olvide {
+  align-self: center;
+  background: none;
+  border: none;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #777;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.login-olvide:hover:not(:disabled) { color: var(--ink); }
+
 .login-btn {
   padding: 13px;
   background: #111;

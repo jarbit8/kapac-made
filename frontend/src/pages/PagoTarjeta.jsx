@@ -4,7 +4,10 @@ import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import Icono from '../components/Icono';
 import PasosCompra from '../components/PasosCompra';
+import PedidoNoDisponible from '../components/PedidoNoDisponible';
+import usePedidoPago from '../hooks/usePedidoPago';
 import { useIdioma } from '../context/LanguageContext';
+import { mensajeServidor } from '../i18n/mensajes';
 import imgTarjeta from '../assets/images/tarjeta.jpg';
 import '../styles/PagoTarjeta.css';
 
@@ -13,52 +16,23 @@ const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
 export default function PagoTarjeta() {
   const { pedidoId } = useParams();
   const navigate = useNavigate();
-  const { t } = useIdioma();
+  const { t, idioma } = useIdioma();
   const [listo, setListo] = useState(false);
+  const [fallaScript, setFallaScript] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState('');
-  const total = sessionStorage.getItem('pago_total') || '0';
-  const totalCentimos = Number(total) * 100; // Culqi usa centimos
+  const { total, estado } = usePedidoPago(pedidoId);
+  const totalCentimos = Math.round(Number(total) * 100); // Culqi usa centimos
 
   // Cargar script de Culqi — SOLO tarjeta habilitada
   useEffect(() => {
     const init = () => {
       window.Culqi.publicKey = CULQI_PUBLIC_KEY;
-      window.Culqi.settings({
-        title: 'Kapac Made',
-        currency: 'PEN',
-        description: `Pedido #${pedidoId.slice(0, 8)}`,
-        amount: totalCentimos,
-      });
-      // Restringir el modal a SOLO tarjeta (sin Yape, sin agente, sin billetera)
-      if (typeof window.Culqi.options === 'function') {
-        window.Culqi.options({
-          lang: 'es',
-          modal: true,
-          installments: true,
-          paymentMethods: {
-            tarjeta:    true,
-            yape:       false,
-            bancaMovil: false,
-            agente:     false,
-            billetera:  false,
-            cuotealo:   false,
-          },
-        });
-      }
-      // Callback cuando Culqi devuelve token
-      window.culqi = async () => {
-        if (window.Culqi.token) {
-          await cobrar(window.Culqi.token.id);
-        } else if (window.Culqi.error) {
-          setError(window.Culqi.error.user_message || 'Error al procesar la tarjeta. Intenta de nuevo.');
-          setProcesando(false);
-        }
-      };
+      setFallaScript(false);
       setListo(true);
     };
 
-    if (document.getElementById('culqi-script') && window.Culqi) {
+    if (window.Culqi) {
       init();
       return;
     }
@@ -67,9 +41,11 @@ export default function PagoTarjeta() {
     script.src = 'https://checkout.culqi.com/js/v4';
     script.async = true;
     script.onload = init;
+    script.onerror = () => setFallaScript(true);
     document.head.appendChild(script);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pedidoId, totalCentimos]);
+    const espera = setTimeout(() => { if (!window.Culqi) setFallaScript(true); }, 10000);
+    return () => clearTimeout(espera);
+  }, []);
 
   const cobrar = async (tokenId) => {
     setProcesando(true);
@@ -94,16 +70,16 @@ export default function PagoTarjeta() {
         navigate(`/confirmacion/${pedidoId}`);
       } else {
         const data = await res.json().catch(() => ({}));
-        setError(data.mensaje || 'Error al procesar el pago. Intenta de nuevo.');
+        setError(mensajeServidor(data.mensaje, idioma, t('pago.err_cobro')));
       }
     } catch (e) {
-      setError('No se pudo confirmar el pago. Si te cobraron, escríbenos al +51 997 050 752.');
+      setError(t('pago.err_confirmar'));
     }
     setProcesando(false);
   };
 
   const abrirCulqi = () => {
-    if (!listo || !window.Culqi) return;
+    if (!listo || !window.Culqi || estado !== 'listo' || !totalCentimos) return;
     setProcesando(true);
     window.Culqi.settings({
       title: 'Kapac Made',
@@ -111,10 +87,10 @@ export default function PagoTarjeta() {
       description: `Pedido #${pedidoId.slice(0, 8)}`,
       amount: totalCentimos,
     });
-    // Re-aplicar restricción SOLO tarjeta (por si quedó config de otra página)
+    // Restringir el modal a SOLO tarjeta (sin Yape, sin agente, sin billetera)
     if (typeof window.Culqi.options === 'function') {
       window.Culqi.options({
-        lang: 'es',
+        lang: idioma,
         modal: true,
         installments: true,
         paymentMethods: {
@@ -127,9 +103,20 @@ export default function PagoTarjeta() {
         },
       });
     }
+    // Callback cuando Culqi devuelve token
+    window.culqi = async () => {
+      if (window.Culqi.token) {
+        await cobrar(window.Culqi.token.id);
+      } else if (window.Culqi.error) {
+        setError(window.Culqi.error.user_message || t('pago.err_tarjeta'));
+        setProcesando(false);
+      }
+    };
     window.Culqi.open();
     setTimeout(() => setProcesando(false), 1000);
   };
+
+  const disponible = estado === 'listo' || estado === 'cargando';
 
   return (
     <>
@@ -145,28 +132,42 @@ export default function PagoTarjeta() {
         <p className="tarjeta-sub"><Icono nombre="escudo" tam={17} /> {t('pago.tarjeta.sub')} <strong>Culqi</strong></p>
 
         <div className="tarjeta-card">
-          <div className="tarjeta-monto">
-            <span>{t('pago.tarjeta.total')}</span>
-            <strong>S/{total}.00</strong>
-          </div>
+          {!disponible ? (
+            <PedidoNoDisponible estado={estado} pedidoId={pedidoId} claseError="tarjeta-error" claseBoton="tarjeta-btn-pagar" />
+          ) : (
+            <>
+              {total && (
+                <div className="tarjeta-monto">
+                  <span>{t('pago.tarjeta.total')}</span>
+                  <strong>S/{total}.00</strong>
+                </div>
+              )}
 
-          <div className="tarjeta-marcas">
-            <img src={imgTarjeta} alt="Visa, Mastercard, American Express" />
-          </div>
+              <div className="tarjeta-marcas">
+                <img src={imgTarjeta} alt="Visa, Mastercard, American Express" />
+              </div>
 
-          <div className="tarjeta-seguro">
-            <Icono nombre="candado" tam={17} />
-            <span>{t('pago.tarjeta.seguro')}</span>
-          </div>
+              <div className="tarjeta-seguro">
+                <Icono nombre="candado" tam={17} />
+                <span>{t('pago.tarjeta.seguro')}</span>
+              </div>
 
-          {error && <p className="tarjeta-error"><Icono nombre="alerta" tam={16} /> {error}</p>}
+              {(error || fallaScript) && (
+                <p className="tarjeta-error"><Icono nombre="alerta" tam={16} /> {error || t('pago.culqi_falla')}</p>
+              )}
 
-          <button className="tarjeta-btn-pagar" onClick={abrirCulqi} disabled={!listo || procesando}>
-            {!listo ? t('pago.tarjeta.cargando') : procesando ? t('pago.tarjeta.procesando')
-              : <><Icono nombre="candado" tam={17} /> {t('pago.tarjeta.boton')} S/{total}.00</>}
-          </button>
+              {fallaScript && !listo ? (
+                <button className="tarjeta-btn-pagar" onClick={() => window.location.reload()}>{t('pago.reintentar')}</button>
+              ) : (
+                <button className="tarjeta-btn-pagar" onClick={abrirCulqi} disabled={!listo || estado !== 'listo' || procesando}>
+                  {!listo || estado !== 'listo' ? t('pago.tarjeta.cargando') : procesando ? t('pago.tarjeta.procesando')
+                    : <><Icono nombre="candado" tam={17} /> {t('pago.tarjeta.boton')} S/{total}.00</>}
+                </button>
+              )}
 
-          <p className="tarjeta-aviso">{t('pago.tarjeta.aviso')}</p>
+              <p className="tarjeta-aviso">{t('pago.tarjeta.aviso')}</p>
+            </>
+          )}
         </div>
 
         <p className="pago-id-ref">{t('pago.referencia')} <code>#{pedidoId.slice(0, 8).toUpperCase()}</code></p>

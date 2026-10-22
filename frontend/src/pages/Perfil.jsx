@@ -66,7 +66,7 @@ export default function Perfil() {
     navigate('/');
   };
 
-  if (cargando || cargandoDatos) {
+  if (cargando || (usuario && cargandoDatos)) {
     return (
       <>
         <Header />
@@ -83,6 +83,7 @@ export default function Perfil() {
       <>
         <Header />
         <main className="perfil-page" style={{ textAlign: 'center', padding: 60 }}>
+          <h1 className="solo-lector">{t('menu.mi_perfil')}</h1>
           <h2><span>{t('perfil.iniciar_msg')}</span></h2>
           <button className="perfil-btn-principal" onClick={() => navigate('/login')}>
             <span>{t('perfil.iniciar')}</span>

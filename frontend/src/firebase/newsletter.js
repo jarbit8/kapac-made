@@ -1,4 +1,6 @@
 // Suscripción al newsletter con verificación por código (vía Cloud Functions)
+// Los errores propios vuelven como `error` (el Footer los pone en el idioma activo);
+// los del servidor, como `mensaje`.
 const BASE = 'https://us-central1-kapac-made.cloudfunctions.net';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -6,7 +8,7 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 // Paso 1: pedir que envíen un código al correo
 export async function pedirCodigo(email) {
   const correo = (email || '').trim().toLowerCase();
-  if (!EMAIL_RE.test(correo)) return { ok: false, mensaje: 'Ingresa un correo válido.' };
+  if (!EMAIL_RE.test(correo)) return { ok: false, error: 'correo' };
   try {
     const res = await fetch(`${BASE}/enviarCodigoNewsletter`, {
       method: 'POST',
@@ -15,9 +17,9 @@ export async function pedirCodigo(email) {
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.ok) return { ok: true, yaExistia: !!data.yaExistia };
-    return { ok: false, mensaje: data.mensaje || 'No se pudo enviar el código.' };
+    return { ok: false, mensaje: data.mensaje };
   } catch (e) {
-    return { ok: false, mensaje: 'Error de conexión. Intenta más tarde.' };
+    return { ok: false, error: 'conexion' };
   }
 }
 
@@ -25,7 +27,7 @@ export async function pedirCodigo(email) {
 export async function confirmarCodigo(email, codigo) {
   const correo = (email || '').trim().toLowerCase();
   const cod = (codigo || '').trim();
-  if (!cod) return { ok: false, mensaje: 'Ingresa el código.' };
+  if (!cod) return { ok: false, error: 'codigo_vacio' };
   try {
     const res = await fetch(`${BASE}/verificarCodigoNewsletter`, {
       method: 'POST',
@@ -34,8 +36,8 @@ export async function confirmarCodigo(email, codigo) {
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.ok) return { ok: true };
-    return { ok: false, mensaje: data.mensaje || 'Código incorrecto.' };
+    return { ok: false, mensaje: data.mensaje };
   } catch (e) {
-    return { ok: false, mensaje: 'Error de conexión. Intenta más tarde.' };
+    return { ok: false, error: 'conexion' };
   }
 }

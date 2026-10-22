@@ -29,7 +29,7 @@ export default function Pedidos() {
       })
       .catch((e) => {
         console.error(e);
-        setError('No se pudieron cargar los pedidos. Intenta recargar la página.');
+        setError('carga');
         setCargando(false);
       });
   }, [usuario, cargandoAuth, navigate]);
@@ -67,7 +67,7 @@ export default function Pedidos() {
         {cargando && <Cargando />}
 
         {!cargando && error && (
-          <p style={{ color: 'crimson' }}>{error}</p>
+          <p style={{ color: 'crimson' }}>{t('pedidos.error_cargar')}</p>
         )}
 
         {!cargando && !error && pedidos.length === 0 && (

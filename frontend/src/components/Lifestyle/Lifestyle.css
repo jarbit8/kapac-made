@@ -125,6 +125,12 @@
 }
 .lm-footer .lm-footer-txt:hover { opacity: 0.65; letter-spacing: 4px; }
 
+/* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
+@media (pointer: coarse) {
+  .lm-footer .lm-footer-txt { position: relative; }
+  .lm-footer .lm-footer-txt::after { content: ''; position: absolute; inset: -9px -8px; }
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .lm-section { padding: 52px 20px 72px; }

@@ -67,6 +67,12 @@
 }
 .info-redes a:hover { opacity: 0.6; }
 
+/* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
+@media (pointer: coarse) {
+  .info-redes a { position: relative; }
+  .info-redes a::after { content: ''; position: absolute; inset: -10px -6px; }
+}
+
 .info-bloque-extra { position: relative; }
 
 .info-bloque-quitar {

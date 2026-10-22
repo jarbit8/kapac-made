@@ -95,6 +95,12 @@
 
 .catalogo-page-name:hover { color: var(--catalogo-texto, var(--ink)) !important; }
 
+/* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
+@media (pointer: coarse) {
+  .catalogo-page-name { position: relative; }
+  .catalogo-page-name::after { content: ''; position: absolute; inset: -13px 0; }
+}
+
 .catalogo-page-precios {
   display: flex;
   gap: 10px;

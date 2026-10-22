@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/Footer.css';
 import { useIdioma } from '../../context/LanguageContext';
 import { pedirCodigo, confirmarCodigo } from '../../firebase/newsletter';
+import { mensajeServidor } from '../../i18n/mensajes';
 import { obtenerContenido, contenidoGuardado, medioDispositivo, slotMedio, cambiarContenido } from '../../firebase/contenido';
 import Editable from '../Editable';
 import CambiarMedio from '../CambiarMedio';
@@ -17,7 +18,7 @@ const IconInstagram = () => (
 );
 
 export default function Footer() {
-  const { idioma } = useIdioma();
+  const { t, idioma } = useIdioma();
   const es = idioma === 'es';
 
   const [correo, setCorreo] = useState('');
@@ -25,6 +26,7 @@ export default function Footer() {
   const [paso, setPaso] = useState('email'); // 'email' | 'codigo' | 'ok'
   const [cargandoNews, setCargandoNews] = useState(false);
   const [msgNews, setMsgNews] = useState('');
+  const [espera, setEspera] = useState(0); // segundos para poder reenviar el código
   const [fondoCfg, setFondoCfg] = useState(() => contenidoGuardado()?.footerFondo ?? null);
   const [videoFallo, setVideoFallo] = useState(false);
   const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
@@ -50,8 +52,18 @@ export default function Footer() {
     setVideoFallo(false);
   };
 
-  const handlePedirCodigo = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (espera <= 0) return;
+    const id = setTimeout(() => setEspera((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [espera]);
+
+  const textoError = (res, generico) => (
+    res.error ? t(`news.err_${res.error}`) : mensajeServidor(res.mensaje, idioma, t(generico))
+  );
+
+  // El servidor no reenvía el código al mismo correo antes de 60 s
+  const enviarCodigo = async () => {
     setMsgNews('');
     setCargandoNews(true);
     const res = await pedirCodigo(correo);
@@ -60,9 +72,21 @@ export default function Footer() {
       setPaso('ok');
     } else if (res.ok) {
       setPaso('codigo');
+      setEspera(60);
     } else {
-      setMsgNews(res.mensaje || (es ? 'No se pudo enviar el código.' : 'Could not send the code.'));
+      setMsgNews(textoError(res, 'news.err_enviar'));
     }
+  };
+
+  const handlePedirCodigo = (e) => {
+    e.preventDefault();
+    enviarCodigo();
+  };
+
+  const cambiarCorreo = () => {
+    setPaso('email');
+    setCodigo('');
+    setMsgNews('');
   };
 
   const handleConfirmarCodigo = async (e) => {
@@ -76,7 +100,7 @@ export default function Footer() {
       setCorreo('');
       setCodigo('');
     } else {
-      setMsgNews(res.mensaje || (es ? 'Código incorrecto.' : 'Wrong code.'));
+      setMsgNews(textoError(res, 'news.err_codigo'));
     }
   };
 
@@ -120,6 +144,7 @@ export default function Footer() {
                 type="text"
                 inputMode="numeric"
                 maxLength={6}
+                aria-label={t('news.aria_codigo')}
                 placeholder={es ? 'Código de 6 dígitos' : '6-digit code'}
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ''))}
@@ -129,12 +154,20 @@ export default function Footer() {
               </button>
             </form>
             <p className="footer-news-hint-mini">{es ? `Código enviado a ${correo}` : `Code sent to ${correo}`}</p>
+            <div className="footer-news-acciones">
+              <button type="button" onClick={cambiarCorreo}>{t('news.cambiar_correo')}</button>
+              <button type="button" onClick={enviarCodigo} disabled={cargandoNews || espera > 0}>
+                {espera > 0 ? `${t('news.reenviar_en')} ${espera} s` : t('news.reenviar')}
+              </button>
+            </div>
           </>
         ) : (
           <form className="footer-news-row" onSubmit={handlePedirCodigo}>
             <input
               type="email"
               required
+              autoComplete="email"
+              aria-label={t('news.aria_correo')}
               placeholder={es ? 'info@ejemplo.com' : 'info@example.com'}
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}

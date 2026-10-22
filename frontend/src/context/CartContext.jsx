@@ -17,8 +17,8 @@ export function CartProvider({ children }) {
 
   const [items, setItems] = useState(() => {
     try {
-      const guardado = localStorage.getItem(STORAGE_KEY);
-      return guardado ? JSON.parse(guardado) : [];
+      const guardado = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      return Array.isArray(guardado) ? guardado : [];
     } catch {
       return [];
     }

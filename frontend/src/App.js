@@ -40,6 +40,7 @@ import './styles/App.css';
 function Home() {
   return (
     <>
+      <h1 className="solo-lector">Kapac Made</h1>
       <Header transparente />
       <Hero />
       {/* NavBar aparece justo debajo del video, se pega al top al scrollear */}
