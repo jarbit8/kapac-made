@@ -94,7 +94,11 @@ export default function Admin() {
     }
   };
 
-  useEffect(() => { cargarPedidos(); cargarStats(); cargarReclamos(); }, []);
+  // Sin sesión de admin las reglas niegan la lectura: no se intenta
+  const autorizado = !cargando && !!usuario && esCorreoAdmin(usuario.email);
+  useEffect(() => {
+    if (autorizado) { cargarPedidos(); cargarStats(); cargarReclamos(); }
+  }, [autorizado]);
 
   const abrirReclamo = (id) => {
     setReclamoAbierto(reclamoAbierto === id ? null : id);
@@ -475,7 +479,7 @@ export default function Admin() {
                     <div className="admin-pedido-top">
                       <div>
                         <span className="admin-pedido-id">#{p.id.slice(0, 8).toUpperCase()}</span>
-                        <span className="admin-pedido-email">{p.email}</span>
+                        <span className="admin-pedido-email">{[p.envio?.nombre || p.nombre, p.email].filter(Boolean).join(' · ')}</span>
                       </div>
                       <span
                         className="admin-pedido-estado"
@@ -498,7 +502,7 @@ export default function Admin() {
                       <p className="admin-pedido-envio">
                         <Icono nombre={p.envio.tipo === 'envio' ? 'camion' : 'tienda'} tam={16} />
                         {p.envio.tipo === 'envio'
-                          ? `${t('admin.dominio_envio')}: ${p.envio.direccion}, ${p.envio.distrito}`
+                          ? `${t('admin.dominio_envio')}: ${p.envio.direccion}, ${p.envio.distrito}${p.envio.referencia ? ` (${p.envio.referencia})` : ''}`
                           : t('admin.recojo')}
                         {p.envio.telefono ? ` · Tel. ${p.envio.telefono}` : ''}
                       </p>

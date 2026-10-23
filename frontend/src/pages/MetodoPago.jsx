@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { crearPedido } from '../firebase/pedidos';
 import { loginAnonimo } from '../firebase/auth';
+import Cargando from '../components/Cargando/Cargando';
+import { cuentaDe, correoCompra, guardarRespaldo, hayRespaldo } from '../utils/compra';
 import '../styles/MetodoPago.css';
 import imgYape from '../assets/images/yape.avif';
 import imgTarjeta from '../assets/images/tarjeta.jpg';
@@ -18,7 +20,7 @@ const logoStyle = { width: 72, height: 44, objectFit: 'contain', borderRadius: 8
 
 export default function MetodoPago() {
   const navigate = useNavigate();
-  const { items, vaciar, totalPrecio } = useCart();
+  const { items, vaciar, totalPrecio, refrescar, restaurar } = useCart();
   const { usuario } = useAuth();
   const { t, idioma } = useIdioma();
   const [metodo, setMetodo] = useState(null);
@@ -27,58 +29,73 @@ export default function MetodoPago() {
 
   const total = totalPrecio;
   const pedidoCreado = useRef(false);
+  const enCurso = useRef(false);
+
+  // Al volver con "atrás" desde el pago el carrito está vacío: se recupera el del pedido recién creado
+  const [recuperando, setRecuperando] = useState(() => !items.length && hayRespaldo());
+  useEffect(() => {
+    if (!recuperando) return;
+    restaurar();
+    setRecuperando(false);
+  }, [recuperando, restaurar]);
 
   const confirmar = async () => {
+    if (enCurso.current) return;
     if (!metodo) {
       setError(t('metodo.seleccionar'));
       return;
     }
 
+    enCurso.current = true;
     setProcesando(true);
     setError('');
 
     try {
+      // Si cambió un precio o el stock, el cliente lo ve en el carrito antes de que se cree el pedido
+      // Si el catálogo no responde en 3 s se sigue: el servidor igual cobra con los precios reales
+      const cambios = await Promise.race([refrescar(), new Promise((r) => setTimeout(() => r([]), 3000))]);
+      if (cambios.length) {
+        navigate('/carrito');
+        return;
+      }
+
       const envioRaw = sessionStorage.getItem('checkout_envio');
       const envio = envioRaw ? JSON.parse(envioRaw) : null;
-      const guestEmail = sessionStorage.getItem('checkout_email') || '';
 
-      // Si no hay sesión, hacer login anónimo para poder escribir en Firestore
-      let uid, email, nombre;
-      if (usuario) {
-        uid    = usuario.uid;
-        email  = usuario.email;
-        nombre = usuario.displayName || '';
-      } else {
-        let cred;
+      // Sin sesión se abre una anónima para poder escribir en Firestore; la anónima de una
+      // compra anterior tampoco es una cuenta
+      let sesion = usuario;
+      if (!sesion) {
         try {
-          cred = await loginAnonimo();
+          sesion = (await loginAnonimo()).user;
         } catch (e) {
           // Proveedor anónimo apagado en Firebase: sin esto no hay compra de invitado
           setError(idioma === 'en'
             ? 'Guest checkout is unavailable right now. Please sign in to complete your purchase.'
             : 'La compra como invitado no está disponible en este momento. Inicia sesión para completar tu compra.');
-          setProcesando(false);
           return;
         }
-        uid    = cred.user.uid;
-        email  = guestEmail;
-        nombre = envio?.nombre || '';
       }
+      const cuenta = cuentaDe(sesion);
+      const email = correoCompra(sesion);
+      const nombre = envio?.nombre || cuenta?.displayName || '';
 
       const pedidoId = await crearPedido({
-        usuarioId: uid,
+        usuarioId: sesion.uid,
         email,
         nombre,
         items,
         total: Number(total),
         envio,
         metodoPago: metodo,
-        esInvitado: !usuario,
+        esInvitado: !cuenta,
       });
 
       // El stock lo descuenta el servidor cuando el pago se confirma
       // (los clientes no tienen permiso para escribir en productos).
+      // Si el cliente cambia de método de pago, el carrito y los datos vuelven de este respaldo.
       pedidoCreado.current = true;
+      guardarRespaldo({ items, envio, email, nombre, pedidoId });
       vaciar();
       sessionStorage.removeItem('checkout_envio');
       sessionStorage.setItem('pago_total', total);
@@ -93,10 +110,21 @@ export default function MetodoPago() {
     } catch (e) {
       console.error(e);
       setError(t('metodo.error'));
+    } finally {
+      enCurso.current = false;
+      setProcesando(false);
     }
-
-    setProcesando(false);
   };
+
+  if (recuperando) {
+    return (
+      <>
+        <Header />
+        <main className="metodo-page"><Cargando /></main>
+        <Footer />
+      </>
+    );
+  }
 
   if (!pedidoCreado.current) {
     if (!items.length) return <Navigate to="/carrito" replace />;

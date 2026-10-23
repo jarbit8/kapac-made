@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { fueReemplazado } from '../utils/compra';
 
 export default function usePedidoPago(pedidoId, abiertos = 'procesando_pago') {
   const [total, setTotal] = useState(() => sessionStorage.getItem('pago_total'));
@@ -12,6 +13,7 @@ export default function usePedidoPago(pedidoId, abiertos = 'procesando_pago') {
 
   useEffect(() => {
     let cancelado = false;
+    if (fueReemplazado(pedidoId)) { setEstado('cerrado'); return undefined; }
     getDoc(doc(db, 'pedidos', pedidoId))
       .then((snap) => {
         if (cancelado) return;

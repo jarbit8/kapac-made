@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
@@ -10,16 +10,48 @@ import { imagen } from '../firebase/imagenesProductos';
 import '../styles/Carrito.css';
 
 export default function Carrito() {
-  const { items, quitar, cambiarCantidad, totalPrecio } = useCart();
+  const { items, quitar, cambiarCantidad, totalPrecio, avisos, refrescar, limpiarAvisos } = useCart();
   const { t, idioma } = useIdioma();
   const navigate = useNavigate();
   const finalizar = () => navigate('/checkout');
+
+  // Precio y stock al día cada vez que se abre el carrito; los avisos se van al salir
+  useEffect(() => {
+    refrescar();
+    window.addEventListener('pagehide', limpiarAvisos);
+    return () => {
+      window.removeEventListener('pagehide', limpiarAvisos);
+      limpiarAvisos();
+    };
+  }, [refrescar, limpiarAvisos]);
+
+  const textoAviso = (a) => {
+    const monto = (v) => `${a.moneda || 'S/'}${v}.00`;
+    return t(`carrito.aviso_${a.tipo}`)
+      .replace('{n}', nombreProducto(a, idioma))
+      .replace('{stock}', a.stock)
+      .replace('{antes}', monto(a.antes))
+      .replace('{ahora}', monto(a.ahora));
+  };
 
   return (
     <>
       <Header />
       <main className="carrito-page">
         <h1>{t('carrito.titulo')}</h1>
+
+        {avisos.length > 0 && (
+          <div className="carrito-avisos" role="status">
+            <ul>
+              {avisos.map((a, i) => (
+                <li key={`${a.id}-${a.tipo}-${i}`}><Icono nombre="alerta" tam={16} /> <span>{textoAviso(a)}</span></li>
+              ))}
+            </ul>
+            <button className="carrito-avisos-cerrar" onClick={limpiarAvisos} aria-label={t('carrito.aviso_cerrar')}>
+              <Icono nombre="cerrar" tam={16} />
+            </button>
+          </div>
+        )}
 
         {items.length === 0 ? (
           <div className="carrito-vacio">

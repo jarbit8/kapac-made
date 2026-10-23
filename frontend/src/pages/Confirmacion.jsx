@@ -9,6 +9,8 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useIdioma } from '../context/LanguageContext';
 import Cargando from '../components/Cargando/Cargando';
 import { nombreEstado, textoPagina } from '../i18n/estadosPedido';
+import { borrarRespaldo, cipPendiente, venceCIP } from '../utils/compra';
+import '../styles/Pago.css';
 import '../styles/Confirmacion.css';
 
 export default function Confirmacion() {
@@ -22,6 +24,10 @@ export default function Confirmacion() {
   const [emailConfirmado, setEmailConfirmado] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [errorEmail, setErrorEmail] = useState('');
+  const [copiadoCIP, setCopiadoCIP] = useState(false);
+
+  // Llegar aquí cierra la compra: ya no hay nada que restaurar al cambiar de método de pago
+  useEffect(() => { borrarRespaldo(); }, []);
 
   useEffect(() => {
     const cargar = async () => {
@@ -81,6 +87,14 @@ export default function Confirmacion() {
     await guardarCanal(true);
   };
 
+  const copiarCIP = () => {
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(pedido.codigoPago).then(() => {
+      setCopiadoCIP(true);
+      setTimeout(() => setCopiadoCIP(false), 2500);
+    }).catch(() => {});
+  };
+
   // Fecha del pedido (la del servidor; si aún no llegó, la de ahora)
   const fecha = (pedido?.fecha?.toDate ? pedido.fecha.toDate() : new Date()).toLocaleDateString(es ? 'es-PE' : 'en-US', {
     day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -137,6 +151,31 @@ export default function Confirmacion() {
           <h1>{pagina?.titulo || t('conf.recibido')}</h1>
           <p className="confirmacion-sub">{pagina?.texto || t('conf.sub_verificando')}</p>
         </div>
+
+        {cipPendiente(pedido) && (() => {
+          const vence = venceCIP(pedido.codigoPagoVence, idioma);
+          return (
+            <div className="conf-cip">
+              <div className="codigo-cip-box">
+                <p className="codigo-cip-label">{t('pago.ef.codigo_label')}</p>
+                <div className="codigo-cip-numero">{pedido.codigoPago}</div>
+                <button className="codigo-cip-copiar" onClick={copiarCIP}>
+                  <Icono nombre={copiadoCIP ? 'check' : 'copiar'} tam={16} /> {copiadoCIP ? t('pago.ef.copiado') : t('pago.ef.copiar')}
+                </button>
+                {vence && (
+                  <p className="codigo-cip-vence">
+                    <Icono nombre="reloj" tam={15} /> {t(vence.vencido ? 'conf.cip_vencio' : 'conf.cip_vence')} {vence.texto}
+                  </p>
+                )}
+              </div>
+              {/^https:\/\//.test(pedido.codigoPagoUrl || '') && (
+                <a href={pedido.codigoPagoUrl} target="_blank" rel="noopener noreferrer" className="pago-btn-secundario">
+                  {t('conf.cip_como_pagar')} <Icono nombre="externo" tam={16} />
+                </a>
+              )}
+            </div>
+          );
+        })()}
 
         <div className="confirmacion-recibo">
           <div className="recibo-header">

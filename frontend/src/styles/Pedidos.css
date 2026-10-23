@@ -99,3 +99,15 @@
 @media (max-width: 768px) {
   .pedidos-page { padding: 40px 20px; }
 }
+
+.pedido-cip {
+  margin: 0 0 14px;
+  padding: 9px 12px;
+  background: #fafafa;
+  border: 1px dashed #c8c8c8;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #555;
+}
+.pedido-cip strong { color: var(--ink); letter-spacing: 1px; }

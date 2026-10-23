@@ -7,6 +7,7 @@ import { useIdioma } from '../context/LanguageContext';
 import { obtenerPedidosUsuario } from '../firebase/pedidos';
 import Cargando from '../components/Cargando/Cargando';
 import { nombreEstado } from '../i18n/estadosPedido';
+import { cipPendiente, venceCIP } from '../utils/compra';
 import '../styles/Pedidos.css';
 
 export default function Pedidos() {
@@ -25,7 +26,9 @@ export default function Pedidos() {
     }
     obtenerPedidosUsuario(usuario.uid)
       .then((data) => {
-        setPedidos(data);
+        // Los que siguen en procesando_pago son intentos de pago que el cliente dejó,
+        // salvo un PagoEfectivo con su código ya generado (todavía lo puede pagar)
+        setPedidos(data.filter((p) => p.estado !== 'procesando_pago' || cipPendiente(p)));
         setCargando(false);
       })
       .catch((e) => {
@@ -70,6 +73,15 @@ export default function Pedidos() {
               <span className={`pedido-estado estado-${p.estado}`}>{nombreEstado(p, idioma)}</span>
             </div>
             <p className="pedido-fecha">{formatoFecha(p.fecha)}</p>
+            {cipPendiente(p) && (() => {
+              const vence = venceCIP(p.codigoPagoVence, idioma);
+              return (
+                <p className="pedido-cip">
+                  {t('pago.ef.codigo_label')}: <strong>{p.codigoPago}</strong>
+                  {vence && <span> · {t(vence.vencido ? 'conf.cip_vencio' : 'conf.cip_vence')} {vence.texto}</span>}
+                </p>
+              );
+            })()}
             <ul className="pedido-items">
               {p.items.map((it, i) => (
                 <li key={i}>

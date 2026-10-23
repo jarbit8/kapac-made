@@ -259,6 +259,12 @@
 .codigo-cip-error .icono { flex-shrink: 0; margin-top: 1px; }
 .codigo-cip-error small { display: block; margin-top: 4px; color: #7a271a; }
 
+/* Más área de toque en pantallas táctiles, sin cambiar lo que se ve */
+@media (pointer: coarse) {
+  .pago-volver { position: relative; }
+  .pago-volver::after { content: ''; position: absolute; inset: -8px -10px; }
+}
+
 @media (max-width: 480px) {
   .pago-page { padding: 36px 16px 48px; }
   .pago-card { padding: 24px 18px; }

@@ -432,6 +432,14 @@ const translations = {
     'libro.ir': 'Ir al Libro de Reclamaciones',
     'legal.proveedor_titulo': 'Datos del proveedor',
     'admin.tab_reclamos': 'Reclamos',
+    'carrito.aviso_precio': 'El precio de {n} cambió: {antes} → {ahora}.',
+    'carrito.aviso_quitado': '{n} ya no está disponible y lo quitamos de tu carrito.',
+    'carrito.aviso_agotado': '{n} se agotó y lo quitamos de tu carrito. Escríbenos por WhatsApp si lo quieres.',
+    'carrito.aviso_stock': 'Solo quedan {stock} de {n}. Ajustamos la cantidad.',
+    'carrito.aviso_cerrar': 'Cerrar aviso',
+    'conf.cip_vence': 'Págalo antes del',
+    'conf.cip_vencio': 'Este código venció el',
+    'conf.cip_como_pagar': 'Ver cómo pagar',
   },
 
   en: {
@@ -864,6 +872,14 @@ const translations = {
     'libro.ir': 'Go to the Complaints Book',
     'legal.proveedor_titulo': 'Supplier details',
     'admin.tab_reclamos': 'Complaints',
+    'carrito.aviso_precio': 'The price of {n} changed: {antes} → {ahora}.',
+    'carrito.aviso_quitado': '{n} is no longer available, so we removed it from your cart.',
+    'carrito.aviso_agotado': '{n} sold out, so we removed it from your cart. Message us on WhatsApp if you want it.',
+    'carrito.aviso_stock': 'Only {stock} of {n} left. We adjusted the quantity.',
+    'carrito.aviso_cerrar': 'Dismiss',
+    'conf.cip_vence': 'Pay it before',
+    'conf.cip_vencio': 'This code expired on',
+    'conf.cip_como_pagar': 'See how to pay',
   },
 };
 

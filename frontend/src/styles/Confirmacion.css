@@ -358,3 +358,13 @@
 .canal-guardado { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .recibo-estado.cancelado { color: #b42318; }
 .recibo-estado.pendiente_envio, .recibo-estado.enviado, .recibo-estado.entregado { color: #2e7d32; }
+
+/* Código CIP de PagoEfectivo mientras se espera el pago */
+.conf-cip { text-align: center; margin-bottom: 1.5rem; }
+.conf-cip .codigo-cip-box { margin: 0 0 14px; }
+.conf-cip .pago-btn-secundario { margin-bottom: 0; }
+.conf-cip .pago-btn-secundario .icono { flex-shrink: 0; }
+
+@media (max-width: 480px) {
+  .conf-cip .codigo-cip-numero { font-size: 28px; letter-spacing: 3px; word-break: break-all; }
+}

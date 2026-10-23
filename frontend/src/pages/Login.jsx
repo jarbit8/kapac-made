@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { useTema } from '../context/TemaContext';
 import { esCorreoAdmin } from '../config/admins';
+import { cuentaDe } from '../utils/compra';
 import '../styles/Login.css';
 
 export default function Login() {
@@ -23,6 +24,8 @@ export default function Login() {
   const [redirigir, setRedirigir] = useState(false);
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  // La sesión anónima de una compra de invitado cuenta como visitante: ve el formulario normal
+  const cuenta = cuentaDe(usuario);
   const { t, idioma } = useIdioma();
   const { cerrado } = useTema();
   // Con la tienda cerrada solo entra el admin: cualquier otra cuenta se cierra al instante
@@ -42,8 +45,8 @@ export default function Login() {
   // el admin ve el sitio cerrado por una fracción de segundo (o hasta que
   // recarga, si no nota que se autocorrige).
   useEffect(() => {
-    if (redirigir && usuario && !bloqueado) navigate('/');
-  }, [redirigir, usuario, bloqueado, navigate]);
+    if (redirigir && cuenta && !bloqueado) navigate('/');
+  }, [redirigir, cuenta, bloqueado, navigate]);
 
   const handleLogout = async () => {
     await cerrarSesion();
@@ -122,7 +125,7 @@ export default function Login() {
   };
 
   // Si ya está logueado, mostrar info de la cuenta en vez del form
-  if (usuario && !bloqueado) {
+  if (cuenta && !bloqueado) {
     return (
       <>
         <Header />
@@ -130,10 +133,10 @@ export default function Login() {
           <h1 className="solo-lector">{t('menu.mi_cuenta')}</h1>
           <div className="login-card login-logueado">
             <div className="login-avatar-grande">
-              {(usuario.displayName || usuario.email || '?').charAt(0).toUpperCase()}
+              {(cuenta.displayName || cuenta.email || '?').charAt(0).toUpperCase()}
             </div>
             <h2><span>{idioma === 'es' ? '¡Ya estás dentro!' : 'You\'re signed in!'}</span></h2>
-            <p className="login-email-mostrar">{usuario.email}</p>
+            <p className="login-email-mostrar">{cuenta.email}</p>
             <p className="login-nota">
               <span>{idioma === 'es'
                 ? 'Tienes sesión iniciada con esta cuenta.'

@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { obtenerPerfil } from '../firebase/perfil';
+import { cuentaDe } from '../utils/compra';
 import '../styles/Checkout.css';
 
 const limpiar = (v) => v.trim().replace(/\s+/g, ' ');
@@ -26,6 +27,7 @@ const leerGuardado = () => {
 export default function Checkout() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  const cuenta = cuentaDe(usuario);
   const { items } = useCart();
   const { t, idioma } = useIdioma();
   // Al volver desde el pago se recuperan los datos ya escritos
@@ -43,29 +45,29 @@ export default function Checkout() {
 
   // Autocompletar con datos del perfil guardado
   useEffect(() => {
-    if (!usuario || guardado) return;
+    if (!cuenta || guardado) return;
     const cargar = async () => {
-      const datos = await obtenerPerfil(usuario.uid);
+      const datos = await obtenerPerfil(cuenta.uid);
       if (datos) {
         setForm({
-          nombre:    datos.nombre    || usuario.displayName || '',
+          nombre:    datos.nombre    || cuenta.displayName || '',
           telefono:  datos.telefono  || '',
           direccion: datos.direccion || '',
           distrito:  datos.distrito  || '',
           referencia: datos.referencia || '',
         });
         setFormRecojo({
-          nombre:   datos.nombre   || usuario.displayName || '',
+          nombre:   datos.nombre   || cuenta.displayName || '',
           telefono: datos.telefono || '',
         });
       } else {
-        const nombre = usuario.displayName || '';
+        const nombre = cuenta.displayName || '';
         setForm(prev => ({ ...prev, nombre }));
         setFormRecojo(prev => ({ ...prev, nombre }));
       }
     };
     cargar();
-  }, [usuario, guardado]);
+  }, [cuenta, guardado]);
 
   const elegir = (m) => {
     setModo(m);
@@ -99,7 +101,7 @@ export default function Checkout() {
 
     // El correo ya no se pide aquí: se ofrece como opción después del pago
     // (pantalla de Confirmación), para no frenar la compra a quien no quiere darlo.
-    sessionStorage.setItem('checkout_email', usuario ? usuario.email : '');
+    sessionStorage.setItem('checkout_email', cuenta ? cuenta.email : '');
     sessionStorage.setItem('checkout_nombre', nombre);
     sessionStorage.setItem('checkout_envio', JSON.stringify(envio
       ? { tipo: 'envio', nombre, telefono: telefono9(telefono), direccion, distrito, referencia: limpiar(form.referencia) }

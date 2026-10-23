@@ -13,6 +13,7 @@ import { useTema, LOGO_CACHE_KEY } from '../../context/TemaContext';
 import { cambiarContenido } from '../../firebase/contenido';
 import { subirImagen } from '../../firebase/almacenamiento';
 import { fotoRapida } from '../../utils/fotos';
+import { cuentaDe } from '../../utils/compra';
 
 export default function Header({ transparente = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -81,7 +82,7 @@ export default function Header({ transparente = false }) {
   ];
 
   const handleCuenta = () => {
-    if (usuario) {
+    if (cuentaDe(usuario)) {
       navigate('/perfil');
     } else {
       navigate('/login');

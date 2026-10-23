@@ -143,8 +143,8 @@ export default function Producto() {
 
   const alternarActivo = () => {
     const activo = producto.activo === false;
-    if (activo && (!(producto.nombre || '').trim() || !producto.precio)) {
-      window.alert('Antes de mostrarlo en la tienda agrega el nombre y el precio.');
+    if (activo && (!(producto.nombre || '').trim() || !producto.precio || !producto.imagenMochila)) {
+      window.alert('Antes de mostrarlo en la tienda agrega el nombre, el precio y al menos una foto.');
       return;
     }
     guardarCampos({ activo });

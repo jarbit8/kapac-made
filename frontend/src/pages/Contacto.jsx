@@ -68,8 +68,8 @@ export default function Contacto() {
           <section className="info-bloque">
             <Editable id="info_envios_titulo" as="h2" estilo>{es ? 'Envíos' : 'Shipping'}</Editable>
             <Editable id="info_envios_texto" as="p" className="info-parrafo-doble" multiline>{es
-              ? 'Realizamos envíos a todo el Perú. Por tiempo limitado, ¡envío gratis a todo el país! El costo de envío (cuando aplique) se calcula automáticamente en el checkout según tu ubicación.\n\nEl tiempo de entrega estimado es de 2 a 5 días hábiles según el destino. Recibirás el seguimiento de tu pedido por correo y WhatsApp.'
-              : 'We ship across Peru. For a limited time, free shipping nationwide! Shipping cost (when it applies) is calculated automatically at checkout based on your location.\n\nEstimated delivery is 2 to 5 business days depending on destination. You will receive order tracking by email and WhatsApp.'}</Editable>
+              ? 'Realizamos envíos a todo el Perú. Por tiempo limitado, ¡envío gratis a todo el país!\n\nEl tiempo de entrega estimado es de 2 a 5 días hábiles según el destino. Si activas los avisos, te escribimos por correo cada vez que cambie el estado de tu pedido, y por WhatsApp resolvemos cualquier duda.'
+              : 'We ship across Peru. For a limited time, free shipping nationwide!\n\nEstimated delivery is 2 to 5 business days depending on destination. If you turn on updates, we email you every time your order status changes, and we answer any question on WhatsApp.'}</Editable>
           </section>
 
           {/* Cambios y devoluciones */}

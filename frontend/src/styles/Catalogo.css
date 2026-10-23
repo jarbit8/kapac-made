@@ -163,6 +163,7 @@
   color: #aaa;
   font-size: 12px !important;
 }
+.cat-sin-foto.vacia { border: 0; background: #f3f1ec; }
 
 .catalogo-agregar {
   align-self: start;

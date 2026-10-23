@@ -6,8 +6,11 @@ import Icono from '../components/Icono';
 import PasosCompra from '../components/PasosCompra';
 import PedidoNoDisponible from '../components/PedidoNoDisponible';
 import usePedidoPago from '../hooks/usePedidoPago';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { mensajeServidor } from '../i18n/mensajes';
+import { correoCompra, marcarReemplazado } from '../utils/compra';
 import imgTarjeta from '../assets/images/tarjeta.jpg';
 import '../styles/PagoTarjeta.css';
 
@@ -16,6 +19,8 @@ const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
 export default function PagoTarjeta() {
   const { pedidoId } = useParams();
   const navigate = useNavigate();
+  const { usuario } = useAuth();
+  const { restaurar } = useCart();
   const { t, idioma } = useIdioma();
   const [listo, setListo] = useState(false);
   const [fallaScript, setFallaScript] = useState(false);
@@ -61,7 +66,7 @@ export default function PagoTarjeta() {
           token: tokenId,
           amount: totalCentimos,
           pedidoId,
-          email: sessionStorage.getItem('checkout_email') || '',
+          email: correoCompra(usuario),
         }),
       });
 
@@ -116,6 +121,12 @@ export default function PagoTarjeta() {
     setTimeout(() => setProcesando(false), 1000);
   };
 
+  const cambiarMetodo = () => {
+    marcarReemplazado(pedidoId);
+    restaurar();
+    navigate('/metodo-pago');
+  };
+
   const disponible = estado === 'listo' || estado === 'cargando';
 
   return (
@@ -124,7 +135,7 @@ export default function PagoTarjeta() {
       <main className="pago-tarjeta-page">
         <PasosCompra actual={2} />
 
-        <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>
+        <button className="pago-volver" onClick={cambiarMetodo}>
           <Icono nombre="flechaIzq" tam={16} /> {t('pago.volver')}
         </button>
 

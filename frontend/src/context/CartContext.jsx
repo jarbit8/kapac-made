@@ -1,16 +1,28 @@
 // Contexto global del carrito de compras
 // Híbrido: localStorage (sin login) + Firestore (con login)
 // Cuando el usuario se loguea, fusiona su carrito local con el remoto.
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
 import {
   obtenerCarrito,
   guardarCarrito,
   fusionarCarritos,
 } from '../firebase/carritos';
+import { obtenerProducto } from '../firebase/productos';
+import { ajustarCarrito, restaurarCheckout } from '../utils/compra';
 
 const CartContext = createContext();
 const STORAGE_KEY = 'kapac_carrito';
+const AVISOS_KEY = 'kapac_carrito_avisos';
+
+// Lee cada producto del carrito en el catálogo; los que no se pueden leer (sin conexión) no cuentan
+async function leerFrescos(ids) {
+  const frescos = new Map();
+  await Promise.all(ids.map(async (id) => {
+    try { frescos.set(id, await obtenerProducto(id)); } catch (_) {}
+  }));
+  return frescos;
+}
 
 export function CartProvider({ children }) {
   const { usuario } = useAuth();
@@ -24,8 +36,24 @@ export function CartProvider({ children }) {
     }
   });
 
+  // Cambios que el cliente aún no vio: precio distinto, menos stock o producto que ya no está
+  const [avisos, setAvisos] = useState(() => {
+    try {
+      const guardados = JSON.parse(localStorage.getItem(AVISOS_KEY));
+      return Array.isArray(guardados) ? guardados : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const avisosRef = useRef(avisos);
+  avisosRef.current = avisos;
+
   // Bandera: ya cargamos el carrito remoto del usuario actual (evita duplicar el merge)
   const remoteCargadoRef = useRef(null);
+  const [remotoListo, setRemotoListo] = useState(null);
 
   // Cuando el usuario se loguea → cargar carrito de Firestore y fusionar con local
   useEffect(() => {
@@ -48,6 +76,7 @@ export function CartProvider({ children }) {
         return fusionado;
       });
       remoteCargadoRef.current = usuario.uid;
+      setRemotoListo(usuario.uid);
     })();
 
     return () => { cancelado = true; };
@@ -67,6 +96,76 @@ export function CartProvider({ children }) {
     }, 400);
     return () => clearTimeout(t);
   }, [items, usuario]);
+
+  // Los avisos quedan guardados hasta que el cliente abre el carrito y los ve
+  const fijarAvisos = useCallback((lista) => {
+    avisosRef.current = lista;
+    setAvisos(lista);
+    try {
+      if (lista.length) localStorage.setItem(AVISOS_KEY, JSON.stringify(lista));
+      else localStorage.removeItem(AVISOS_KEY);
+    } catch (_) {}
+  }, []);
+
+  const ultimaLectura = useRef(0);
+  const enCurso = useRef(null);
+  const siguiente = useRef(null);
+  const registro = useRef([]); // todo lo que se ha encontrado en esta visita, en orden
+
+  // Lee el catálogo y pone el carrito al día; los cambios quedan en el registro y en los avisos
+  const leerYAjustar = useCallback(async () => {
+    const ids = [...new Set(itemsRef.current.map((i) => i.id))];
+    if (!ids.length) return;
+    const r = ajustarCarrito(itemsRef.current, await leerFrescos(ids));
+    ultimaLectura.current = Date.now();
+    if (r.cambio) {
+      itemsRef.current = r.items;
+      setItems(r.items);
+    }
+    if (r.avisos.length) {
+      registro.current.push(...r.avisos);
+      fijarAvisos([...avisosRef.current, ...r.avisos]);
+    }
+  }, [fijarAvisos]);
+
+  // Una lectura que ya empezó pudo ver datos viejos: quien pide otra espera a que termine y lee de nuevo.
+  // Devuelve lo que cambió desde que se la pidió, venga de la lectura que venga.
+  const refrescar = useCallback(async () => {
+    const desde = registro.current.length;
+    const leer = () => {
+      enCurso.current = leerYAjustar().finally(() => { enCurso.current = null; });
+      return enCurso.current;
+    };
+    if (enCurso.current) {
+      if (!siguiente.current) {
+        siguiente.current = enCurso.current.then(() => {
+          siguiente.current = null;
+          return leer();
+        });
+      }
+      await siguiente.current;
+    } else {
+      await leer();
+    }
+    return registro.current.slice(desde);
+  }, [leerYAjustar]);
+
+  // Al abrir la tienda con productos en el carrito, y otra vez cuando llega el carrito de la cuenta
+  useEffect(() => {
+    const espera = setTimeout(() => {
+      if (Date.now() - ultimaLectura.current > 5000) refrescar();
+    }, 1500);
+    return () => clearTimeout(espera);
+  }, [remotoListo, refrescar]);
+
+  const limpiarAvisos = useCallback(() => fijarAvisos([]), [fijarAvisos]);
+
+  // Vuelve a poner el carrito del pedido que se acaba de crear (cambiar de método de pago)
+  const restaurar = useCallback(() => {
+    if (itemsRef.current.length) return;
+    const guardados = restaurarCheckout();
+    if (guardados) setItems(guardados);
+  }, []);
 
   const agregar = (producto) => {
     setItems((prev) => {
@@ -107,7 +206,10 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider
-      value={{ items, agregar, quitar, cambiarCantidad, vaciar, totalItems, totalPrecio }}
+      value={{
+        items, agregar, quitar, cambiarCantidad, vaciar, totalItems, totalPrecio,
+        avisos, refrescar, limpiarAvisos, restaurar,
+      }}
     >
       {children}
     </CartContext.Provider>

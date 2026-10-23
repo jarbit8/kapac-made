@@ -190,3 +190,39 @@
   .carrito-quitar::after { inset: -7px; }
   .carrito-vaciar::after { inset: -13px -10px; }
 }
+
+/* Cambios que el catálogo hizo en el carrito (precio, stock, producto que ya no está) */
+.carrito-avisos {
+  position: relative;
+  margin: -16px 0 24px;
+  padding: 12px 44px 12px 16px;
+  background: #fff8e6;
+  border: 1px solid #f0d58a;
+  border-radius: 8px;
+  color: #6b4e00;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.carrito-avisos ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.carrito-avisos li { display: flex; gap: 8px; align-items: flex-start; }
+.carrito-avisos li .icono { flex-shrink: 0; margin-top: 3px; }
+.carrito-avisos-cerrar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: #6b4e00;
+  cursor: pointer;
+}
+.carrito-avisos-cerrar:hover { background: rgba(107, 78, 0, 0.1); }
+
+@media (pointer: coarse) {
+  .carrito-avisos-cerrar { top: 2px; right: 2px; width: 44px; height: 44px; }
+}

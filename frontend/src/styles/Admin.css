@@ -694,3 +694,6 @@
   .admin-resumen-card { padding: 14px 10px; }
   .admin-resumen-label { font-size: 11px !important; letter-spacing: 0; overflow-wrap: anywhere; }
 }
+
+/* Un correo largo sin espacios no ensancha la tarjeta en celular */
+.admin-pedido-email { overflow-wrap: anywhere; }

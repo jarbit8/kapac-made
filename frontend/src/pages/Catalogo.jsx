@@ -145,8 +145,8 @@ export default function Catalogo() {
               <div key={p.id} className={`catalogo-page-card${p.activo === false ? ' borrador' : ''}`}>
                 {p.activo === false && <span className="catalogo-borrador">Borrador</span>}
                 <Link to={`/producto/${p.id}`} className="cat-img-wrap">
-                  {esAdmin && !p.imagenMochila
-                    ? <span className="cat-sin-foto">Sin foto</span>
+                  {!p.imagenMochila
+                    ? <span className={`cat-sin-foto${esAdmin ? '' : ' vacia'}`}>{esAdmin ? 'Sin foto' : ''}</span>
                     : <img src={imagen(p.imagenMochila)} alt={p.nombre} loading="lazy" decoding="async" />}
                 </Link>
                 <div className="catalogo-page-info">

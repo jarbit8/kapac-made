@@ -42,6 +42,9 @@ async function recalcularPedido(items, { revisarStock = true } = {}) {
   return { centimos, items: limpios };
 }
 
+// El primer correo válido de la lista (el navegador a veces manda "null")
+const correoValido = (...lista) => lista.map((c) => String(c || '').trim()).find((c) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c)) || 'pedidos@kapac-made.com';
+
 // IP real del cliente: Google agrega la verdadera al FINAL de x-forwarded-for;
 // lo que viene antes lo puede inventar cualquiera.
 function ipCliente(req) {
@@ -243,7 +246,7 @@ exports.cobrarCulqi = onRequest(
         body: JSON.stringify({
           amount,
           currency_code: 'PEN',
-          email: email || pedido.email || 'cliente@kapacmade.com',
+          email: correoValido(email, pedido.email),
           source_id: token,
           description: `Kapac Made - Pedido #${pedidoId.slice(0, 8)}`,
         }),
@@ -454,7 +457,7 @@ exports.crearOrdenCulqi = onRequest(
 
       // El invitado no tiene email en su sesión anónima: se toma el que dejó
       // en el checkout (guardado en el pedido) para no rechazar la compra.
-      const emailCliente = email || ped.email || 'cliente@kapacmade.com';
+      const emailCliente = correoValido(email, ped.email);
       const nombreCliente = nombre || ped.nombre || '';
 
       if (ped.codigoPago && ped.codigoPagoVence && ped.codigoPagoVence * 1000 > Date.now()) {

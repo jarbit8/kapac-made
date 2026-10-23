@@ -7,12 +7,15 @@ import Icono from '../components/Icono';
 import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { cerrarSesion } from '../firebase/auth';
+import { cuentaDe } from '../utils/compra';
 import { obtenerPerfil, guardarPerfil } from '../firebase/perfil';
 import Cargando from '../components/Cargando/Cargando';
 import '../styles/Perfil.css';
 
 export default function Perfil() {
   const { usuario, cargando } = useAuth();
+  // La sesión anónima de una compra de invitado no es una cuenta: no tiene perfil
+  const cuenta = cuentaDe(usuario);
   const { t } = useIdioma();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -24,33 +27,33 @@ export default function Perfil() {
   const [modalCerrarSesion, setModalCerrarSesion] = useState(false);
 
   useEffect(() => {
-    if (!usuario) return;
+    if (!cuenta) return;
     const cargar = async () => {
-      const data = await obtenerPerfil(usuario.uid);
+      const data = await obtenerPerfil(cuenta.uid);
       if (data) {
         setForm({
-          nombre:    data.nombre || usuario.displayName || '',
+          nombre:    data.nombre || cuenta.displayName || '',
           telefono:  data.telefono || '',
           direccion: data.direccion || '',
           distrito:  data.distrito || '',
           referencia: data.referencia || '',
         });
       } else {
-        setForm(prev => ({ ...prev, nombre: usuario.displayName || '' }));
+        setForm(prev => ({ ...prev, nombre: cuenta.displayName || '' }));
       }
       setCargandoDatos(false);
     };
     cargar();
-  }, [usuario]);
+  }, [cuenta]);
 
   const guardar = async (e) => {
     e.preventDefault();
     setGuardando(true);
     setMensaje('');
     try {
-      await guardarPerfil(usuario.uid, {
+      await guardarPerfil(cuenta.uid, {
         ...form,
-        email: usuario.email,
+        email: cuenta.email,
         actualizadoEn: new Date().toISOString(),
       });
       setMensaje(t('perfil.guardado'));
@@ -66,7 +69,7 @@ export default function Perfil() {
     navigate('/');
   };
 
-  if (cargando || (usuario && cargandoDatos)) {
+  if (cargando || (cuenta && cargandoDatos)) {
     return (
       <>
         <Header />
@@ -78,7 +81,7 @@ export default function Perfil() {
     );
   }
 
-  if (!usuario) {
+  if (!cuenta) {
     return (
       <>
         <Header />
@@ -94,7 +97,7 @@ export default function Perfil() {
     );
   }
 
-  const inicial = (form.nombre || usuario.email || '?').charAt(0).toUpperCase();
+  const inicial = (form.nombre || cuenta.email || '?').charAt(0).toUpperCase();
 
   return (
     <>
@@ -106,7 +109,7 @@ export default function Perfil() {
           <div className="perfil-avatar">{inicial}</div>
           <div className="perfil-info">
             <h1>{form.nombre || <span>{t('perfil.sin_nombre')}</span>}</h1>
-            <p>{usuario.email}</p>
+            <p>{cuenta.email}</p>
           </div>
         </div>
 
@@ -178,7 +181,7 @@ export default function Perfil() {
             <span className="acceso-icono"><Icono nombre="salir" tam={26} /></span>
             <div>
               <strong><span>{t('menu.cerrar_sesion')}</span></strong>
-              <span>{usuario.email}</span>
+              <span>{cuenta.email}</span>
             </div>
             <span className="acceso-flecha"><Icono nombre="flechaDer" /></span>
           </button>
@@ -192,7 +195,7 @@ export default function Perfil() {
         abierto={modalCerrarSesion}
         onClose={() => setModalCerrarSesion(false)}
         titulo={t('perfil.cerrar_sesion_titulo')}
-        mensaje={`${t('perfil.cerrar_sesion_msg')} ${usuario.email}. ${t('perfil.cerrar_sesion_sub')}`}
+        mensaje={`${t('perfil.cerrar_sesion_msg')} ${cuenta.email}. ${t('perfil.cerrar_sesion_sub')}`}
         confirmar={t('menu.cerrar_sesion')}
         cancelar={t('modal.cerrar')}
         onConfirmar={handleCerrarSesion}

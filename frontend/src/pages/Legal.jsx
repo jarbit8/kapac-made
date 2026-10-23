@@ -50,8 +50,8 @@ export default function Legal() {
           <section className="legal-section">
             <h2><Editable id="legal_devoluciones_titulo" as="span">{es ? 'Política de Devoluciones' : 'Return Policy'}</Editable></h2>
             <Editable id="legal_devoluciones_p1" as="p" multiline>{es
-              ? 'Aceptamos devoluciones dentro de los 14 días calendario posteriores a la recepción del producto, siempre que esté en su estado original, sin uso y con todos sus accesorios.'
-              : 'We accept returns within 14 calendar days after you receive the product, provided it is in its original condition, unused and with all accessories.'}</Editable>
+              ? 'Aceptamos devoluciones dentro de los 7 días calendario posteriores a la recepción del producto, siempre que esté en su estado original, sin uso y con todos sus accesorios.'
+              : 'We accept returns within 7 calendar days after you receive the product, provided it is in its original condition, unused and with all accessories.'}</Editable>
             <Editable id="legal_devoluciones_p2" as="p" multiline>{es
               ? 'Para iniciar una devolución, contáctanos al +51 997 050 752 indicando tu número de pedido y el motivo. Los gastos de envío de devolución corren por cuenta del cliente, salvo que el producto presente un defecto de fabricación, en cuyo caso Kapac Made cubre el envío.'
               : 'To start a return, contact us at +51 997 050 752 with your order number and reason. Return shipping costs are paid by the customer, unless the product has a manufacturing defect — in that case Kapac Made covers shipping.'}</Editable>
@@ -72,8 +72,8 @@ export default function Legal() {
               <li><Editable id="legal_envios_li3" as="span">{es ? 'Otras ciudades: 3 a 7 días hábiles' : 'Other cities: 3 to 7 business days'}</Editable></li>
             </ul>
             <Editable id="legal_envios_p2" as="p" multiline>{es
-              ? 'También ofrecemos recojo en tienda en Arequipa coordinando previamente por WhatsApp. El envío a domicilio tiene un costo adicional según la ciudad de destino, que se comunica al confirmar el pedido.'
-              : 'We also offer in-store pickup in Arequipa, coordinated in advance via WhatsApp. Home delivery has an additional cost depending on the destination city, communicated upon order confirmation.'}</Editable>
+              ? 'También ofrecemos recojo en tienda en Arequipa coordinando previamente por WhatsApp. Por tiempo limitado, el envío a domicilio es gratis a todo el Perú.'
+              : 'We also offer in-store pickup in Arequipa, coordinated in advance via WhatsApp. For a limited time, home delivery is free across Peru.'}</Editable>
             <Editable id="legal_envios_p3" as="p" multiline>{es
               ? 'El seguimiento del pedido se realiza por correo electrónico (si lo seleccionaste al confirmar tu compra) o contactándonos directamente.'
               : 'Order tracking is done by email (if selected when confirming your purchase) or by contacting us directly.'}</Editable>
@@ -160,8 +160,8 @@ export default function Legal() {
             </p>
             <p>
               <Editable id="legal_propiedad_texto2" as="span" multiline>{es
-                ? 'El nombre "Kapac Made" y su logotipo son marcas registradas. Cualquier uso no autorizado será perseguido conforme a la ley peruana.'
-                : 'The name "Kapac Made" and its logo are registered trademarks. Any unauthorized use will be prosecuted under Peruvian law.'}</Editable>
+                ? 'El nombre "Kapac Made" y su logotipo son propiedad de QHAPAQ BRANDS S.A.C.S. No está permitido usarlos sin autorización.'
+                : 'The name "Kapac Made" and its logo are owned by QHAPAQ BRANDS S.A.C.S. They may not be used without permission.'}</Editable>
             </p>
           </section>
 
@@ -210,8 +210,8 @@ export default function Legal() {
 
           <p className="legal-actualizado">
             {es
-              ? `Última actualización: ${new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })}`
-              : `Last updated: ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+              ? 'Última actualización: 23 de octubre de 2026'
+              : 'Last updated: October 23, 2026'}
           </p>
 
         </div>

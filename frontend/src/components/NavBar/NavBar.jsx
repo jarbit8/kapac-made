@@ -39,7 +39,7 @@ export default function NavBar() {
         <button
           className="navbar-burger"
           onClick={() => setMenu(true)}
-          aria-label="Menú"
+          aria-label={idioma === 'en' ? 'Menu' : 'Menú'}
         >
           <span></span><span></span><span></span>
         </button>
@@ -49,7 +49,7 @@ export default function NavBar() {
       <div className={`navbar-left ${menu ? 'abierto' : ''}`}>
         {/* X dentro del dropdown, arriba a la derecha */}
         {menu && (
-          <button className="navbar-cerrar" onClick={cerrar} aria-label="Cerrar">
+          <button className="navbar-cerrar" onClick={cerrar} aria-label={idioma === 'en' ? 'Close' : 'Cerrar'}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M18 6 6 18M6 6l12 12"/>
             </svg>
@@ -89,7 +89,7 @@ export default function NavBar() {
       <div className="navbar-right">
         <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer" className="navbar-ig" aria-label="Instagram"><IconIg /></a>
 
-        <button className="icon-btn cart-btn navbar-cart" aria-label="Carrito" onClick={() => navigate('/carrito')}>
+        <button className="icon-btn cart-btn navbar-cart" aria-label={idioma === 'en' ? 'Cart' : 'Carrito'} onClick={() => navigate('/carrito')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="9" cy="21" r="1"/>
             <circle cx="20" cy="21" r="1"/>

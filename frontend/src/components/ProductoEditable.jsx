@@ -67,8 +67,10 @@ export function CampoProducto({ valor, mostrar, multiline = false, numero = fals
     if (numero) {
       if (!nuevo && !opcional) { setAviso('Escribe un número'); return; }
       if (nuevo) {
-        nuevo = Math.round(Number(nuevo));
+        nuevo = Number(nuevo.replace(',', '.'));
         if (!Number.isFinite(nuevo) || nuevo < 0) { setAviso('Escribe un número válido'); return; }
+        // La tienda muestra y cobra montos enteros (S/90.00)
+        if (!Number.isInteger(nuevo)) { setAviso('Sin decimales: escribe un número entero'); return; }
       } else {
         nuevo = null;
       }

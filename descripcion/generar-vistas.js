@@ -117,7 +117,7 @@ const ENTREGAS = {
 
 // Quién cambia cada estado y qué pasa además, según el método
 function pasos(metodo) {
-  const lista = [{ estado: 'procesando_pago', quien: 'El sistema', cuando: 'El cliente eligió cómo pagar y está en la pantalla de pago.', extra: 'Si cierra sin pagar, el pedido se queda así en "Mis pedidos" y en tu panel.' }];
+  const lista = [{ estado: 'procesando_pago', quien: 'El sistema', cuando: 'El cliente eligió cómo pagar y está en la pantalla de pago.', extra: 'Mientras no pague, el pedido no sale en "Mis pedidos" ni en tu lista de pendientes. Si cierra sin pagar, queda como intento y no reserva stock.' }];
   if (metodo === 'yape') lista.push({ estado: 'verificando_pago', quien: 'El cliente', cuando: 'Escaneó el QR, yapeó y tocó "Ya realicé el pago".', extra: 'Tú revisas tu Yape y, si llegó la plata, lo pasas a pagado en el panel.' });
   if (metodo === 'efectivo') lista.push({ estado: 'verificando_pago', quien: 'El cliente', cuando: 'Generó su código CIP y tocó "Ya tengo mi código".', extra: 'Tiene 48 horas para pagarlo. No tienes que hacer nada: cuando pague, Culqi avisa solo.' });
   lista.push({
@@ -262,7 +262,8 @@ function pintar(){
     return '<section class="paso">'
       +'<div class="paso-cab"><span class="paso-num">'+(cancelado?'×':i+1)+'</span><div>'
       +'<p class="quien">'+e(p.quien)+'</p><p>'+e(p.cuando)+'</p>'+(p.extra?'<p class="extra">'+e(p.extra)+'</p>':'')+'</div></div>'
-      +'<div class="paso-cuerpo"><div>'
+      +(p.estado==='procesando_pago'?'<div class="paso-cuerpo"><div><div class="sin-correo">El cliente está en la pantalla de pago. Este estado no se muestra en la página ni en tu panel.</div></div><div><p class="etiqueta">Correo que le llega al cliente</p><div class="sin-correo">No llega correo en este paso</div></div></div></section>':'')
+      +(p.estado==='procesando_pago'?'':'<div class="paso-cuerpo"><div>'
       +'<p class="etiqueta">Página del pedido (confirmación)</p>'
       +'<div class="vista"><div class="conf"><div class="conf-icono '+(pagado?'ok':cancelado?'no':'')+'">'+(pagado?ICONOS.ok:cancelado?ICONOS.no:ICONOS.espera)+'</div>'
       +'<h3>'+e(en(t,'pagina_titulo'))+'</h3><p>'+e(en(t,'pagina_texto'))+'</p></div>'
@@ -274,7 +275,7 @@ function pintar(){
       +'<div class="vista"><div class="fila"><b>#K7Q2M9XA</b><span class="chip-panel" style="background:'+pb+';color:'+pc+'">'+e(t.nombre)+'</span></div><p class="sub">'+e(METODOS[metodo].panel)+' · '+e(ENTREGAS[entrega])+'</p></div>'
       +'</div><div><p class="etiqueta">Correo que le llega al cliente</p>'
       +(correo?'<p class="asunto"><b>Asunto:</b> '+e(correo.asunto)+'</p><iframe class="correo" onload="ajustar(this)" srcdoc="'+e(correo.html)+'"></iframe>':'<div class="sin-correo">No llega correo en este paso</div>')
-      +'</div></div></section>';
+      +'</div></div></section>');
   }).join('');
 }
 pintar();

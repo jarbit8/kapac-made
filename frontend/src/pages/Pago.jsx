@@ -8,8 +8,10 @@ import PedidoNoDisponible from '../components/PedidoNoDisponible';
 import usePedidoPago from '../hooks/usePedidoPago';
 import { actualizarEstadoPedido } from '../firebase/pedidos';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { mensajeServidor } from '../i18n/mensajes';
+import { correoCompra, nombreCompra, marcarReemplazado } from '../utils/compra';
 import qrImg from '../assets/images/qr.jpeg';
 import imgYape from '../assets/images/yape.avif';
 import imgEfectivo from '../assets/images/pago efectivo.avif';
@@ -21,6 +23,7 @@ export default function Pago() {
   const { metodo, pedidoId } = useParams(); // /pago/:metodo/:pedidoId
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  const { restaurar } = useCart();
   const { t, idioma } = useIdioma();
   const [cargando, setCargando] = useState(false);
   const { total, estado } = usePedidoPago(pedidoId, metodo === 'efectivo' ? 'procesando_pago,verificando_pago' : 'procesando_pago');
@@ -48,8 +51,8 @@ export default function Pago() {
           body: JSON.stringify({
             amount: Math.round(Number(total) * 100), // céntimos
             pedidoId,
-            email: usuario.email || sessionStorage.getItem('checkout_email') || '',
-            nombre: usuario.displayName || sessionStorage.getItem('checkout_nombre') || '',
+            email: correoCompra(usuario),
+            nombre: nombreCompra(usuario),
           }),
         });
         const data = await resp.json();
@@ -109,8 +112,14 @@ export default function Pago() {
     setCargando(false);
   };
 
+  const cambiarMetodo = () => {
+    marcarReemplazado(pedidoId);
+    restaurar();
+    navigate('/metodo-pago');
+  };
+
   const volver = (
-    <button className="pago-volver" onClick={() => navigate('/metodo-pago')}>
+    <button className="pago-volver" onClick={cambiarMetodo}>
       <Icono nombre="flechaIzq" tam={16} /> {t('pago.volver')}
     </button>
   );

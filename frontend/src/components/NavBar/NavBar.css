@@ -229,8 +229,10 @@
   }
 
   .navbar-burger::after { inset: -4px; }
-  .navbar-lang::after { inset: -14px -3px; }
+  .navbar-lang::after { inset: -14px -10px; }
+  .navbar-right { gap: 22px; }
   .navbar-ig::after,
-  .navbar-cart::after { inset: -14px -6px; }
-  .navbar-link::after { inset: -6px -10px; }
+  .navbar-cart::after { inset: -14px -12px; }
+  .navbar-link::after { inset: -10px -10px; }
+  .navbar-cerrar { padding: 10px; }
 }

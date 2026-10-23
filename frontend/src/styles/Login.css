@@ -169,6 +169,10 @@
 
 .login-olvide:hover:not(:disabled) { color: var(--ink); }
 
+@media (pointer: coarse) {
+  .login-olvide { padding: 12px 14px; }
+}
+
 .login-btn {
   padding: 13px;
   background: #111;
