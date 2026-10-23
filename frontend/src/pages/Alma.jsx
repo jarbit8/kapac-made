@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import Editable from '../components/Editable';
@@ -21,8 +21,9 @@ export default function Alma() {
   const { textos, esAdmin, guardar } = useTextos();
 
   const [contenido, setContenido] = useState(contenidoGuardado);
+  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
   useEffect(() => {
-    obtenerContenido().then(setContenido).catch(() => {});
+    obtenerContenido().then((c) => { if (!cambiado.current) setContenido(c); }).catch(() => {});
   }, []);
 
   const bloques = contenido ? contenido.almaBloques : [];
@@ -30,6 +31,7 @@ export default function Alma() {
   const fotos = contenido ? contenido.almaFotos : [];
 
   const guardarContenidoParcial = async (cambiar) => {
+    cambiado.current = true;
     // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
     // para no perder lo que se haya cambiado desde otro dispositivo.
     let base;
@@ -45,11 +47,11 @@ export default function Alma() {
   };
 
   const agregarBloque = () => guardarContenidoParcial((b) => ({ almaBloques: [...b.almaBloques, `bloque_${Date.now()}`] }));
-  const quitarBloque = (key) => guardarContenidoParcial((b) => ({ almaBloques: b.almaBloques.filter((k) => k !== key) }));
+  const quitarBloque = (key) => window.confirm('¿Quitar este bloque?') && guardarContenidoParcial((b) => ({ almaBloques: b.almaBloques.filter((k) => k !== key) }));
 
   const claveFotoDe = (foto, i) => (typeof foto === 'object' && foto !== null) ? `legacy${i}` : foto;
   const agregarFoto = () => guardarContenidoParcial((b) => ({ almaFotos: [...b.almaFotos, `foto_${Date.now()}`] }));
-  const quitarFoto = (key) => guardarContenidoParcial((b) => ({ almaFotos: b.almaFotos.filter((f, i) => claveFotoDe(f, i) !== key) }));
+  const quitarFoto = (key) => window.confirm('¿Quitar esta foto?') && guardarContenidoParcial((b) => ({ almaFotos: b.almaFotos.filter((f, i) => claveFotoDe(f, i) !== key) }));
 
   return (
     <>
@@ -110,7 +112,7 @@ export default function Alma() {
                 return (
                   <div key={key} className={`alma-foto${tamano === 'grande' ? ' alma-foto--hero' : ''}`}>
                     <EditableImage id={`alma_${key}_img`} srcDefault={urlDefault} alt={captionDefault} className="alma-foto-img-wrap" carpeta="alma" />
-                    <div className="alma-foto-overlay">
+                    <div className={`alma-foto-overlay${esAdmin ? ' alma-foto-overlay--edicion' : ''}`}>
                       <Editable id={`alma_${key}_caption`} as="p" className="alma-foto-caption" placeholder="Agregar descripción (opcional)">{captionDefault}</Editable>
                     </div>
                     {esAdmin && (

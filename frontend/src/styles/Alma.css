@@ -263,3 +263,24 @@ img.alma-foto-img-wrap:not(.cargada) { aspect-ratio: 4 / 3; }
 .alma-foto--hero img.alma-foto-img-wrap:not(.cargada) { aspect-ratio: 21 / 9; }
 .alma-foto-img-wrap.editable-img-wrap .editable-img { height: auto; max-height: 85vh; object-fit: contain; }
 .alma-foto-img-wrap.editable-img-wrap .editable-img:not(.cargada) { aspect-ratio: 4 / 3; }
+
+/* Modo edición: la descripción de cada foto se ve siempre y se puede tocar
+   (sin esto solo aparecía con el mouse encima y no recibía toques) */
+.alma-foto-overlay--edicion { opacity: 1; }
+.alma-foto-overlay--edicion .editable-text,
+.alma-foto-overlay--edicion .editable-vacio,
+.alma-foto-overlay--edicion .editable-edit { pointer-events: auto; }
+.alma-foto-overlay--edicion .editable-vacio { background: rgba(255, 255, 255, 0.92); }
+
+@media (pointer: coarse) {
+  .alma-bloque-quitar {
+    top: -6px;
+    right: -8px;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+    opacity: 0.85;
+  }
+  .alma-foto-tamano,
+  .alma-foto-quitar-btn { padding: 10px 14px; font-size: 13px; }
+}

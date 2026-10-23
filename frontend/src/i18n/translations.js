@@ -259,7 +259,7 @@ const translations = {
 
     // ── Admin ──
     'admin.titulo':           'Panel admin',
-    'admin.sub':              'Gestiona productos, pedidos y visitas.',
+    'admin.sub':              'Pedidos, visitas y reclamos. Los productos se editan en la tienda.',
     'admin.tab_productos':    'Productos',
     'admin.tab_pedidos':      'Pedidos',
     'admin.tab_visitas':      'Visitas',
@@ -691,7 +691,7 @@ const translations = {
 
     // ── Admin ──
     'admin.titulo':           'Admin panel',
-    'admin.sub':              'Manage products, orders and visits.',
+    'admin.sub':              'Orders, visits and complaints. Products are edited in the shop.',
     'admin.tab_productos':    'Products',
     'admin.tab_pedidos':      'Orders',
     'admin.tab_visitas':      'Visits',

@@ -46,13 +46,14 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
 
   const onArchivo = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = ''; // para poder elegir la misma foto otra vez
     if (!file) return;
     setSubiendo(true);
     try {
       const nuevaUrl = await subirImagen(file, carpeta);
       await guardar(id, nuevaUrl);
     } catch (_) {
-      /* error silencioso, igual que el resto del panel de edición en vivo */
+      window.alert('No se pudo subir la foto. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
     }
     setSubiendo(false);
   };
@@ -68,7 +69,8 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
       >
         <IconoFoto /> {subiendo ? 'Subiendo…' : 'Cambiar foto'}
       </button>
-      <input ref={inputRef} type="file" accept="image/*" onChange={onArchivo} hidden />
+      <input ref={inputRef} type="file" accept="image/*" onChange={onArchivo} hidden
+        onClick={(e) => e.stopPropagation()} />
     </div>
   );
 }

@@ -128,3 +128,7 @@
 @media (max-width: 768px) {
   .info-page { padding: 88px 24px 70px; }
 }
+
+@media (pointer: coarse) {
+  .info-bloque-quitar { padding: 10px 16px; font-size: 13px; }
+}

@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useIdioma } from '../context/LanguageContext';
 import { obtenerPedidosUsuario } from '../firebase/pedidos';
 import Cargando from '../components/Cargando/Cargando';
+import { nombreEstado } from '../i18n/estadosPedido';
 import '../styles/Pedidos.css';
 
 export default function Pedidos() {
@@ -43,21 +44,6 @@ export default function Pedidos() {
     });
   };
 
-  const estadoLabel = (e) => {
-    const mapa = {
-      procesando_pago:  t('estado.procesando_pago'),
-      verificando_pago: t('estado.verificando_pago'),
-      pendiente_envio:  t('estado.pendiente_envio'),
-      enviado:          t('estado.enviado'),
-      entregado:        t('estado.entregado'),
-      cancelado:        t('estado.cancelado'),
-      pendiente:   t('estado.verificando_pago'),
-      verificando: t('estado.procesando_pago'),
-      pagado:      t('estado.pendiente_envio'),
-    };
-    return mapa[e] || e;
-  };
-
   return (
     <>
       <Header />
@@ -81,7 +67,7 @@ export default function Pedidos() {
           <div key={p.id} className="pedido-card">
             <div className="pedido-header">
               <span className="pedido-id"><span>{t('pedidos.pedido')}</span> #{p.id.slice(0, 8)}</span>
-              <span className={`pedido-estado estado-${p.estado}`}>{estadoLabel(p.estado)}</span>
+              <span className={`pedido-estado estado-${p.estado}`}>{nombreEstado(p, idioma)}</span>
             </div>
             <p className="pedido-fecha">{formatoFecha(p.fecha)}</p>
             <ul className="pedido-items">

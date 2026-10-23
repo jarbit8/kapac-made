@@ -54,7 +54,7 @@
   font-size: 12px;
   padding: 4px 12px;
   border-radius: 12px;
-  text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .estado-procesando_pago  { background: #fff3cd; color: #856404; }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/Footer.css';
 import { useIdioma } from '../../context/LanguageContext';
@@ -10,6 +10,7 @@ import CambiarMedio from '../CambiarMedio';
 import Icono from '../Icono';
 import { EMPRESA } from '../../config/empresa';
 import { fotoRapida } from '../../utils/fotos';
+import { useTextos } from '../../context/TextosContext';
 
 /* ─── Iconos SVG (sociales) ─────────────────────────────────────────────── */
 const IconInstagram = () => (
@@ -20,8 +21,21 @@ const IconInstagram = () => (
   </svg>
 );
 
+// Botón del boletín. En modo edición el texto se edita fuera de un <button>: ahí el campo
+// no recibe el toque ni el teclado en el celular.
+function BotonNews({ id, cargando, children }) {
+  const { esAdmin } = useTextos();
+  if (esAdmin) return <span className="footer-news-boton"><Editable id={id} as="span" sinColor>{children}</Editable></span>;
+  return (
+    <button type="submit" disabled={cargando}>
+      {cargando ? '...' : <Editable id={id} as="span" sinColor>{children}</Editable>}
+    </button>
+  );
+}
+
 export default function Footer() {
   const { t, idioma } = useIdioma();
+  const { esAdmin } = useTextos();
   const es = idioma === 'es';
 
   const [correo, setCorreo] = useState('');
@@ -33,6 +47,7 @@ export default function Footer() {
   const [fondoCfg, setFondoCfg] = useState(() => contenidoGuardado()?.footerFondo ?? null);
   const [videoFallo, setVideoFallo] = useState(false);
   const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
+  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
 
   useEffect(() => {
     const onResize = () => setEsMobile(window.innerWidth < 768);
@@ -41,12 +56,13 @@ export default function Footer() {
   }, []);
 
   useEffect(() => {
-    obtenerContenido().then((c) => c.footerFondo && setFondoCfg(c.footerFondo)).catch(() => {});
+    obtenerContenido().then((c) => c.footerFondo && !cambiado.current && setFondoCfg(c.footerFondo)).catch(() => {});
   }, []);
 
   const fondo = medioDispositivo(fondoCfg, esMobile);
 
   const cambiarFondo = (slot) => async (nuevo) => {
+    cambiado.current = true;
     const c = await cambiarContenido((b) => {
       const actual = b.footerFondo?.pc || b.footerFondo?.mobile ? b.footerFondo : {};
       return { footerFondo: { ...actual, [slot]: nuevo } };
@@ -83,7 +99,7 @@ export default function Footer() {
 
   const handlePedirCodigo = (e) => {
     e.preventDefault();
-    enviarCodigo();
+    if (!esAdmin) enviarCodigo();
   };
 
   const cambiarCorreo = () => {
@@ -94,6 +110,7 @@ export default function Footer() {
 
   const handleConfirmarCodigo = async (e) => {
     e.preventDefault();
+    if (esAdmin) return;
     setMsgNews('');
     setCargandoNews(true);
     const res = await confirmarCodigo(correo, codigo);
@@ -152,9 +169,7 @@ export default function Footer() {
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ''))}
               />
-              <button type="submit" disabled={cargandoNews}>
-                {cargandoNews ? '...' : <Editable id="footer_news_confirmar" as="span" sinColor>{es ? 'Confirmar' : 'Confirm'}</Editable>}
-              </button>
+              <BotonNews id="footer_news_confirmar" cargando={cargandoNews}>{es ? 'Confirmar' : 'Confirm'}</BotonNews>
             </form>
             <p className="footer-news-hint-mini">{es ? `Código enviado a ${correo}` : `Code sent to ${correo}`}</p>
             <div className="footer-news-acciones">
@@ -175,9 +190,7 @@ export default function Footer() {
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
             />
-            <button type="submit" disabled={cargandoNews}>
-              {cargandoNews ? '...' : <Editable id="footer_news_suscribirme" as="span" sinColor>{es ? 'Suscribirme' : 'Subscribe'}</Editable>}
-            </button>
+            <BotonNews id="footer_news_suscribirme" cargando={cargandoNews}>{es ? 'Suscribirme' : 'Subscribe'}</BotonNews>
           </form>
         )}
         {msgNews && <p className="footer-news-error-mini">{msgNews}</p>}

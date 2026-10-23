@@ -114,6 +114,11 @@ input, textarea, select {
   font-family: var(--font-body) !important;
 }
 
+/* En el celular, menos de 16px hace que iOS acerque la página al escribir */
+@media (pointer: coarse) {
+  input, textarea, select { font-size: 16px !important; }
+}
+
 /* Botones */
 button, [type="button"], [type="submit"] {
   font-family: var(--font-body) !important;

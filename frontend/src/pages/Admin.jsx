@@ -4,85 +4,16 @@ import Header from '../components/Header/Header';
 import { useAuth } from '../context/AuthContext';
 import { esCorreoAdmin, NOMBRES } from '../config/admins';
 import {
-  obtenerProductos, agregarProducto, actualizarProducto, eliminarProducto,
-} from '../firebase/productos';
-import {
   obtenerTodosPedidos, actualizarEstadoPedido,
 } from '../firebase/pedidos';
 import { obtenerEstadisticas, obtenerVisitasRecientes, nombreRuta } from '../firebase/visitas';
 import { obtenerReclamos, responderReclamo } from '../firebase/reclamos';
 import { diasHabilesHasta } from '../utils/diasHabiles';
-import { imagen } from '../firebase/imagenesProductos';
-import { subirImagen } from '../firebase/almacenamiento';
+import { nombreEstado } from '../i18n/estadosPedido';
 import { useIdioma } from '../context/LanguageContext';
-import { useTextos } from '../context/TextosContext';
 import Cargando from '../components/Cargando/Cargando';
 import Icono from '../components/Icono';
 import '../styles/Admin.css';
-
-// Control reutilizable: muestra la foto actual y un botón para subir otra a Storage.
-function SubirFoto({ valor, onSubido, carpeta = 'varios', prevStyle, vaciStyle }) {
-  const [subiendo, setSubiendo] = useState(false);
-  const [err, setErr] = useState('');
-  const onArchivo = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setErr(''); setSubiendo(true);
-    try {
-      const url = await subirImagen(file, carpeta);
-      onSubido(url);
-    } catch (ex) {
-      setErr(ex?.message || 'No se pudo subir');
-    }
-    setSubiendo(false);
-  };
-  return (
-    <div className="subir-foto">
-      {valor
-        ? <img src={imagen(valor)} alt="" className="subir-foto-prev" style={prevStyle} />
-        : <div className="subir-foto-vacio" style={vaciStyle}>Sin foto</div>}
-      <label className="subir-foto-btn">
-        {subiendo ? 'Subiendo…' : (valor ? 'Cambiar foto' : 'Subir foto')}
-        <input type="file" accept="image/*" onChange={onArchivo} disabled={subiendo} hidden />
-      </label>
-      {err && <span className="subir-foto-err">{err}</span>}
-    </div>
-  );
-}
-
-const CATEGORIAS = ['Climbing', 'Mountaineering', 'Trekking', 'Daypack'];
-const CAT_ES = { Climbing: 'Escalada', Mountaineering: 'Montañismo', Trekking: 'Senderismo', Daypack: 'Mochila de día' };
-
-const FEATURES_DEFAULT = [
-  { titulo: '', desc: '' },
-];
-
-const SPECS_DEFAULT = [
-  { label: '', valor: '' },
-];
-
-// Zonas de texto del producto con color y tipografía propios (se guardan con el producto).
-const ESTILO_ZONAS = [
-  ['nombre', 'Nombre'],
-  ['precio', 'Precio'],
-  ['descripcion', 'Descripción'],
-  ['features', 'Características'],
-  ['specs', 'Especificaciones'],
-  ['stock', 'Aviso de stock'],
-];
-
-const VACIO = {
-  nombre: '', nombreEn: '',
-  precio: '', precioOriginal: '', moneda: 'S/',
-  imagenMochila: '', imagenContexto: '',
-  fotos: [],
-  descripcion: '', descripcionEn: '',
-  stock: '', activo: true, categoria: 'Climbing',
-  galeria: [],
-  features: FEATURES_DEFAULT,
-  specs: SPECS_DEFAULT,
-  estilos: {},
-};
 
 const ESTADOS_PEDIDO = ['procesando_pago', 'verificando_pago', 'pendiente_envio', 'enviado', 'entregado'];
 // Estados viejos → su equivalente, para saber desde dónde puede avanzar
@@ -97,21 +28,8 @@ const estadosPosibles = (estado) => {
   return [estado, ...siguientes, ...(estado === 'entregado' ? [] : ['cancelado'])];
 };
 
-const etiquetaEstado = (estado, pedido) =>
-  estado === 'enviado' && pedido.envio?.tipo !== 'envio' ? 'Listo para recoger' : (ESTADO_LABELS[estado] || estado);
-
-const ESTADO_LABELS = {
-  procesando_pago:  'Procesando pago',
-  verificando_pago: 'Verificando pago',
-  pendiente_envio:  'Pagado, por enviar',
-  enviado:         'Enviado',
-  entregado:       'Entregado',
-  cancelado:       'Cancelado',
-  // viejos
-  pendiente:   'Pendiente',
-  verificando: 'Procesando pago',
-  pagado:      'Pagado, por enviar',
-};
+// Los mismos nombres que ve el cliente (descripcion/textos-pedidos.json)
+const etiquetaEstado = (estado, pedido) => nombreEstado(pedido, 'es', estado);
 
 const METODO_PAGO = {
   yape:          { texto: 'Yape (QR)', icono: 'celular' },
@@ -136,16 +54,12 @@ const ESTADO_COLORES = {
 export default function Admin() {
   const { usuario, cargando } = useAuth();
   const { t } = useIdioma();
-  const { textos, guardar: guardarTextoGlobal } = useTextos();
   const navigate = useNavigate();
-  const [productos, setProductos] = useState([]);
   const [pedidos, setPedidos] = useState([]);
   const [stats, setStats] = useState({ total: 0, logueados: 0, porRuta: {}, porDia: {}, porPais: {} });
   const [visitasRecientes, setVisitasRecientes] = useState([]);
   const [visitasLimite, setVisitasLimite] = useState(10);
-  const [pestana, setPestana] = useState('productos'); // 'productos' | 'pedidos' | 'visitas' | 'reclamos'
-  const [form, setForm] = useState(VACIO);
-  const [editandoId, setEditandoId] = useState(null);
+  const [pestana, setPestana] = useState('pedidos'); // 'pedidos' | 'visitas' | 'reclamos'
   const [msg, setMsg] = useState('');
   const [reclamos, setReclamos] = useState([]);
   const [reclamosError, setReclamosError] = useState('');
@@ -153,10 +67,6 @@ export default function Admin() {
   const [reclamoAbierto, setReclamoAbierto] = useState(null);
   const [respuesta, setRespuesta] = useState('');
   const [respondiendo, setRespondiendo] = useState(false);
-
-  const cargar = async () => {
-    setProductos(await obtenerProductos());
-  };
 
   const cargarPedidos = async () => {
     setPedidos(await obtenerTodosPedidos());
@@ -184,7 +94,7 @@ export default function Admin() {
     }
   };
 
-  useEffect(() => { cargar(); cargarPedidos(); cargarStats(); cargarReclamos(); }, []);
+  useEffect(() => { cargarPedidos(); cargarStats(); cargarReclamos(); }, []);
 
   const abrirReclamo = (id) => {
     setReclamoAbierto(reclamoAbierto === id ? null : id);
@@ -243,7 +153,8 @@ export default function Admin() {
     });
   };
 
-  const pedidosVerificando = pedidos.filter(p => ['verificando_pago', 'verificando'].includes(p.estado));
+  // PagoEfectivo se confirma solo: solo el Yape con QR lo revisa el admin
+  const pedidosVerificando = pedidos.filter(p => ['verificando_pago', 'verificando'].includes(p.estado) && p.metodoPago !== 'efectivo');
   const reclamosPendientes = reclamos.filter((r) => r.estado !== 'respondido');
   const reclamosRespondidos = reclamos.filter((r) => r.estado === 'respondido');
 
@@ -253,60 +164,6 @@ export default function Admin() {
   const pedidosCancelados  = pedidos.filter(p => p.estado === 'cancelado');
 
   const [filtroPedidos, setFiltroPedidos] = useState('pendientes'); // 'pendientes' | 'completados' | 'cancelados'
-
-  const guardar = async (e) => {
-    e.preventDefault();
-    const fotos = (form.fotos || []).filter(Boolean);
-    const datos = {
-      ...form,
-      fotos,
-      imagenMochila: fotos[0] || form.imagenMochila || '', // portada para el catálogo
-      precio: Number(form.precio),
-      precioOriginal: Number(form.precioOriginal) || null,
-      stock: Number(form.stock) || 0,
-    };
-    try {
-      if (editandoId) {
-        await actualizarProducto(editandoId, datos);
-        setMsg('Producto actualizado');
-      } else {
-        await agregarProducto(datos);
-        setMsg('Producto agregado');
-      }
-      setForm(VACIO);
-      setEditandoId(null);
-      cargar();
-    } catch (err) {
-      setMsg('No se pudo guardar: ' + err.message);
-    }
-  };
-
-  const editar = (p) => {
-    setForm({
-      nombre: p.nombre, nombreEn: p.nombreEn || '', precio: p.precio, precioOriginal: p.precioOriginal || '',
-      moneda: p.moneda || 'S/', imagenMochila: p.imagenMochila,
-      imagenContexto: p.imagenContexto, descripcion: p.descripcion || '',
-      descripcionEn: p.descripcionEn || '',
-      stock: p.stock || '', activo: p.activo !== false,
-      categoria: p.categoria || 'Climbing',
-      fotos: Array.isArray(p.fotos) && p.fotos.length
-        ? p.fotos
-        : [p.imagenMochila, p.imagenContexto].filter(Boolean),
-      galeria: Array.isArray(p.galeria) ? p.galeria : [],
-      features: Array.isArray(p.features) && p.features.length ? p.features : FEATURES_DEFAULT,
-      specs: Array.isArray(p.specs) && p.specs.length ? p.specs : SPECS_DEFAULT,
-      estilos: p.estilos || {},
-    });
-    setEditandoId(p.id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const borrar = async (id) => {
-    if (!window.confirm('¿Eliminar este producto?')) return;
-    await eliminarProducto(id);
-    setMsg('Producto eliminado');
-    cargar();
-  };
 
   // Protección: solo usuarios logueados pueden acceder
   if (cargando) {
@@ -352,12 +209,6 @@ export default function Admin() {
 
         {/* Pestañas */}
         <div className="admin-pestanas">
-          <button
-            className={pestana === 'productos' ? 'activa' : ''}
-            onClick={() => setPestana('productos')}
-          >
-            {t('admin.tab_productos')}
-          </button>
           <button
             className={pestana === 'pedidos' ? 'activa' : ''}
             onClick={() => setPestana('pedidos')}
@@ -787,235 +638,6 @@ export default function Admin() {
             })()}
           </div>
         )}
-
-        {/* ====== SECCIÓN PRODUCTOS ====== */}
-        {pestana === 'productos' && (<>
-        <form className="admin-form" onSubmit={guardar}>
-          <h2>{editandoId ? t('admin.editar_producto') : t('admin.agregar_producto')}</h2>
-          <div className="admin-grid">
-            <label>{t('admin.nombre_es')}
-              <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required />
-            </label>
-            <label>{t('admin.precio')}
-              <input type="number" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} required />
-            </label>
-            <label>{t('admin.precio_original')}
-              <input type="number" value={form.precioOriginal} onChange={(e) => setForm({ ...form, precioOriginal: e.target.value })} />
-            </label>
-            <label>{t('admin.stock')}
-              <input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
-            </label>
-            <label>{t('admin.categoria')}
-              <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
-                {CATEGORIAS.map((c) => <option key={c} value={c}>{c} — {CAT_ES[c]}</option>)}
-              </select>
-            </label>
-          </div>
-
-          {/* Fotos de la mochila — carrusel que se desliza arriba del producto */}
-          <label>Fotos de la mochila <span style={{ color: '#999', fontSize: '12px' }}>(se deslizan arriba; la 1ª es la portada del catálogo)</span></label>
-          <div className="admin-fotos-grid" style={{ marginBottom: 18 }}>
-            {(form.fotos || []).map((url, i) => (
-              <div key={i} className="admin-foto-card">
-                <SubirFoto valor={url} carpeta="productos"
-                  onSubido={(nueva) => {
-                    const arr = [...form.fotos];
-                    arr[i] = nueva;
-                    setForm({ ...form, fotos: arr });
-                  }} />
-                {url && (
-                  <button type="button" className="admin-foto-quitar"
-                    onClick={() => setForm({ ...form, fotos: form.fotos.filter((_, j) => j !== i) })}>
-                    Quitar
-                  </button>
-                )}
-              </div>
-            ))}
-            <button type="button" className="admin-foto-agregar"
-              onClick={() => setForm({ ...form, fotos: [...(form.fotos || []), ''] })}>
-              + Agregar foto
-            </button>
-          </div>
-
-          {/* Galería propia del producto — se muestra debajo del producto */}
-          <label>Galería de abajo <span style={{ color: '#999', fontSize: '12px' }}>(las otras fotos que salen debajo del producto)</span></label>
-          <div className="admin-fotos-grid" style={{ marginBottom: 18 }}>
-            {(form.galeria || []).map((url, i) => (
-              <div key={i} className="admin-foto-card">
-                <SubirFoto valor={url} carpeta="productos"
-                  onSubido={(nueva) => {
-                    const arr = [...form.galeria];
-                    arr[i] = nueva;
-                    setForm({ ...form, galeria: arr });
-                  }} />
-                {url && (
-                  <button type="button" className="admin-foto-quitar"
-                    onClick={() => setForm({ ...form, galeria: form.galeria.filter((_, j) => j !== i) })}>
-                    Quitar
-                  </button>
-                )}
-              </div>
-            ))}
-            <button type="button" className="admin-foto-agregar"
-              onClick={() => setForm({ ...form, galeria: [...(form.galeria || []), ''] })}>
-              + Agregar foto
-            </button>
-          </div>
-          {/* Características destacadas */}
-          <label style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-            Características <span style={{ color: '#999', fontSize: '12px' }}>(propiedades que se muestran bajo la descripción)</span>
-            <input
-              type="color"
-              value={textos['producto_specs_color'] || '#1d1b15'}
-              onChange={(e) => guardarTextoGlobal('producto_specs_color', e.target.value)}
-              title="Color de Características y Especificaciones en TODOS los productos"
-              style={{ width: 26, height: 26, border: '1px solid #ddd', borderRadius: '50%', cursor: 'pointer', padding: 0, background: 'none' }}
-            />
-          </label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
-            {(form.features || []).map((f, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 28px', gap: 6, alignItems: 'center' }}>
-                <input
-                  className="admin-foto-input"
-                  placeholder={`Título ${i + 1}`}
-                  value={f.titulo}
-                  onChange={(e) => {
-                    const arr = [...form.features];
-                    arr[i] = { ...arr[i], titulo: e.target.value };
-                    setForm({ ...form, features: arr });
-                  }}
-                />
-                <input
-                  className="admin-foto-input"
-                  placeholder="Descripción corta"
-                  value={f.desc}
-                  onChange={(e) => {
-                    const arr = [...form.features];
-                    arr[i] = { ...arr[i], desc: e.target.value };
-                    setForm({ ...form, features: arr });
-                  }}
-                />
-                <button type="button" onClick={() => setForm({ ...form, features: form.features.filter((_, j) => j !== i) })}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c00', fontSize: 16, padding: 0 }}>×</button>
-              </div>
-            ))}
-          </div>
-          <button type="button" className="admin-fila-agregar" style={{ marginBottom: 18 }}
-            onClick={() => setForm({ ...form, features: [...(form.features || []), { titulo: '', desc: '' }] })}>
-            + Agregar fila
-          </button>
-
-          {/* Especificaciones */}
-          <label style={{ marginBottom: 6 }}>Especificaciones <span style={{ color: '#999', fontSize: '12px' }}>(tabla de la ficha técnica — usa el mismo color de arriba)</span></label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
-            {(form.specs || SPECS_DEFAULT).map((s, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 28px', gap: 6, alignItems: 'center' }}>
-                <input
-                  className="admin-foto-input"
-                  placeholder={`Título ${i + 1}`}
-                  value={s.label}
-                  onChange={(e) => {
-                    const arr = [...form.specs];
-                    arr[i] = { ...arr[i], label: e.target.value };
-                    setForm({ ...form, specs: arr });
-                  }}
-                />
-                <input
-                  className="admin-foto-input"
-                  placeholder="Descripción corta"
-                  value={s.valor}
-                  onChange={(e) => {
-                    const arr = [...form.specs];
-                    arr[i] = { ...arr[i], valor: e.target.value };
-                    setForm({ ...form, specs: arr });
-                  }}
-                />
-                <button type="button" onClick={() => setForm({ ...form, specs: form.specs.filter((_, j) => j !== i) })}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c00', fontSize: 16, padding: 0 }}>×</button>
-              </div>
-            ))}
-          </div>
-          <button type="button" className="admin-fila-agregar" style={{ marginBottom: 18 }}
-            onClick={() => setForm({ ...form, specs: [...(form.specs || []), { label: '', valor: '' }] })}>
-            + Agregar fila
-          </button>
-
-          <label>{t('admin.descripcion_es')} <span style={{ color: '#999', fontSize: '12px' }}>(el inglés se traduce solo)</span>
-            <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} rows="3" />
-          </label>
-
-          {/* Color y tipografía de cada texto del producto */}
-          <label style={{ marginBottom: 6 }}>Color y tipo de letra <span style={{ color: '#999', fontSize: '12px' }}>(cómo se ve cada texto en la página del producto; la fuente se escribe, ej. IBM Plex Mono, Georgia, Roboto)</span></label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18 }}>
-            {ESTILO_ZONAS.map(([zona, nombreZona]) => {
-              const est = (form.estilos || {})[zona] || {};
-              const setEstilo = (campo, valor) => setForm({
-                ...form,
-                estilos: { ...(form.estilos || {}), [zona]: { ...est, [campo]: valor } },
-              });
-              return (
-                <div key={zona} style={{ display: 'grid', gridTemplateColumns: '150px 44px 1fr 28px', gap: 6, alignItems: 'center' }}>
-                  <span style={{ fontSize: 13 }}>{nombreZona}</span>
-                  <input
-                    type="color"
-                    value={est.color || '#111111'}
-                    onChange={(e) => setEstilo('color', e.target.value)}
-                    title={`Color de ${nombreZona}`}
-                    style={{ width: 36, height: 28, border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer', padding: 0, background: 'none' }}
-                  />
-                  <input
-                    className="admin-foto-input"
-                    placeholder="IBM Plex Mono"
-                    value={est.fuente || ''}
-                    onChange={(e) => setEstilo('fuente', e.target.value)}
-                    spellCheck={false}
-                    title={`Tipo de letra de ${nombreZona}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, estilos: { ...(form.estilos || {}), [zona]: {} } })}
-                    title="Volver al estilo por defecto"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c00', fontSize: 16, padding: 0 }}
-                  >×</button>
-                </div>
-              );
-            })}
-          </div>
-
-          <label className="admin-check">
-            <input type="checkbox" checked={form.activo} onChange={(e) => setForm({ ...form, activo: e.target.checked })} />
-            {t('admin.activo')}
-          </label>
-          <div className="admin-acciones">
-            <button type="submit">{editandoId ? t('admin.guardar') : t('admin.agregar_producto')}</button>
-            {editandoId && (
-              <button type="button" className="admin-cancelar" onClick={() => { setForm(VACIO); setEditandoId(null); }}>
-                {t('admin.cancelar')}
-              </button>
-            )}
-          </div>
-        </form>
-
-        <h2 className="admin-lista-titulo">{t('admin.lista_productos')} ({productos.length})</h2>
-        <div className="admin-lista">
-          {productos.length === 0 && (
-            <p style={{ color: '#888' }}>{t('admin.sin_productos')}</p>
-          )}
-          {productos.map((p) => (
-            <div key={p.id} className="admin-card">
-              <img src={imagen(p.imagenMochila)} alt={p.nombre} />
-              <div className="admin-card-info">
-                <strong>{p.nombre}</strong>
-                <span>{p.moneda}{p.precio}.00 · stock: {p.stock} · {p.activo !== false ? (t('productos.coleccion') === 'Collection' ? 'active' : 'activo') : (t('productos.coleccion') === 'Collection' ? 'hidden' : 'oculto')}</span>
-              </div>
-              <div className="admin-card-btns">
-                <button onClick={() => editar(p)}>{t('admin.editar')}</button>
-                <button className="del" onClick={() => borrar(p.id)}>{t('admin.eliminar')}</button>
-              </div>
-            </div>
-          ))}
-        </div>
-        </>)}
       </div>
     </>
   );

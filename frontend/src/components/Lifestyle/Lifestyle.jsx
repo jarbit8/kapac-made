@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './Lifestyle.css';
 import Editable from '../Editable';
 import EditableImage from '../EditableImage';
@@ -28,14 +28,16 @@ export default function Lifestyle() {
   const es = idioma === 'es';
   const { textos, esAdmin } = useTextos();
   const [contenido, setContenido] = useState(contenidoGuardado);
+  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
 
   useEffect(() => {
-    obtenerContenido().then(setContenido).catch(() => {});
+    obtenerContenido().then((c) => { if (!cambiado.current) setContenido(c); }).catch(() => {});
   }, []);
 
   const fotos = contenido ? contenido.homeFotos : [];
 
   const guardarFotos = async (cambiar) => {
+    cambiado.current = true;
     // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
     // para no perder lo que se haya cambiado desde otro dispositivo.
     let base;
@@ -58,7 +60,7 @@ export default function Lifestyle() {
   });
 
   const agregarFoto = () => guardarFotos((f) => [...f, `foto_${Date.now()}`]);
-  const quitarFoto = (key) => guardarFotos((f) => f.filter((x, i) => claveDe(x, i) !== key));
+  const quitarFoto = (key) => window.confirm('¿Quitar esta foto?') && guardarFotos((f) => f.filter((x, i) => claveDe(x, i) !== key));
 
   return (
     <section className="lm-section">

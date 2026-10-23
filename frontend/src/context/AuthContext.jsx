@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { observarUsuario } from '../firebase/auth';
 import { esCorreoAdmin, esDueno } from '../config/admins';
+import { useIdioma } from './LanguageContext';
 
 const AuthContext = createContext();
 const DISPOSITIVO_ADMIN_KEY = 'kapac_dispositivo_admin';
@@ -22,6 +23,13 @@ export function AuthProvider({ children }) {
   // el botón de la barra (al recargar vuelve a modo visita)
   const [modoEdicion, setModoEdicion] = useState(false);
   const puedeEditar = esAdmin && modoEdicion;
+
+  // Los textos se editan en español: al entrar en modo edición la página pasa a ES
+  // (y se queda así mientras dure la edición)
+  const { idioma, setIdioma } = useIdioma();
+  useEffect(() => {
+    if (puedeEditar && idioma !== 'es') setIdioma('es');
+  }, [puedeEditar, idioma, setIdioma]);
 
   useEffect(() => {
     const unsub = observarUsuario((user) => {

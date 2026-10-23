@@ -75,7 +75,7 @@
   overflow: hidden;
 }
 
-.footer-news-row input {
+.footer-news-row input:not(.editable-input) {
   flex: 1;
   padding: 12px 16px;
   border: none;
@@ -86,7 +86,10 @@
   font-family: inherit;
 }
 
-.footer-news-row input::placeholder { color: rgba(0, 0, 0, 0.35); }
+.footer-news-row input:not(.editable-input)::placeholder { color: rgba(0, 0, 0, 0.35); }
+@media (pointer: coarse) {
+  .footer-news-row input:not(.editable-input) { font-size: 16px !important; }
+}
 
 .footer-news-row button {
   padding: 12px 20px;
@@ -103,6 +106,21 @@
 }
 
 .footer-news-row button:hover { background: #8a3d1e; }
+
+/* Modo edición: el texto del botón se edita fuera del <button> */
+.footer-news-boton {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--clay);
+  color: #fff;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.footer-news-row:has(.editable-edit) { flex-wrap: wrap; overflow: visible; }
+.footer-news-boton:has(.editable-edit) { flex-basis: 100%; padding: 10px 0 0; background: none; white-space: normal; }
 .footer-news-row button:disabled { opacity: 0.6; cursor: default; }
 
 .footer-news-ok-mini {

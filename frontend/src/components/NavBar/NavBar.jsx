@@ -65,7 +65,8 @@ export default function NavBar() {
         <span className="navbar-langs">
           <button className={`navbar-lang ${idioma === 'es' ? 'activo' : ''}`} onClick={() => setIdioma('es')}>ES</button>
           <span className="navbar-lang-sep">/</span>
-          <button className={`navbar-lang ${idioma === 'en' ? 'activo' : ''}`} onClick={() => setIdioma('en')}>EN</button>
+          <button className={`navbar-lang ${idioma === 'en' ? 'activo' : ''}`} onClick={() => setIdioma('en')} disabled={modoEdicion && esAdmin}
+            title={modoEdicion && esAdmin ? 'Para ver el inglés sal del modo edición' : undefined}>EN</button>
         </span>
 
         {/* Admin — solo para el admin, al final. La página se ve como la ve un visitante

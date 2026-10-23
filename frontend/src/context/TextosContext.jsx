@@ -40,10 +40,12 @@ export function TextosProvider({ children }) {
     setTextos((prev) => ({ ...prev, [clave]: valor })); // refleja al instante
     try {
       await guardarTexto(clave, valor);
+      return true;
     } catch (e) {
       console.error('No se pudo guardar el texto:', clave, e);
       setTextos((prev) => ({ ...prev, [clave]: anterior })); // revertir: no se guardó de verdad
       window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+      return false;
     }
   };
 

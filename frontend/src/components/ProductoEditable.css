@@ -203,11 +203,58 @@
 .pe-foto-acciones button.quitar:hover { background: #fdf0f0; border-color: #e0a0a0; color: #c0392b; }
 .pe-foto-acciones button:disabled { opacity: 0.35; cursor: default; }
 @media (pointer: coarse) {
-  .pe-foto-acciones button { height: 34px; }
+  .pe-fotos-lista { grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); }
+  .pe-foto-acciones button { height: 44px; }
 }
 
 .pe-agregar-foto { aspect-ratio: 4 / 5; padding: 6px; font-size: 10px !important; line-height: 1.3; }
 .pe-agregar-foto.grande {
   width: 100%;
   font-size: 13px !important;
+}
+
+/* Galería de abajo: se edita donde se ve, con el mismo escalonado de la página */
+.producto-page .pe-galeria-nota {
+  margin: 0 0 22px;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.5;
+  color: #888 !important;
+}
+
+.producto-galeria-edit .pe-galeria-item:hover img { transform: none; filter: saturate(0.92); }
+.pe-galeria-item .pe-foto-acciones { margin-top: 8px; }
+.pe-galeria-item .pe-foto-acciones button { height: 34px; }
+@media (pointer: coarse) {
+  .pe-galeria-item .pe-foto-acciones button { height: 44px; }
+}
+
+.producto-page .pe-galeria-oculta {
+  display: block;
+  margin-top: 6px;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  font-size: 11px !important;
+  color: #c0392b !important;
+}
+
+.pe-galeria-agregar { width: 100%; }
+.pe-galeria-agregar.vacia {
+  grid-column: 1 / -1;
+  aspect-ratio: auto;
+  min-height: 96px;
+  font-size: 13px !important;
+}
+
+/* Botones de edición con área de toque cómoda en pantallas táctiles */
+@media (pointer: coarse) {
+  .pe-estado-btn,
+  .pe-eliminar,
+  .pe-agregar,
+  .pe-categoria { min-height: 44px; }
+  .pe-quitar {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+  }
 }

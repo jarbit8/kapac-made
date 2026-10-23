@@ -8,6 +8,7 @@ import { db } from '../firebase/config';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useIdioma } from '../context/LanguageContext';
 import Cargando from '../components/Cargando/Cargando';
+import { nombreEstado, textoPagina } from '../i18n/estadosPedido';
 import '../styles/Confirmacion.css';
 
 export default function Confirmacion() {
@@ -85,18 +86,13 @@ export default function Confirmacion() {
     day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 
-  const ESTADOS = {
-    procesando_pago: 'estado.procesando_pago', pendiente: 'estado.procesando_pago', verificando: 'estado.procesando_pago',
-    verificando_pago: 'estado.verificando_pago',
-    pendiente_envio: 'estado.pendiente_envio', pagado: 'estado.pendiente_envio',
-    enviado: 'estado.enviado', entregado: 'estado.entregado', cancelado: 'estado.cancelado',
-  };
   const METODOS = {
     yape: 'Yape', 'yape-codigo': 'Yape',
     tarjeta: es ? 'Tarjeta' : 'Card',
     efectivo: 'PagoEfectivo',
   };
   const pagado = ['pendiente_envio', 'pagado', 'enviado', 'entregado'].includes(pedido?.estado);
+  const pagina = textoPagina(pedido, idioma);
 
   if (cargando) {
     return (
@@ -136,10 +132,10 @@ export default function Confirmacion() {
 
         <div className="confirmacion-header">
           <div className={`confirmacion-icono ${pagado ? 'ok' : 'espera'}`}>
-            <Icono nombre={pagado ? 'checkCirculo' : 'reloj'} tam={44} />
+            <Icono nombre={pagado ? 'checkCirculo' : pedido.estado === 'cancelado' ? 'alerta' : 'reloj'} tam={44} />
           </div>
-          <h1>{pagado ? t('conf.confirmado') : t('conf.recibido')}</h1>
-          <p className="confirmacion-sub">{pagado ? t('conf.sub_pagado') : t('conf.sub_verificando')}</p>
+          <h1>{pagina?.titulo || t('conf.recibido')}</h1>
+          <p className="confirmacion-sub">{pagina?.texto || t('conf.sub_verificando')}</p>
         </div>
 
         <div className="confirmacion-recibo">
@@ -177,7 +173,7 @@ export default function Confirmacion() {
             </div>
             <div className="recibo-detalle">
               <span className="recibo-detalle-label">{t('pedidos.estado')}</span>
-              <span className={`recibo-estado ${pedido.estado || ''}`}>{ESTADOS[pedido.estado] ? t(ESTADOS[pedido.estado]) : (pedido.estado || '—')}</span>
+              <span className={`recibo-estado ${pedido.estado || ''}`}>{nombreEstado(pedido, idioma)}</span>
             </div>
             {pedido.envio?.tipo === 'envio' && (
               <div className="recibo-detalle">

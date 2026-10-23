@@ -1,0 +1,170 @@
+{
+  "como_usar": [
+    "Aquí cambias el nombre de cada estado del pedido, lo que dice la página y el correo que le llega al cliente.",
+    "Cambia solo el texto entre comillas que va después de los dos puntos. No borres comillas, comas ni llaves.",
+    "En los correos puedes usar: {pedido} = número del pedido, {cip} = codigo de PagoEfectivo, {vence} = hasta cuándo puede pagar ese codigo.",
+    "\"correo\": null quiere decir que en ese paso no se manda correo.",
+    "_en es el texto de la página en inglés. Los correos solo van en español.",
+    "Para ver cómo queda: doble clic en 'Ver cambios.bat' (se abre pedidos.html).",
+    "Para que salga en la página real: dile a Claude que publique la web. Para los correos: doble clic en archivo/Publicar correos.bat."
+  ],
+
+  "correo_comun": {
+    "paso_recibido": "Recibido",
+    "resumen": "Resumen del pedido",
+    "cantidad": "Cantidad",
+    "entrega": "Entrega",
+    "domicilio": "Envío a domicilio",
+    "recojo": "Recojo en Arequipa",
+    "total": "Total",
+    "boton_whatsapp": "Escríbenos por WhatsApp",
+    "mensaje_whatsapp": "Hola, tengo una consulta sobre mi pedido #{pedido}",
+    "pie": "Recibes este correo porque hiciste un pedido en kapac-made.com y pediste que te avisáramos de su estado."
+  },
+
+  "estados": {
+    "procesando_pago": {
+      "todos": {
+        "nombre": "Pago pendiente",
+        "nombre_en": "Payment pending",
+        "pagina_titulo": "Falta completar el pago",
+        "pagina_titulo_en": "Payment not completed",
+        "pagina_texto": "Todavía no recibimos el pago de este pedido.",
+        "pagina_texto_en": "We haven't received the payment for this order yet.",
+        "correo": null
+      }
+    },
+
+    "verificando_pago": {
+      "yape_qr": {
+        "nombre": "Verificando pago",
+        "nombre_en": "Verifying payment",
+        "pagina_titulo": "¡Recibimos tu pedido!",
+        "pagina_titulo_en": "We got your order!",
+        "pagina_texto": "Estamos verificando tu pago. Te avisaremos apenas se confirme.",
+        "pagina_texto_en": "We're verifying your payment. We'll let you know as soon as it's confirmed.",
+        "correo": {
+          "asunto": "Recibimos tu pedido #{pedido}",
+          "titulo": "Recibimos tu pedido",
+          "mensaje": "Estamos verificando tu pago. Te escribiremos apenas se confirme, normalmente en pocas horas."
+        }
+      },
+      "pagoefectivo": {
+        "nombre": "Esperando pago",
+        "nombre_en": "Awaiting payment",
+        "pagina_titulo": "¡Recibimos tu pedido!",
+        "pagina_titulo_en": "We got your order!",
+        "pagina_texto": "Paga tu código CIP en tu banca móvil, por internet o en un agente. Apenas pagues, tu pedido se confirma solo.",
+        "pagina_texto_en": "Pay your CIP code in your banking app, online or at an agent. Once you pay, your order is confirmed automatically.",
+        "correo": {
+          "asunto": "Tu código de pago del pedido #{pedido}",
+          "titulo": "Falta tu pago",
+          "mensaje": "Tienes hasta el {vence} para pagar el código CIP {cip} en tu banca móvil, por internet o en un agente. Apenas pagues, tu pedido se confirma solo y te avisamos por aquí."
+        }
+      }
+    },
+
+    "pendiente_envio": {
+      "domicilio": {
+        "nombre": "Pagado",
+        "nombre_en": "Paid",
+        "pagina_titulo": "¡Pago confirmado!",
+        "pagina_titulo_en": "Payment confirmed!",
+        "pagina_texto": "Gracias por tu compra. Ya estamos preparando tu pedido.",
+        "pagina_texto_en": "Thank you for your purchase. We're already preparing your order.",
+        "correo": {
+          "asunto": "Pago confirmado · Pedido #{pedido}",
+          "titulo": "Gracias por tu compra",
+          "mensaje": "Tu pago está confirmado y ya estamos preparando tu pedido. Te avisaremos cuando salga hacia tu dirección."
+        }
+      },
+      "recojo": {
+        "nombre": "Pagado",
+        "nombre_en": "Paid",
+        "pagina_titulo": "¡Pago confirmado!",
+        "pagina_titulo_en": "Payment confirmed!",
+        "pagina_texto": "Gracias por tu compra. Ya estamos preparando tu pedido.",
+        "pagina_texto_en": "Thank you for your purchase. We're already preparing your order.",
+        "correo": {
+          "asunto": "Pago confirmado · Pedido #{pedido}",
+          "titulo": "Gracias por tu compra",
+          "mensaje": "Tu pago está confirmado y ya estamos preparando tu pedido. Te avisaremos cuando esté listo para recoger en Arequipa."
+        }
+      }
+    },
+
+    "enviado": {
+      "domicilio": {
+        "nombre": "Enviando",
+        "nombre_en": "On its way",
+        "pagina_titulo": "Tu pedido está en camino",
+        "pagina_titulo_en": "Your order is on its way",
+        "pagina_texto": "Tu mochila ya salió hacia tu dirección.",
+        "pagina_texto_en": "Your backpack is on its way to your address.",
+        "correo": {
+          "asunto": "Tu pedido #{pedido} está en camino",
+          "titulo": "Tu pedido está en camino",
+          "mensaje": "Tu mochila ya salió hacia tu dirección. Si necesitas algo, escríbenos por WhatsApp."
+        }
+      },
+      "recojo": {
+        "nombre": "Listo para recoger",
+        "nombre_en": "Ready for pickup",
+        "pagina_titulo": "Tu pedido está listo",
+        "pagina_titulo_en": "Your order is ready",
+        "pagina_texto": "Ya puedes recogerlo en Arequipa. Escríbenos por WhatsApp para coordinar el día y la hora.",
+        "pagina_texto_en": "You can pick it up in Arequipa. Message us on WhatsApp to arrange the day and time.",
+        "correo": {
+          "asunto": "Tu pedido #{pedido} está listo para recoger",
+          "titulo": "Tu pedido está listo",
+          "mensaje": "Ya puedes recogerlo en Arequipa. Escríbenos por WhatsApp para coordinar el día y la hora."
+        }
+      }
+    },
+
+    "entregado": {
+      "domicilio": {
+        "nombre": "Entregado",
+        "nombre_en": "Delivered",
+        "pagina_titulo": "Pedido entregado",
+        "pagina_titulo_en": "Order delivered",
+        "pagina_texto": "Gracias por elegir Kapac Made.",
+        "pagina_texto_en": "Thank you for choosing Kapac Made.",
+        "correo": {
+          "asunto": "Pedido #{pedido} entregado",
+          "titulo": "Que la disfrutes",
+          "mensaje": "Tu pedido fue entregado. Gracias por elegir Kapac Made: cada mochila está hecha a mano en Arequipa para acompañarte en cada ruta."
+        }
+      },
+      "recojo": {
+        "nombre": "Entregado",
+        "nombre_en": "Delivered",
+        "pagina_titulo": "Pedido entregado",
+        "pagina_titulo_en": "Order delivered",
+        "pagina_texto": "Gracias por elegir Kapac Made.",
+        "pagina_texto_en": "Thank you for choosing Kapac Made.",
+        "correo": {
+          "asunto": "Pedido #{pedido} entregado",
+          "titulo": "Que la disfrutes",
+          "mensaje": "Tu pedido fue entregado. Gracias por elegir Kapac Made: cada mochila está hecha a mano en Arequipa para acompañarte en cada ruta."
+        }
+      }
+    },
+
+    "cancelado": {
+      "todos": {
+        "nombre": "Cancelado",
+        "nombre_en": "Cancelled",
+        "pagina_titulo": "Pedido cancelado",
+        "pagina_titulo_en": "Order cancelled",
+        "pagina_texto": "Si crees que es un error, escríbenos por WhatsApp.",
+        "pagina_texto_en": "If you think this is a mistake, message us on WhatsApp.",
+        "correo": {
+          "asunto": "Pedido #{pedido} cancelado",
+          "titulo": "Tu pedido fue cancelado",
+          "mensaje": "Si tienes dudas o crees que se trata de un error, escríbenos por WhatsApp y lo revisamos."
+        }
+      }
+    }
+  }
+}

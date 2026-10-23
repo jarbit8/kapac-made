@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
@@ -24,14 +24,16 @@ export default function B2B() {
   const { textos, esAdmin } = useTextos();
 
   const [contenido, setContenido] = useState(contenidoGuardado);
+  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
   useEffect(() => {
-    obtenerContenido().then(setContenido).catch(() => {});
+    obtenerContenido().then((c) => { if (!cambiado.current) setContenido(c); }).catch(() => {});
   }, []);
 
   const beneficios = contenido ? contenido.b2bBeneficios : [];
   const vacio = (id, def) => !(textos[`${id}__${idioma}`] ?? def).trim();
 
   const guardarBeneficios = async (cambiar) => {
+    cambiado.current = true;
     // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
     // para no perder lo que se haya cambiado desde otro dispositivo.
     let base;
@@ -47,7 +49,7 @@ export default function B2B() {
   };
 
   const agregarBeneficio = () => guardarBeneficios((b) => [...b, `beneficio_${Date.now()}`]);
-  const quitarBeneficio = (key) => guardarBeneficios((b) => b.filter((k) => k !== key));
+  const quitarBeneficio = (key) => window.confirm('¿Quitar este beneficio?') && guardarBeneficios((b) => b.filter((k) => k !== key));
 
   return (
     <>

@@ -61,8 +61,8 @@ async function permitirIP(req, segundos, prefijo = '') {
 
 // ─── Correos para el cliente (Resend) ─────────────────────────────────────────
 // Las plantillas están en correos.js
-async function enviarCorreo({ to, pedidoId, estado, total, items, envio }) {
-  const correo = correoPedido({ pedidoId, estado, total, items, envio });
+async function enviarCorreo({ to, ...pedido }) {
+  const correo = correoPedido(pedido);
   if (!correo) return;
   try {
     const resend = new Resend(resendSecret.value());
@@ -170,6 +170,9 @@ exports.notificarCambioEstado = onDocumentUpdated(
         total,
         items,
         envio: despues.envio,
+        metodoPago: despues.metodoPago,
+        codigoPago: despues.codigoPago,
+        codigoPagoVence: despues.codigoPagoVence,
       });
       await event.data.after.ref.update({ ultimoAviso: nuevoEstado });
     }

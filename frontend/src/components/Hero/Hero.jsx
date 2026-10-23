@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../../styles/Hero.css';
 import { obtenerContenido, contenidoGuardado, normalizarMedio, cambiarContenido } from '../../firebase/contenido';
 import { fotoRapida } from '../../utils/fotos';
@@ -8,6 +8,7 @@ export default function Hero() {
   const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
   const [videoCfg, setVideoCfg] = useState(() => contenidoGuardado()?.heroVideo ?? null);
   const [fallo, setFallo] = useState(false);
+  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
 
   useEffect(() => {
     const handleResize = () => setEsMobile(window.innerWidth < 768);
@@ -17,13 +18,14 @@ export default function Hero() {
 
   useEffect(() => {
     obtenerContenido().then((c) => {
-      setVideoCfg(c.heroVideo || null);
+      if (!cambiado.current) setVideoCfg(c.heroVideo || null);
     }).catch(() => {});
   }, []);
 
   const medio = videoCfg ? normalizarMedio(esMobile ? videoCfg.mobile : videoCfg.pc) : null;
 
   const cambiarFondo = (slot) => async (nuevo) => {
+    cambiado.current = true;
     const c = await cambiarContenido((b) => ({ heroVideo: { ...(b.heroVideo || {}), [slot]: nuevo } }));
     setVideoCfg(c.heroVideo);
     setFallo(false);

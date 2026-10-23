@@ -26,140 +26,6 @@
   font-size: 14px;
 }
 
-.admin-form {
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 24px;
-  margin-bottom: 40px;
-}
-
-.admin-form h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 18px;
-}
-
-.admin-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.admin-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  font-size: 13px;
-  color: #555;
-}
-
-.admin-form input,
-.admin-form select,
-.admin-form textarea {
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-}
-
-.admin-form input:focus,
-.admin-form select:focus,
-.admin-form textarea:focus {
-  border-color: #111;
-}
-
-.admin-check {
-  flex-direction: row !important;
-  align-items: center;
-  margin: 14px 0;
-}
-
-.admin-check input { width: auto; }
-
-.admin-acciones {
-  display: flex;
-  gap: 12px;
-}
-
-.admin-acciones button {
-  padding: 11px 26px;
-  background: #111;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.admin-cancelar {
-  background: #fff !important;
-  color: #111 !important;
-  border: 1px solid #ccc !important;
-}
-
-.admin-lista-titulo {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.admin-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.admin-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 14px 18px;
-}
-
-.admin-card img {
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-}
-
-.admin-card-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.admin-card-info strong { font-size: 15px; color: #111; }
-.admin-card-info span { font-size: 13px; color: #888; }
-
-.admin-card-btns {
-  display: flex;
-  gap: 8px;
-}
-
-.admin-card-btns button {
-  padding: 8px 16px;
-  border: none;
-  background: #111;
-  color: #fff;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 600;
-}
-
-.admin-card-btns .del {
-  background: crimson;
-  color: #fff;
-}
-
 /* ====== Pestañas ====== */
 .admin-pestanas {
   display: flex;
@@ -403,8 +269,6 @@
 
 @media (max-width: 768px) {
   .admin-page { padding: 30px 20px; }
-  .admin-grid { grid-template-columns: 1fr; }
-  .admin-card { flex-wrap: wrap; }
   .admin-pedido-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
 }
 
@@ -625,44 +489,6 @@
   padding: 14px 18px;
 }
 
-.admin-form h2,
-.admin-lista-titulo {
-  font-family: var(--font-display) !important;
-  font-size: 24px !important;
-  font-weight: 500 !important;
-  letter-spacing: -0.01em;
-  margin-bottom: 22px;
-}
-
-.admin-form label {
-  font-size: 13px !important;
-  color: var(--ink-soft);
-  gap: 6px;
-}
-
-.admin-form input,
-.admin-form select,
-.admin-form textarea {
-  padding: 12px 14px !important;
-  font-size: 14.5px !important;
-}
-
-.admin-check { font-size: 14px !important; }
-
-.admin-acciones button {
-  padding: 13px 30px !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-}
-
-.admin-card-info strong { font-size: 16px !important; }
-.admin-card-info span { font-size: 13.5px !important; }
-
-.admin-card-btns button {
-  padding: 10px 18px !important;
-  font-size: 13px !important;
-}
-
 .admin-pestanas button {
   font-size: 14px !important;
   padding: 12px 24px !important;
@@ -754,67 +580,14 @@
   border: none;
 }
 
-/* ── Subida de fotos (control reutilizable) ── */
-.subir-foto { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
-.subir-foto-prev {
-  width: 100%; max-width: 220px; aspect-ratio: 4/5; object-fit: cover;
-  border-radius: 8px; border: 1px solid #e2e2e2; background: #f3f3f3; display: block;
-}
-.subir-foto-vacio {
-  width: 100%; max-width: 220px; aspect-ratio: 4/5; border-radius: 8px;
-  border: 1px dashed #ccc; background: #fafafa; color: #999;
-  display: flex; align-items: center; justify-content: center; font-size: 13px;
-}
-.subir-foto-btn {
-  display: inline-block; cursor: pointer; background: var(--clay); color: #fff !important;
-  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
-  transition: background 0.15s;
-}
-.subir-foto-btn:hover { background: #8a3d1e; }
-.subir-foto-err { color: #c0392b; font-size: 12px; }
-
-/* ── Pestaña Fotos ── */
-.admin-fotos-intro { color: #666; font-size: 14px; margin-bottom: 18px; }
-.admin-fotos-titulo {
-  font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-  color: #111; margin: 28px 0 14px; border-bottom: 1px solid #eee; padding-bottom: 8px;
-}
-.admin-fotos-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px; align-items: start;
-}
-.admin-foto-card {
-  display: flex; flex-direction: column; gap: 8px;
-  background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 14px;
-}
-.admin-foto-input {
-  width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px;
-  font-size: 13px; font-family: inherit; resize: vertical;
-}
-.admin-foto-quitar {
-  background: none; border: 1px solid #e0a0a0; color: #c0392b; border-radius: 6px;
-  padding: 6px 12px; font-size: 12px; cursor: pointer; align-self: flex-start;
-}
-.admin-foto-quitar:hover { background: #fdf0f0; }
-.admin-foto-agregar {
-  border: 1px dashed #bbb; background: #fafafa; color: #555; border-radius: 10px;
-  font-size: 14px; cursor: pointer; min-height: 120px; padding: 14px;
-}
-.admin-foto-agregar:hover { background: #f0f0f0; color: #111; }
+/* ── Botón de agregar (Ver más) ── */
 .admin-fila-agregar {
   border: 1px dashed #bbb; background: #fafafa; color: #555; border-radius: 6px;
   font-size: 13px; line-height: 1.3; cursor: pointer; padding: 8px 16px; display: inline-block;
 }
 .admin-fila-agregar:hover { background: #f0f0f0; color: #111; }
-.admin-fotos-guardar { margin-top: 26px; display: flex; align-items: center; gap: 16px; }
-.admin-fotos-guardar button {
-  background: var(--clay); color: #fff; border: none; border-radius: 8px;
-  padding: 12px 28px; font-size: 14px; font-weight: 700; cursor: pointer;
-}
-.admin-fotos-guardar button:disabled { opacity: 0.6; cursor: default; }
-.admin-fotos-msg { font-size: 14px; color: #155724; font-weight: 600; }
 
-/* ── Pestañas: en dos filas en móvil (evita que "Fotos" se corte) ── */
+/* ── Pestañas: en dos filas en móvil ── */
 @media (max-width: 768px) {
   .admin-pestanas {
     flex-wrap: wrap;
@@ -913,4 +686,11 @@
 
 @media (max-width: 600px) {
   .admin-reclamo-fila { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* Resumen de pedidos en celular: las tres tarjetas caben en el ancho */
+@media (max-width: 768px) {
+  .admin-pedidos-resumen { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .admin-resumen-card { padding: 14px 10px; }
+  .admin-resumen-label { font-size: 11px !important; letter-spacing: 0; overflow-wrap: anywhere; }
 }

@@ -13,7 +13,7 @@ import { useTraducido } from '../i18n/useTraducido';
 import { traducirEsEn } from '../i18n/traducir';
 import TextoProducto from '../components/TextoProducto';
 import Cargando from '../components/Cargando/Cargando';
-import { CampoProducto, EstadoProducto, FotosProducto } from '../components/ProductoEditable';
+import { CampoProducto, EstadoProducto, FotosProducto, GaleriaProducto, MAX_GALERIA } from '../components/ProductoEditable';
 import { asegurarFuente, cssFuente } from '../utils/fuentes';
 import '../styles/Producto.css';
 
@@ -138,6 +138,8 @@ export default function Producto() {
     imagenMochila: fotos[0] || '',
     ...(producto.imagenContexto ? { imagenContexto: '' } : {}),
   });
+
+  const cambiarGaleria = (galeria) => guardarCampos({ galeria });
 
   const alternarActivo = () => {
     const activo = producto.activo === false;
@@ -381,7 +383,9 @@ export default function Producto() {
 
         {/* Galería propia del producto — filas escalonadas (sin título) */}
         {producto && (() => {
-          const fotos = (producto.galeria || []).filter(Boolean).map(imagen).slice(0, 6);
+          const galeria = (Array.isArray(producto.galeria) ? producto.galeria : []).filter(Boolean);
+          if (esAdmin) return <GaleriaProducto fotos={galeria} nombre={nombreProducto(producto, idioma)} onCambiar={cambiarGaleria} />;
+          const fotos = galeria.map(imagen).slice(0, MAX_GALERIA);
           if (!fotos.length) return null;
           return (
             <section className="producto-galeria-edit">

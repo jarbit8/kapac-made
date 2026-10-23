@@ -10,17 +10,25 @@ import TextoProducto from '../components/TextoProducto';
 import Cargando from '../components/Cargando/Cargando';
 import '../styles/Catalogo.css';
 
-// Borrador vacío que se crea al agregar un producto en modo edición
+// Borrador que se crea al agregar un producto en modo edición, con textos base para reemplazar
 const PRODUCTO_NUEVO = {
   nombre: '', nombreEn: '',
   precio: 0, precioOriginal: null, moneda: 'S/',
   imagenMochila: '', imagenContexto: '',
   fotos: [],
-  descripcion: '', descripcionEn: '',
+  descripcion: 'Escribe aquí la descripción de la mochila.', descripcionEn: '',
   stock: 0, activo: false, categoria: 'Climbing',
   galeria: [],
-  features: [],
-  specs: [],
+  features: [
+    { titulo: 'Característica 1', desc: 'Describe la característica 1' },
+    { titulo: 'Característica 2', desc: 'Describe la característica 2' },
+    { titulo: 'Característica 3', desc: 'Describe la característica 3' },
+  ],
+  specs: [
+    { label: 'Especificación 1', valor: 'Detalle 1' },
+    { label: 'Especificación 2', valor: 'Detalle 2' },
+    { label: 'Especificación 3', valor: 'Detalle 3' },
+  ],
   estilos: {},
 };
 

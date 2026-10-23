@@ -38,8 +38,10 @@ export default function Editable({ id, children, as = 'span', className = '', mu
   const [colorDraft, setColorDraft] = useState('');
   const [fuenteDraft, setFuenteDraft] = useState('');
   const [guardando, setGuardando] = useState(false);
+  const [comoArea, setComoArea] = useState(false); // textos largos se editan en un cuadro que crece
   const Tag = as;
   const elRef = useRef(null);
+  const areaRef = useRef(null);
 
   // Muchas reglas CSS del sitio usan "!important" — un style prop normal no les gana.
   // Lo aplicamos por JS con prioridad "important" real para que el color y la fuente sí se vean.
@@ -64,6 +66,14 @@ export default function Editable({ id, children, as = 'span', className = '', mu
     return () => document.removeEventListener('pointerdown', fuera);
   }, [marcado]);
 
+  // El cuadro de texto crece con lo que se escribe, así se ve todo sin desplazarse dentro
+  useEffect(() => {
+    const a = areaRef.current;
+    if (!a) return;
+    a.style.height = 'auto';
+    a.style.height = `${a.scrollHeight + 2}px`;
+  }, [draft, editando]);
+
   const vacio = placeholder && !valor.trim();
 
   if (!esAdmin) {
@@ -74,12 +84,10 @@ export default function Editable({ id, children, as = 'span', className = '', mu
   const abrir = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // La edición siempre se hace en español: al guardar se traduce y actualiza el inglés.
-    if (idioma !== 'es') {
-      window.alert('Para editar textos cambia el idioma a ES. Lo que escribas se guarda en español y la versión en inglés se actualiza sola al guardar.');
-      return;
-    }
+    // La edición siempre se hace en español (el modo edición lo fuerza): al guardar se traduce el inglés.
+    if (idioma !== 'es') return;
     setDraft(valor);
+    setComoArea(multiline || valor.length > 36 || valor.includes('\n'));
     setColorDraft(colorPropio);
     setFuenteDraft(nombreFuente(fuentePropia));
     setMarcado(false);
@@ -95,10 +103,13 @@ export default function Editable({ id, children, as = 'span', className = '', mu
     setMarcado(true);
   };
 
-  const salvar = async (e) => {
-    e.stopPropagation();
+  const salvar = async () => {
     setGuardando(true);
-    await guardar(clave, draft);
+    // Si no se guardó (sin conexión o sesión vencida) el editor sigue abierto con lo escrito
+    if (!(await guardar(clave, draft))) {
+      setGuardando(false);
+      return;
+    }
     // Se edita en español y el inglés se regenera siempre al guardar,
     // para que no quede una traducción vieja del texto anterior.
     const traducido = draft.trim() ? await traducirEsEn(draft) : '';
@@ -114,12 +125,24 @@ export default function Editable({ id, children, as = 'span', className = '', mu
     setEditando(false);
   };
 
+  const cancelar = () => setEditando(false);
+
+  const teclas = (e) => {
+    if (e.key === 'Escape') cancelar();
+    else if (e.key === 'Enter' && !multiline && !guardando) { e.preventDefault(); salvar(); }
+  };
+
   if (editando) {
+    // Si el editor queda dentro de un enlace, tocarlo no debe abrir el enlace (el selector de color sí necesita su clic)
+    const alClicEditor = (e) => {
+      e.stopPropagation();
+      if (!e.target.closest('input[type="color"], label')) e.preventDefault();
+    };
     return (
-      <span className="editable-edit" onClick={(e) => e.stopPropagation()}>
-        {multiline
-          ? <textarea className="editable-area" value={draft} onChange={(e) => setDraft(e.target.value)} rows={4} autoFocus />
-          : <input className="editable-input" value={draft} onChange={(e) => setDraft(e.target.value)} autoFocus />}
+      <span className="editable-edit" onClick={alClicEditor}>
+        {comoArea
+          ? <textarea ref={areaRef} className="editable-area" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={teclas} rows={multiline ? 3 : 2} autoFocus />
+          : <input className="editable-input" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={teclas} autoFocus />}
         {estilo && (
           <span className="editable-estilo">
             <label className="editable-campo">
@@ -139,7 +162,7 @@ export default function Editable({ id, children, as = 'span', className = '', mu
         )}
         <span className="editable-acciones">
           <button type="button" onClick={salvar} disabled={guardando} className="editable-ok">{guardando ? '…' : 'Guardar'}</button>
-          <button type="button" onClick={(e) => { e.stopPropagation(); setEditando(false); }} className="editable-cancel">Cancelar</button>
+          <button type="button" onClick={cancelar} className="editable-cancel">Cancelar</button>
         </span>
       </span>
     );

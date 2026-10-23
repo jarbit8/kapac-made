@@ -11,47 +11,27 @@ const TINTA = '#111111';
 const GRIS = '#6b6760';
 const LINEA = '#e7e3dc';
 
-const ESTADOS = {
-  verificando_pago: {
-    paso: 1, color: '#9a6700',
-    etiqueta: () => 'Pago en verificación',
-    asunto: (id) => `Recibimos tu pedido #${id}`,
-    titulo: () => 'Recibimos tu pedido',
-    mensaje: () => 'Estamos verificando tu pago. Te escribiremos apenas se confirme, normalmente en pocas horas.',
-  },
-  pendiente_envio: {
-    paso: 2, color: '#1a7d3b',
-    etiqueta: () => 'Pago confirmado',
-    asunto: (id) => `Pago confirmado · Pedido #${id}`,
-    titulo: () => 'Gracias por tu compra',
-    mensaje: (recojo) => (recojo
-      ? 'Tu pago está confirmado y ya estamos preparando tu pedido. Te avisaremos cuando esté listo para recoger en Arequipa.'
-      : 'Tu pago está confirmado y ya estamos preparando tu pedido. Te avisaremos cuando salga hacia tu dirección.'),
-  },
-  enviado: {
-    paso: 3, color: '#1f5fbf',
-    etiqueta: (recojo) => (recojo ? 'Listo para recoger' : 'En camino'),
-    asunto: (id, recojo) => (recojo ? `Tu pedido #${id} está listo para recoger` : `Tu pedido #${id} está en camino`),
-    titulo: (recojo) => (recojo ? 'Tu pedido está listo' : 'Tu pedido está en camino'),
-    mensaje: (recojo) => (recojo
-      ? 'Ya puedes recogerlo en Arequipa. Escríbenos por WhatsApp para coordinar el día y la hora.'
-      : 'Tu mochila ya salió hacia tu dirección. Si necesitas algo, escríbenos por WhatsApp.'),
-  },
-  entregado: {
-    paso: 4, color: '#1a7d3b',
-    etiqueta: () => 'Entregado',
-    asunto: (id) => `Pedido #${id} entregado`,
-    titulo: () => 'Que la disfrutes',
-    mensaje: () => 'Tu pedido fue entregado. Gracias por elegir Kapac Made: cada mochila está hecha a mano en Arequipa para acompañarte en cada ruta.',
-  },
-  cancelado: {
-    paso: 0, color: '#b42318',
-    etiqueta: () => 'Cancelado',
-    asunto: (id) => `Pedido #${id} cancelado`,
-    titulo: () => 'Tu pedido fue cancelado',
-    mensaje: () => 'Si tienes dudas o crees que se trata de un error, escríbenos por WhatsApp y lo revisamos.',
-  },
+// Los nombres de los estados y lo que dice cada correo están en textos-pedidos.json
+// (se copia de descripcion/ al publicar)
+const TEXTOS = require('./textos-pedidos.json');
+const COMUN = TEXTOS.correo_comun;
+
+const ESTILO = {
+  verificando_pago: { paso: 1, color: '#9a6700' },
+  pendiente_envio: { paso: 2, color: '#1a7d3b' },
+  enviado: { paso: 3, color: '#1f5fbf' },
+  entregado: { paso: 4, color: '#1a7d3b' },
+  cancelado: { paso: 0, color: '#b42318' },
 };
+
+// El texto de un estado depende del método (Yape QR o PagoEfectivo) o de la entrega
+function textosEstado(estado, { metodoPago, recojo }) {
+  const casos = TEXTOS.estados[estado];
+  if (!casos) return null;
+  return casos[metodoPago === 'efectivo' ? 'pagoefectivo' : 'yape_qr'] || casos[recojo ? 'recojo' : 'domicilio'] || casos.todos;
+}
+
+const rellenar = (texto, datos) => String(texto || '').replace(/\{(\w+)\}/g, (todo, k) => (datos[k] !== undefined ? datos[k] : todo));
 
 const html = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const soles = (n) => `S/ ${Number(n || 0).toFixed(2)}`;
@@ -96,14 +76,14 @@ function marco({ previa, contenido, foto = true }) {
 </html>`;
 }
 
-// Barra de avance del pedido: Recibido → Pago confirmado → En camino → Entregado
+// Barra de avance del pedido: Recibido → Pagado → Enviando (o Listo para recoger) → Entregado
 function avance(paso, recojo) {
-  const pasos = ['Recibido', 'Pago confirmado', recojo ? 'Listo para recoger' : 'En camino', 'Entregado'];
+  const pasos = [COMUN.paso_recibido, ...['pendiente_envio', 'enviado', 'entregado'].map((e) => textosEstado(e, { recojo }).nombre)];
   const celdas = pasos.map((nombre, i) => {
     const hecho = i < paso;
     return `<td width="25%" valign="top" style="padding:0 3px;">
       <div style="height:4px;line-height:4px;font-size:0;background:${hecho ? TINTA : LINEA};">&nbsp;</div>
-      <p style="margin:8px 0 0;font-size:11px;line-height:1.35;color:${hecho ? TINTA : '#a29d94'};font-weight:${i === paso - 1 ? 700 : 400};">${nombre}</p>
+      <p style="margin:8px 0 0;font-size:11px;line-height:1.35;color:${hecho ? TINTA : '#a29d94'};font-weight:${i === paso - 1 ? 700 : 400};">${html(nombre)}</p>
     </td>`;
   }).join('');
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 32px;"><tr>${celdas}</tr></table>`;
@@ -118,52 +98,57 @@ function boton(texto, enlace) {
 }
 
 // Correo de cada cambio de estado del pedido. null si ese estado no lleva correo.
-function correoPedido({ pedidoId, estado, total, items, envio }) {
-  const e = ESTADOS[estado];
-  if (!e) return null;
-  const id = String(pedidoId).slice(0, 8).toUpperCase();
+function correoPedido({ pedidoId, estado, total, items, envio, metodoPago, codigoPago, codigoPagoVence }) {
   const recojo = envio?.tipo !== 'envio';
-  const mensaje = e.mensaje(recojo);
+  const e = textosEstado(estado, { metodoPago, recojo });
+  if (!e?.correo || !ESTILO[estado]) return null;
+  const { paso, color } = ESTILO[estado];
+  const id = String(pedidoId).slice(0, 8).toUpperCase();
+  const vence = codigoPagoVence
+    ? new Date(codigoPagoVence * 1000).toLocaleString('es-PE', { timeZone: 'America/Lima', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' })
+    : '';
+  const datos = { pedido: id, cip: codigoPago || '', vence };
+  const mensaje = rellenar(e.correo.mensaje, datos);
 
   const filas = (items || []).map((it) => `
     <tr>
       <td style="padding:14px 0;border-bottom:1px solid ${LINEA};font-size:14px;color:${TINTA};">
-        ${html(it.nombre)}<br><span style="font-size:12px;color:${GRIS};">Cantidad: ${Number(it.cantidad) || 1}</span>
+        ${html(it.nombre)}<br><span style="font-size:12px;color:${GRIS};">${html(COMUN.cantidad)}: ${Number(it.cantidad) || 1}</span>
       </td>
       <td align="right" valign="top" style="padding:14px 0;border-bottom:1px solid ${LINEA};font-size:14px;color:${TINTA};white-space:nowrap;">${soles(it.precio * it.cantidad)}</td>
     </tr>`).join('');
 
   const entrega = recojo
-    ? 'Recojo en Arequipa'
-    : `Envío a domicilio<br><span style="color:${GRIS};">${html(envio?.direccion)}${envio?.distrito ? `, ${html(envio.distrito)}` : ''}</span>`;
+    ? html(COMUN.recojo)
+    : `${html(COMUN.domicilio)}<br><span style="color:${GRIS};">${html(envio?.direccion)}${envio?.distrito ? `, ${html(envio.distrito)}` : ''}</span>`;
 
-  const wa = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Hola, tengo una consulta sobre mi pedido #${id}`)}`;
+  const wa = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(rellenar(COMUN.mensaje_whatsapp, datos))}`;
 
   const contenido = `
-    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:${e.color};">${e.etiqueta(recojo)}</p>
-    <h1 style="margin:0 0 14px;font-size:28px;line-height:1.2;font-weight:700;color:${TINTA};">${e.titulo(recojo)}</h1>
-    <p style="margin:0 0 30px;font-size:15px;line-height:1.65;color:#45423d;">${mensaje}</p>
-    ${e.paso ? avance(e.paso, recojo) : ''}
+    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:${color};">${html(e.nombre)}</p>
+    <h1 style="margin:0 0 14px;font-size:28px;line-height:1.2;font-weight:700;color:${TINTA};">${html(rellenar(e.correo.titulo, datos))}</h1>
+    <p style="margin:0 0 30px;font-size:15px;line-height:1.65;color:#45423d;">${html(mensaje)}</p>
+    ${paso ? avance(paso, recojo) : ''}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:2px solid ${TINTA};">
       <tr>
-        <td style="padding:14px 0;border-bottom:1px solid ${LINEA};font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GRIS};">Resumen del pedido</td>
+        <td style="padding:14px 0;border-bottom:1px solid ${LINEA};font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${GRIS};">${html(COMUN.resumen)}</td>
         <td align="right" style="padding:14px 0;border-bottom:1px solid ${LINEA};font-size:14px;font-weight:700;letter-spacing:1px;color:${TINTA};">#${id}</td>
       </tr>
       ${filas}
       <tr>
-        <td valign="top" style="padding:14px 0;border-bottom:1px solid ${LINEA};font-size:13px;color:${GRIS};">Entrega</td>
+        <td valign="top" style="padding:14px 0;border-bottom:1px solid ${LINEA};font-size:13px;color:${GRIS};">${html(COMUN.entrega)}</td>
         <td align="right" style="padding:14px 0;border-bottom:1px solid ${LINEA};font-size:13px;line-height:1.5;color:${TINTA};">${entrega}</td>
       </tr>
       <tr>
-        <td style="padding:18px 0 0;font-size:15px;font-weight:700;color:${TINTA};">Total</td>
+        <td style="padding:18px 0 0;font-size:15px;font-weight:700;color:${TINTA};">${html(COMUN.total)}</td>
         <td align="right" style="padding:18px 0 0;font-size:20px;font-weight:700;color:${TINTA};white-space:nowrap;">${soles(total)}</td>
       </tr>
     </table>
     <div style="height:36px;line-height:36px;font-size:0;">&nbsp;</div>
-    ${boton('Escríbenos por WhatsApp', wa)}
-    <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid ${LINEA};font-size:11px;line-height:1.6;color:#9a958c;">Recibes este correo porque hiciste un pedido en kapac-made.com y pediste que te avisáramos de su estado.</p>`;
+    ${boton(html(COMUN.boton_whatsapp), wa)}
+    <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid ${LINEA};font-size:11px;line-height:1.6;color:#9a958c;">${html(COMUN.pie)}</p>`;
 
-  return { asunto: e.asunto(id, recojo), html: marco({ previa: mensaje, contenido }) };
+  return { asunto: rellenar(e.correo.asunto, datos), html: marco({ previa: mensaje, contenido }) };
 }
 
 // Código de 6 dígitos para confirmar la suscripción al boletín

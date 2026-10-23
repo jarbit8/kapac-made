@@ -237,6 +237,7 @@ export function nombreRuta(ruta) {
     'alma':         'Kapac Made (historia)',
     'contacto':     'Contacto',
     'legal':        'Información legal',
+    'libro-reclamaciones': 'Libro de Reclamaciones',
     'producto':     'Detalle de producto',
     'carrito':      'Carrito',
     'checkout':     'Datos de envío',

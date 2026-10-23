@@ -95,8 +95,28 @@ export default function Header({ transparente = false }) {
   // El logo se cambia acá mismo (antes vivía en la pestaña Fotos del admin).
   const [subiendoLogo, setSubiendoLogo] = useState(false);
   const logoInputRef = useRef(null);
+  const logoRef = useRef(null);
+  const [logoMarcado, setLogoMarcado] = useState(false); // toque en pantallas sin hover
+
+  // El botón marcado con un toque se oculta al tocar en otra parte
+  useEffect(() => {
+    if (!logoMarcado) return;
+    const fuera = (e) => { if (!logoRef.current?.contains(e.target)) setLogoMarcado(false); };
+    document.addEventListener('pointerdown', fuera);
+    return () => document.removeEventListener('pointerdown', fuera);
+  }, [logoMarcado]);
+
+  // Sin hover, el primer toque al logo muestra "Cambiar logo"; el segundo vuelve al inicio
+  const alTocarLogo = (e) => {
+    if (!esAdmin || logoMarcado || e.target.closest('.editable-img-btn')) return;
+    if (!window.matchMedia('(hover: none)').matches) return;
+    e.preventDefault();
+    setLogoMarcado(true);
+  };
+
   const cambiarLogo = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
     setSubiendoLogo(true);
     try {
@@ -140,7 +160,8 @@ export default function Header({ transparente = false }) {
               {cambiandoTienda ? 'Guardando…' : (cerrado ? 'Tienda cerrada' : 'Tienda abierta')}
             </button>
           )}
-          <Link to="/" className={`logo${esAdmin ? ' editable-img-wrap' : ''}`}>
+          <Link ref={logoRef} to="/" onClick={alTocarLogo}
+            className={`logo${esAdmin ? ' editable-img-wrap editable-toque' : ''}${logoMarcado ? ' editable-marcado' : ''}`}>
             {/* key: al pasar a admin se crea otra imagen, así vuelve a marcarse como cargada */}
             <img key={esAdmin ? 'admin' : 'visita'} src={logoSrc} alt="Kapac Made" className={`logo-simbolo${esAdmin ? ' editable-img' : ''}`}
               style={logoListo ? undefined : { opacity: 0 }} />

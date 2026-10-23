@@ -54,3 +54,9 @@ html.con-barra-edicion .zone { top: var(--barra-edicion); }
 @media (max-width: 560px) {
   .barra-edicion-extra { display: none; }
 }
+
+/* Pantallas táctiles: más área de toque para Salir sin agrandar la barra */
+@media (pointer: coarse) {
+  .barra-edicion-salir { position: relative; }
+  .barra-edicion-salir::after { content: ''; position: absolute; inset: -6px -8px; }
+}

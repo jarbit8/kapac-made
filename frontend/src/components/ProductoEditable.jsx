@@ -129,6 +129,45 @@ export function EstadoProducto({ activo, onAlternar }) {
   );
 }
 
+// La galería de abajo muestra hasta 6 fotos
+export const MAX_GALERIA = 6;
+
+// Sube las fotos elegidas a Storage; devuelve las URL de las que se pudieron subir
+async function subirFotos(archivos) {
+  const urls = [];
+  try {
+    for (const archivo of archivos) urls.push(await subirImagen(archivo, 'productos'));
+  } catch (err) {
+    console.error('No se pudo subir la foto:', err);
+    window.alert(MENSAJE_ERROR);
+  }
+  return urls;
+}
+
+// Cambia de lugar la foto i con su vecina (paso -1 o 1)
+function moverFoto(fotos, i, paso) {
+  const nuevas = [...fotos];
+  [nuevas[i], nuevas[i + paso]] = [nuevas[i + paso], nuevas[i]];
+  return nuevas;
+}
+
+// Mover a la izquierda, a la derecha y quitar
+function AccionesFoto({ i, total, onMover, onQuitar }) {
+  return (
+    <div className="pe-foto-acciones">
+      <button type="button" onClick={() => onMover(-1)} disabled={i === 0} aria-label="Mover a la izquierda">
+        <Icono nombre="flechaIzq" tam={14} />
+      </button>
+      <button type="button" onClick={() => onMover(1)} disabled={i === total - 1} aria-label="Mover a la derecha">
+        <Icono nombre="flechaDer" tam={14} />
+      </button>
+      <button type="button" className="quitar" onClick={onQuitar} aria-label="Quitar foto">
+        <Icono nombre="cerrar" tam={14} />
+      </button>
+    </div>
+  );
+}
+
 // Fotos del producto: agregar, quitar y mover. La primera es la portada del catálogo.
 // elegida: la que muestra el carrusel · onCambiar recibe la lista nueva
 export function FotosProducto({ fotos, elegida, onElegir, onCambiar }) {
@@ -138,9 +177,7 @@ export function FotosProducto({ fotos, elegida, onElegir, onCambiar }) {
   const mover = (i, paso) => {
     const j = i + paso;
     if (j < 0 || j >= fotos.length) return;
-    const nuevas = [...fotos];
-    [nuevas[i], nuevas[j]] = [nuevas[j], nuevas[i]];
-    onCambiar(nuevas);
+    onCambiar(moverFoto(fotos, i, paso));
     onElegir(j);
   };
 
@@ -149,13 +186,7 @@ export function FotosProducto({ fotos, elegida, onElegir, onCambiar }) {
     e.target.value = '';
     if (!archivos.length) return;
     setSubiendo(true);
-    const nuevas = [];
-    try {
-      for (const archivo of archivos) nuevas.push(await subirImagen(archivo, 'productos'));
-    } catch (err) {
-      console.error('No se pudo subir la foto:', err);
-      window.alert(MENSAJE_ERROR);
-    }
+    const nuevas = await subirFotos(archivos);
     if (nuevas.length) await onCambiar([...fotos, ...nuevas]);
     setSubiendo(false);
   };
@@ -176,17 +207,7 @@ export function FotosProducto({ fotos, elegida, onElegir, onCambiar }) {
                 <img src={imagen(url)} alt="" />
                 {i === 0 && <span className="pe-portada">Portada</span>}
               </button>
-              <div className="pe-foto-acciones">
-                <button type="button" onClick={() => mover(i, -1)} disabled={i === 0} aria-label="Mover a la izquierda">
-                  <Icono nombre="flechaIzq" tam={14} />
-                </button>
-                <button type="button" onClick={() => mover(i, 1)} disabled={i === fotos.length - 1} aria-label="Mover a la derecha">
-                  <Icono nombre="flechaDer" tam={14} />
-                </button>
-                <button type="button" className="quitar" onClick={() => onCambiar(fotos.filter((_, k) => k !== i))} aria-label="Quitar foto">
-                  <Icono nombre="cerrar" tam={14} />
-                </button>
-              </div>
+              <AccionesFoto i={i} total={fotos.length} onMover={(paso) => mover(i, paso)} onQuitar={() => onCambiar(fotos.filter((_, k) => k !== i))} />
             </div>
           ))}
           {agregar}
@@ -194,5 +215,49 @@ export function FotosProducto({ fotos, elegida, onElegir, onCambiar }) {
       )}
       <input ref={entradaRef} type="file" accept="image/*" multiple onChange={subir} hidden />
     </div>
+  );
+}
+
+// Galería de abajo: las fotos escalonadas que salen debajo del producto, con los mismos controles de las fotos
+export function GaleriaProducto({ fotos, nombre, onCambiar }) {
+  const [subiendo, setSubiendo] = useState(false);
+  const entradaRef = useRef(null);
+  const cupo = MAX_GALERIA - fotos.length;
+
+  const subir = async (e) => {
+    const archivos = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!archivos.length) return;
+    if (archivos.length > cupo) window.alert(`La galería muestra hasta ${MAX_GALERIA} fotos: se agregan solo las primeras ${cupo}.`);
+    setSubiendo(true);
+    const nuevas = await subirFotos(archivos.slice(0, cupo));
+    if (nuevas.length) await onCambiar([...fotos, ...nuevas]);
+    setSubiendo(false);
+  };
+
+  return (
+    <section className="producto-galeria-edit">
+      <p className="pe-galeria-nota">Galería de abajo · estas fotos salen debajo del producto (hasta {MAX_GALERIA}).</p>
+      <div className="galeria-edit-grid">
+        {fotos.map((url, i) => (
+          <figure key={`${i}-${url}`} className={`galeria-edit-item pos-${i} pe-galeria-item`}>
+            <img src={imagen(url)} alt={`${nombre} ${i + 1}`} />
+            {i >= MAX_GALERIA && <span className="pe-galeria-oculta">No se muestra</span>}
+            <AccionesFoto i={i} total={fotos.length} onMover={(paso) => onCambiar(moverFoto(fotos, i, paso))} onQuitar={() => onCambiar(fotos.filter((_, k) => k !== i))} />
+          </figure>
+        ))}
+        {cupo > 0 && (
+          <button
+            type="button"
+            className={`galeria-edit-item pos-${fotos.length} pe-agregar-foto pe-galeria-agregar${fotos.length ? '' : ' vacia'}`}
+            onClick={() => entradaRef.current?.click()}
+            disabled={subiendo}
+          >
+            {subiendo ? 'Subiendo…' : '+ Agregar foto'}
+          </button>
+        )}
+      </div>
+      <input ref={entradaRef} type="file" accept="image/*" multiple onChange={subir} hidden />
+    </section>
   );
 }

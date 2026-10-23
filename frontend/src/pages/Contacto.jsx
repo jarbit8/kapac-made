@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
@@ -15,14 +15,16 @@ export default function Contacto() {
   const { textos, esAdmin } = useTextos();
 
   const [contenido, setContenido] = useState(contenidoGuardado);
+  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
   useEffect(() => {
-    obtenerContenido().then(setContenido).catch(() => {});
+    obtenerContenido().then((c) => { if (!cambiado.current) setContenido(c); }).catch(() => {});
   }, []);
 
   const extras = contenido ? contenido.infoExtra : [];
   const vacio = (id) => !(textos[`${id}__${idioma}`] ?? '').trim();
 
   const guardarExtras = async (cambiar) => {
+    cambiado.current = true;
     // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
     // para no perder lo que se haya cambiado desde otro dispositivo.
     let base;
@@ -38,7 +40,7 @@ export default function Contacto() {
   };
 
   const agregarExtra = () => guardarExtras((e) => [...e, `campo_${Date.now()}`]);
-  const quitarExtra = (key) => guardarExtras((e) => e.filter((k) => k !== key));
+  const quitarExtra = (key) => window.confirm('¿Quitar este campo?') && guardarExtras((e) => e.filter((k) => k !== key));
 
   return (
     <>

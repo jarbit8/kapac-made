@@ -17,3 +17,7 @@ skills-lock.json
 # Firebase
 functions/.env*
 functions/.runtimeconfig.json
+
+# Vistas que arma descripcion/Ver cambios.bat (se regeneran)
+descripcion/*.html
+descripcion/capturas/

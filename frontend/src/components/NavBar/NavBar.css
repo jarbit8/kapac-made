@@ -101,6 +101,7 @@
 }
 .navbar-lang.activo { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
 .navbar-lang:hover { opacity: 0.85; }
+.navbar-lang:disabled { opacity: 0.3; cursor: default; }
 .navbar-lang-sep { font-size: 10px; color: rgba(176, 83, 46, 0.35); font-weight: 300; }
 
 .navbar-ig {
