@@ -33,13 +33,29 @@ function detectarNavegador(ua = navigator.userAgent) {
   return 'Otro';
 }
 
+const aleatorio = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+
+// Número al azar que se queda en este navegador: distingue a una persona de otra
+// sin saber quién es (la misma persona en otra pestaña u otro día cuenta una vez)
+function obtenerVisitanteId() {
+  try {
+    let id = localStorage.getItem('kapac_visitante');
+    if (!id) { id = aleatorio().slice(0, 36); localStorage.setItem('kapac_visitante', id); }
+    return id;
+  } catch (_) {
+    return '';
+  }
+}
+
 // Id de sesión: 1 por pestaña/sesión de navegador. Sirve para saber cuántas
 // veces entraron realmente al sitio, sin que cada página que recorren cuente aparte.
+// Empieza con el id del visitante ("visitante.sesión") para contar personas distintas.
 // esNueva = true solo la primera vez (recién entró), false en el resto de páginas que recorra.
 function obtenerSesionId() {
   let id = sessionStorage.getItem('kapac_sesion_id');
   if (id) return { id, esNueva: false };
-  id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const visitante = obtenerVisitanteId();
+  id = `${visitante ? `${visitante}.` : ''}${aleatorio().slice(0, 36)}`;
   sessionStorage.setItem('kapac_sesion_id', id);
   return { id, esNueva: true };
 }
@@ -178,8 +194,8 @@ export async function obtenerEstadisticas(diasAtras = 30) {
       .filter((v) => !esDueno(v.email)); // excluir al dueño
 
     const porRuta = {};
-    const porPais = {};
-    const porDispositivo = {};
+    const personasPorPais = {};
+    const personasPorDispositivo = {};
     const visitantesUnicos = new Set();
     const sesionesPorDia = {}; // dia -> Set(sesionId): cuenta accesos reales, no cada página vista
     const sesionesTotal = new Set();
@@ -189,13 +205,16 @@ export async function obtenerEstadisticas(diasAtras = 30) {
 
     visitas.forEach((v) => {
       porRuta[v.ruta]  = (porRuta[v.ruta]  || 0) + 1;
-      porPais[v.pais || 'Desconocido'] = (porPais[v.pais || 'Desconocido'] || 0) + 1;
-      porDispositivo[v.dispositivo || 'Otro'] = (porDispositivo[v.dispositivo || 'Otro'] || 0) + 1;
+
       if (v.email) identificados.add(v.email);
 
       // Sesión = 1 entrada real al sitio. Las visitas viejas (sin sesionId) se agrupan
       // por persona+día como aproximación, para no contar cada página que recorrieron.
-      const identidad = v.email || `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`;
+      // Persona: su correo, o el número de su navegador; las visitas viejas (sin ese
+      // número) se aproximan por país, ciudad, dispositivo y navegador
+      const identidad = v.email || (v.sesionId?.includes('.') ? v.sesionId.split('.')[0] : `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`);
+      (personasPorPais[v.pais || 'Desconocido'] ||= new Set()).add(identidad);
+      (personasPorDispositivo[v.dispositivo || 'Otro'] ||= new Set()).add(identidad);
       const sid = v.sesionId || `${v.dia}_${identidad}`;
       sesionesTotal.add(sid);
       if (!sesionesPorDia[v.dia]) sesionesPorDia[v.dia] = new Set();
@@ -214,8 +233,8 @@ export async function obtenerEstadisticas(diasAtras = 30) {
       visitantesUnicos: visitantesUnicos.size,
       porRuta,
       porDia,
-      porPais,
-      porDispositivo,
+      porPais: Object.fromEntries(Object.entries(personasPorPais).map(([k, s]) => [k, s.size])),
+      porDispositivo: Object.fromEntries(Object.entries(personasPorDispositivo).map(([k, s]) => [k, s.size])),
     };
   } catch (e) {
     console.error('Error obteniendo estadísticas:', e);
