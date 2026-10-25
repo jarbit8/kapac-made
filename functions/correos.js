@@ -221,7 +221,7 @@ function hojaReclamo(r) {
 function correoReclamo(r, { paraTienda = false } = {}) {
   const tipo = r.tipo === 'queja' ? 'queja' : 'reclamo';
   const mensaje = paraTienda
-    ? `Llegó un${tipo === 'queja' ? 'a' : ''} ${tipo} nuevo${tipo === 'queja' ? 'a' : ''} el ${fechaLima(r.fecha)}. Hay que responder desde el panel (pestaña Reclamos) a más tardar el ${fechaLima(r.fechaLimite)}.`
+    ? `Llegó ${tipo === 'queja' ? 'una queja nueva' : 'un reclamo nuevo'} el ${fechaLima(r.fecha)}. Hay que responder desde el panel (pestaña Reclamos) a más tardar el ${fechaLima(r.fechaLimite)}.`
     : `Registramos tu ${tipo} el ${fechaLima(r.fecha)}. Esta es tu copia de la hoja de reclamación. Te responderemos a este correo a más tardar el ${fechaLima(r.fechaLimite)}.`;
   const contenido = `
     <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:${GRIS};">Libro de Reclamaciones</p>
