@@ -59,7 +59,7 @@ function marco({ previa, contenido, foto = true }) {
     </td></tr>
     <tr><td align="center" style="background:#0f0f0f;padding:32px 24px 28px;font-family:${LETRA};">
       <img src="${LOGO}" width="120" alt="KAPAC MADE" style="display:block;width:120px;height:auto;border:0;margin:0 auto 14px;color:#ffffff;font:700 14px ${LETRA};letter-spacing:3px;">
-      <p style="margin:0 0 16px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a8a39a;">Hecho a mano en Arequipa, Perú</p>
+      <p style="margin:0 0 16px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a8a39a;">Mountaineering, Climbing &amp; Trekking</p>
       <p style="margin:0 0 18px;font-size:13px;">
         <a href="${SITIO}" style="color:#ffffff;text-decoration:none;">Tienda</a>
         <span style="color:#55524d;">&nbsp;&nbsp;·&nbsp;&nbsp;</span>
