@@ -8,6 +8,7 @@ import { obtenerPedidosUsuario } from '../firebase/pedidos';
 import Cargando from '../components/Cargando/Cargando';
 import { nombreEstado } from '../i18n/estadosPedido';
 import { cipPendiente, venceCIP } from '../utils/compra';
+import { soles, fechaHora } from '../utils/formato';
 import '../styles/Pedidos.css';
 
 export default function Pedidos() {
@@ -39,12 +40,8 @@ export default function Pedidos() {
   }, [usuario, cargandoAuth, navigate]);
 
   const formatoFecha = (ts) => {
-    const locale = idioma === 'en' ? 'en-US' : 'es-PE';
     if (!ts?.toDate) return idioma === 'en' ? 'Just created' : 'Recién creado';
-    return ts.toDate().toLocaleDateString(locale, {
-      day: '2-digit', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+    return fechaHora(ts.toDate(), idioma);
   };
 
   return (
@@ -85,11 +82,11 @@ export default function Pedidos() {
             <ul className="pedido-items">
               {p.items.map((it, i) => (
                 <li key={i}>
-                  {it.cantidad}× {it.nombre} — S/{it.precio * it.cantidad}.00
+                  {it.cantidad}× {it.nombre} — {soles(it.precio * it.cantidad)}
                 </li>
               ))}
             </ul>
-            <div className="pedido-total"><span>{t('pedidos.total')}</span>: <strong>S/{p.total}.00</strong></div>
+            <div className="pedido-total"><span>{t('pedidos.total')}</span>: <strong>{soles(p.total)}</strong></div>
           </div>
         ))}
       </main>

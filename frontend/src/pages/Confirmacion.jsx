@@ -10,6 +10,7 @@ import { useIdioma } from '../context/LanguageContext';
 import Cargando from '../components/Cargando/Cargando';
 import { nombreEstado, textoPagina } from '../i18n/estadosPedido';
 import { borrarRespaldo, cipPendiente, venceCIP } from '../utils/compra';
+import { soles, numeroPedido, fechaHora } from '../utils/formato';
 import '../styles/Pago.css';
 import '../styles/Confirmacion.css';
 
@@ -96,16 +97,14 @@ export default function Confirmacion() {
   };
 
   // Fecha del pedido (la del servidor; si aún no llegó, la de ahora)
-  const fecha = (pedido?.fecha?.toDate ? pedido.fecha.toDate() : new Date()).toLocaleDateString(es ? 'es-PE' : 'en-US', {
-    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
+  const fecha = fechaHora(pedido?.fecha?.toDate ? pedido.fecha.toDate() : new Date(), idioma);
 
   const METODOS = {
     yape: 'Yape', 'yape-codigo': 'Yape',
     tarjeta: es ? 'Tarjeta' : 'Card',
     efectivo: 'PagoEfectivo',
   };
-  const pagado = ['pendiente_envio', 'pagado', 'enviado', 'entregado'].includes(pedido?.estado);
+  const pagado = ['pendiente_envio', 'enviado', 'entregado'].includes(pedido?.estado);
   const pagina = textoPagina(pedido, idioma);
 
   if (cargando) {
@@ -184,7 +183,7 @@ export default function Confirmacion() {
           </div>
 
           <div className="recibo-id">
-            {t('conf.num')} <strong>#{pedidoId.slice(0, 8).toUpperCase()}</strong>
+            {t('conf.num')} <strong>#{numeroPedido(pedidoId)}</strong>
           </div>
 
           {pedido.items?.length > 0 && (
@@ -194,7 +193,7 @@ export default function Confirmacion() {
                 <div className="recibo-item" key={i}>
                   <span className="recibo-item-nombre">{item.nombre}</span>
                   <span className="recibo-item-qty">x{item.cantidad}</span>
-                  <span className="recibo-item-precio">S/{item.precio * item.cantidad}.00</span>
+                  <span className="recibo-item-precio">{soles(item.precio * item.cantidad)}</span>
                 </div>
               ))}
             </div>
@@ -202,7 +201,7 @@ export default function Confirmacion() {
 
           <div className="recibo-total">
             <span>{t('conf.total')}</span>
-            <strong>S/{pedido.total ?? '—'}.00</strong>
+            <strong>{soles(pedido.total ?? '—')}</strong>
           </div>
 
           <div className="recibo-detalles">

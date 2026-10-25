@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTextos } from '../context/TextosContext';
 import { subirImagen } from '../firebase/almacenamiento';
 import { fotoRapida } from '../utils/fotos';
+import { avisarFallo } from '../utils/avisos';
+import useMarcado from '../hooks/useMarcado';
 import './EditableImage.css';
 
 const IconoFoto = () => (
@@ -19,30 +21,13 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
   const url = fotoRapida(textos[id] || srcDefault);
 
   const [subiendo, setSubiendo] = useState(false);
-  const [marcado, setMarcado] = useState(false);   // toque en pantallas sin hover
   const inputRef = useRef(null);
-  const wrapRef = useRef(null);
-
-  // El botón marcado con un toque se oculta al tocar en otra parte
-  useEffect(() => {
-    if (!marcado) return;
-    const fuera = (e) => { if (!wrapRef.current?.contains(e.target)) setMarcado(false); };
-    document.addEventListener('pointerdown', fuera);
-    return () => document.removeEventListener('pointerdown', fuera);
-  }, [marcado]);
+  const { ref: wrapRef, marcado, alTocar } = useMarcado('.editable-img-btn'); // toque en pantallas sin hover
 
   if (!esAdmin) {
     if (listos && !url) return null;
     return <img src={listos ? url : undefined} alt={listos ? alt : ''} className={className} loading="lazy" decoding="async" />;
   }
-
-  const alTocar = (e) => {
-    if (!window.matchMedia('(hover: none)').matches) return;
-    if (e.target.closest('.editable-img-btn')) return;
-    e.preventDefault();
-    e.stopPropagation();
-    setMarcado(true);
-  };
 
   const onArchivo = async (e) => {
     const file = e.target.files?.[0];
@@ -53,7 +38,7 @@ export default function EditableImage({ id, srcDefault, alt = '', className = ''
       const nuevaUrl = await subirImagen(file, carpeta);
       await guardar(id, nuevaUrl);
     } catch (_) {
-      window.alert('No se pudo subir la foto. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+      avisarFallo('subir la foto');
     }
     setSubiendo(false);
   };

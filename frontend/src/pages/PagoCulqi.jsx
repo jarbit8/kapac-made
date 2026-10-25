@@ -11,12 +11,31 @@ import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { mensajeServidor } from '../i18n/mensajes';
 import { correoCompra, marcarReemplazado } from '../utils/compra';
+import { soles, numeroPedido } from '../utils/formato';
 import imgTarjeta from '../assets/images/tarjeta.jpg';
+import imgYape from '../assets/images/yape.avif';
 import '../styles/PagoTarjeta.css';
 
 const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
+const COBRAR_URL = 'https://cobrarculqi-3lp3eiv6xa-uc.a.run.app';
 
-export default function PagoTarjeta() {
+// Lo que cambia entre pagar con tarjeta o con Yape (código de aprobación) en el modal de Culqi
+const METODOS = {
+  tarjeta: {
+    imagen: imgTarjeta, alt: 'Visa, Mastercard, American Express', cuotas: true,
+    titulo: 'pago.tarjeta.titulo', seguro: 'pago.tarjeta.seguro', boton: 'pago.tarjeta.boton',
+    aviso: 'pago.tarjeta.aviso', errorModal: 'pago.err_tarjeta',
+  },
+  yape: {
+    imagen: imgYape, alt: 'Yape', cuotas: false,
+    titulo: 'pago.yapeculqi.titulo', seguro: 'pago.yapeculqi.seguro', boton: 'pago.yapeculqi.boton',
+    aviso: 'pago.yapeculqi.aviso', errorModal: 'pago.err_yape',
+  },
+};
+
+// metodo: 'tarjeta' | 'yape'
+export default function PagoCulqi({ metodo }) {
+  const m = METODOS[metodo];
   const { pedidoId } = useParams();
   const navigate = useNavigate();
   const { usuario } = useAuth();
@@ -27,9 +46,9 @@ export default function PagoTarjeta() {
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState('');
   const { total, estado } = usePedidoPago(pedidoId);
-  const totalCentimos = Math.round(Number(total) * 100); // Culqi usa centimos
+  const totalCentimos = Math.round(Number(total) * 100); // Culqi usa céntimos
 
-  // Cargar script de Culqi — SOLO tarjeta habilitada
+  // Cargar script de Culqi (Checkout v4)
   useEffect(() => {
     const init = () => {
       window.Culqi.publicKey = CULQI_PUBLIC_KEY;
@@ -56,10 +75,7 @@ export default function PagoTarjeta() {
     setProcesando(true);
     setError('');
     try {
-      // Llamada al backend (Cloud Function) para hacer el cargo
-      // Por ahora marcamos como "verificando" y el cargo se hace manualmente
-      // cuando tengan el backend listo
-      const res = await fetch('https://cobrarculqi-3lp3eiv6xa-uc.a.run.app', {
+      const res = await fetch(COBRAR_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -78,6 +94,7 @@ export default function PagoTarjeta() {
         setError(mensajeServidor(data.mensaje, idioma, t('pago.err_cobro')));
       }
     } catch (e) {
+      console.error(e);
       setError(t('pago.err_confirmar'));
     }
     setProcesando(false);
@@ -92,15 +109,15 @@ export default function PagoTarjeta() {
       description: `Pedido #${pedidoId.slice(0, 8)}`,
       amount: totalCentimos,
     });
-    // Restringir el modal a SOLO tarjeta (sin Yape, sin agente, sin billetera)
+    // El modal de Culqi solo ofrece el método elegido
     if (typeof window.Culqi.options === 'function') {
       window.Culqi.options({
         lang: idioma,
         modal: true,
-        installments: true,
+        installments: m.cuotas,
         paymentMethods: {
-          tarjeta:    true,
-          yape:       false,
+          tarjeta:    metodo === 'tarjeta',
+          yape:       metodo === 'yape',
           bancaMovil: false,
           agente:     false,
           billetera:  false,
@@ -108,12 +125,13 @@ export default function PagoTarjeta() {
         },
       });
     }
-    // Callback cuando Culqi devuelve token
+    // Callback cuando Culqi devuelve el token
     window.culqi = async () => {
       if (window.Culqi.token) {
         await cobrar(window.Culqi.token.id);
       } else if (window.Culqi.error) {
-        setError(window.Culqi.error.user_message || t('pago.err_tarjeta'));
+        console.error('Culqi error:', window.Culqi.error);
+        setError(window.Culqi.error.user_message || t(m.errorModal));
         setProcesando(false);
       }
     };
@@ -139,7 +157,7 @@ export default function PagoTarjeta() {
           <Icono nombre="flechaIzq" tam={16} /> {t('pago.volver')}
         </button>
 
-        <h1>{t('pago.tarjeta.titulo')}</h1>
+        <h1>{t(m.titulo)}</h1>
         <p className="tarjeta-sub"><Icono nombre="escudo" tam={17} /> {t('pago.tarjeta.sub')} <strong>Culqi</strong></p>
 
         <div className="tarjeta-card">
@@ -150,17 +168,17 @@ export default function PagoTarjeta() {
               {total && (
                 <div className="tarjeta-monto">
                   <span>{t('pago.tarjeta.total')}</span>
-                  <strong>S/{total}.00</strong>
+                  <strong>{soles(total)}</strong>
                 </div>
               )}
 
               <div className="tarjeta-marcas">
-                <img src={imgTarjeta} alt="Visa, Mastercard, American Express" />
+                <img src={m.imagen} alt={m.alt} />
               </div>
 
               <div className="tarjeta-seguro">
                 <Icono nombre="candado" tam={17} />
-                <span>{t('pago.tarjeta.seguro')}</span>
+                <span>{t(m.seguro)}</span>
               </div>
 
               {(error || fallaScript) && (
@@ -172,16 +190,16 @@ export default function PagoTarjeta() {
               ) : (
                 <button className="tarjeta-btn-pagar" onClick={abrirCulqi} disabled={!listo || estado !== 'listo' || procesando}>
                   {!listo || estado !== 'listo' ? t('pago.tarjeta.cargando') : procesando ? t('pago.tarjeta.procesando')
-                    : <><Icono nombre="candado" tam={17} /> {t('pago.tarjeta.boton')} S/{total}.00</>}
+                    : <><Icono nombre="candado" tam={17} /> {t(m.boton)} {soles(total)}</>}
                 </button>
               )}
 
-              <p className="tarjeta-aviso">{t('pago.tarjeta.aviso')}</p>
+              <p className="tarjeta-aviso">{t(m.aviso)}</p>
             </>
           )}
         </div>
 
-        <p className="pago-id-ref">{t('pago.referencia')} <code>#{pedidoId.slice(0, 8).toUpperCase()}</code></p>
+        <p className="pago-id-ref">{t('pago.referencia')} <code>#{numeroPedido(pedidoId)}</code></p>
       </main>
       <Footer />
     </>

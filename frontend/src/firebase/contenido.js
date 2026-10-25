@@ -1,4 +1,4 @@
-// Contenido editable del sitio (fotos de la home y galería de producto).
+// Contenido editable del sitio (fotos, bloques y tema).
 // Vive en un único doc: contenido/sitio. Si no existe, se usan los defaults.
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from './config';
@@ -7,36 +7,29 @@ const REF = () => doc(db, 'contenido', 'sitio');
 
 // Claves de las fotos de "estilo de vida" del home (el texto y la imagen viven en
 // contenido/textos vía Editable/EditableImage, editable directo en la página).
-export const HOME_FOTOS_DEFAULT = ['foto1', 'foto2', 'foto3', 'foto4'];
-
-export const GALERIA_PRODUCTO_DEFAULT = [
-  'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=900&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=900&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=900&q=80&auto=format&fit=crop',
-];
+const HOME_FOTOS_DEFAULT = ['foto1', 'foto2', 'foto3', 'foto4'];
 
 // Fondo del footer: imagen (default = la montaña) o video.
-export const FOOTER_FONDO_DEFAULT = {
+const FOOTER_FONDO_DEFAULT = {
   tipo: 'imagen',
   url: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1600&q=80&auto=format&fit=crop',
 };
 
 // Galería de fotos al final de la página Kapac Made (Alma).
-export const ALMA_FOTOS_DEFAULT = [];
+const ALMA_FOTOS_DEFAULT = [];
 
 // Foto épica que abre "in the zone" en una pestaña nueva.
 export const IN_THE_ZONE_DEFAULT =
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=85&auto=format&fit=crop';
 
 // Claves de las tarjetas de "beneficios" en B2B (el texto vive en contenido/textos vía Editable).
-export const B2B_BENEFICIOS_DEFAULT = ['beneficio1', 'beneficio2', 'beneficio3', 'beneficio4'];
+const B2B_BENEFICIOS_DEFAULT = ['beneficio1', 'beneficio2', 'beneficio3', 'beneficio4'];
 
 // Claves de los bloques de filosofía en Kapac Made / Alma (texto vía Editable).
-export const ALMA_BLOQUES_DEFAULT = ['bloque1', 'bloque2', 'bloque3'];
+const ALMA_BLOQUES_DEFAULT = ['bloque1', 'bloque2', 'bloque3'];
 
 // Claves de "Info" adicional al final de Contacto (bloques extra que agregue el admin).
-export const INFO_EXTRA_DEFAULT = [];
+const INFO_EXTRA_DEFAULT = [];
 
 // Identidad visual editable por el admin.
 export const ACENTO_DEFAULT = '#b0532e'; // terracota de la marca
@@ -46,7 +39,10 @@ export const TEXTO_DEFAULT = '#111111';  // color del texto principal
 
 // Medio principal (Hero) por dispositivo: { tipo:'imagen'|'video', url }.
 // null = usa los videos por defecto del proyecto.
-export const HERO_VIDEO_DEFAULT = { pc: null, mobile: null };
+const HERO_VIDEO_DEFAULT = { pc: null, mobile: null };
+
+// Clave de una foto de la lista: las nuevas ya son una clave; las viejas ({url, ...}) usan su posición
+export const claveFoto = (foto, i) => ((typeof foto === 'object' && foto !== null) ? `legacy${i}` : foto);
 
 // Normaliza: acepta string (formato viejo = video) u objeto { tipo, url }.
 export function normalizarMedio(v) {
@@ -70,17 +66,7 @@ export function medioDispositivo(cfg, esMobile) {
 }
 
 // Igual pero solo devuelve la URL (para cosas que siempre son imagen, como "in the zone").
-export function urlDispositivo(cfg, esMobile) {
-  if (!cfg) return '';
-  if (typeof cfg === 'string') return cfg;
-  // Si tiene slots pc/mobile, los usa con preferencia sobre url directo (formato viejo)
-  if (cfg.pc || cfg.mobile) {
-    const pick = esMobile ? (cfg.mobile || cfg.pc) : (cfg.pc || cfg.mobile);
-    return typeof pick === 'string' ? pick : (pick?.url || '');
-  }
-  if (cfg.url) return cfg.url;
-  return '';
-}
+export const urlDispositivo = (cfg, esMobile) => medioDispositivo(cfg, esMobile)?.url || '';
 
 // Lee el slot pc|mobile para el panel admin (maneja formatos viejos).
 export function slotMedio(cfg, slot) {
@@ -94,7 +80,6 @@ export function slotMedio(cfg, slot) {
 function completar(data) {
   return {
     homeFotos: Array.isArray(data.homeFotos) && data.homeFotos.length ? data.homeFotos : HOME_FOTOS_DEFAULT,
-    galeriaProducto: Array.isArray(data.galeriaProducto) && data.galeriaProducto.length ? data.galeriaProducto : GALERIA_PRODUCTO_DEFAULT,
     footerFondo: (data.footerFondo?.pc || data.footerFondo?.mobile || data.footerFondo?.url) ? data.footerFondo : FOOTER_FONDO_DEFAULT,
     inTheZoneFoto: data.inTheZoneFoto || IN_THE_ZONE_DEFAULT,
     almaFotos: Array.isArray(data.almaFotos) ? data.almaFotos : ALMA_FOTOS_DEFAULT,
@@ -102,7 +87,6 @@ function completar(data) {
     acento: data.acento || ACENTO_DEFAULT,
     logo: data.logo || LOGO_DEFAULT,
     fondo: data.fondo || FONDO_DEFAULT,
-    texto: data.texto || TEXTO_DEFAULT,
     b2bBeneficios: Array.isArray(data.b2bBeneficios) && data.b2bBeneficios.length ? data.b2bBeneficios : B2B_BENEFICIOS_DEFAULT,
     almaBloques: Array.isArray(data.almaBloques) && data.almaBloques.length ? data.almaBloques : ALMA_BLOQUES_DEFAULT,
     infoExtra: Array.isArray(data.infoExtra) ? data.infoExtra : INFO_EXTRA_DEFAULT,

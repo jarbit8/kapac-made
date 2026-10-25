@@ -9,10 +9,8 @@ import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { obtenerPerfil } from '../firebase/perfil';
 import { cuentaDe } from '../utils/compra';
+import { limpiar, letras } from '../utils/formato';
 import '../styles/Checkout.css';
-
-const limpiar = (v) => v.trim().replace(/\s+/g, ' ');
-const letras = (v) => (v.match(/\p{L}/gu) || []).length;
 
 // Celular peruano: acepta espacios, guiones y +51 al escribir, guarda solo los 9 dígitos
 const telefono9 = (v) => {
@@ -23,6 +21,34 @@ const telefono9 = (v) => {
 const leerGuardado = () => {
   try { return JSON.parse(sessionStorage.getItem('checkout_envio')) || null; } catch { return null; }
 };
+
+// Nombre y celular: los piden tanto el envío como el recojo
+function NombreTelefono({ valores, onCambiar, t }) {
+  return (
+    <>
+      <label>
+        <span>{t('checkout.nombre')} <span className="req">*</span></span>
+        <input
+          autoComplete="name"
+          maxLength={80}
+          value={valores.nombre}
+          onChange={e => onCambiar({ ...valores, nombre: e.target.value })}
+        />
+      </label>
+      <label>
+        <span>{t('checkout.telefono')} <span className="req">*</span></span>
+        <input
+          type="tel"
+          autoComplete="tel"
+          maxLength={16}
+          placeholder="987 654 321"
+          value={valores.telefono}
+          onChange={e => onCambiar({ ...valores, telefono: e.target.value })}
+        />
+      </label>
+    </>
+  );
+}
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -150,26 +176,7 @@ export default function Checkout() {
           <div className="checkout-form">
             <h2>{t('checkout.envio_titulo')}</h2>
             <div className="checkout-grid">
-              <label>
-                <span>{t('checkout.nombre')} <span className="req">*</span></span>
-                <input
-                  autoComplete="name"
-                  maxLength={80}
-                  value={form.nombre}
-                  onChange={e => setForm({ ...form, nombre: e.target.value })}
-                />
-              </label>
-              <label>
-                <span>{t('checkout.telefono')} <span className="req">*</span></span>
-                <input
-                  type="tel"
-                  autoComplete="tel"
-                  maxLength={16}
-                  placeholder="987 654 321"
-                  value={form.telefono}
-                  onChange={e => setForm({ ...form, telefono: e.target.value })}
-                />
-              </label>
+              <NombreTelefono valores={form} onCambiar={setForm} t={t} />
               <label className="full">
                 <span>{t('checkout.direccion')} <span className="req">*</span></span>
                 <input
@@ -210,26 +217,7 @@ export default function Checkout() {
             </div>
             <h2>{t('checkout.contacto_titulo')}</h2>
             <div className="checkout-grid">
-              <label>
-                <span>{t('checkout.nombre')} <span className="req">*</span></span>
-                <input
-                  autoComplete="name"
-                  maxLength={80}
-                  value={formRecojo.nombre}
-                  onChange={e => setFormRecojo({ ...formRecojo, nombre: e.target.value })}
-                />
-              </label>
-              <label>
-                <span>{t('checkout.telefono')} <span className="req">*</span></span>
-                <input
-                  type="tel"
-                  autoComplete="tel"
-                  maxLength={16}
-                  placeholder="987 654 321"
-                  value={formRecojo.telefono}
-                  onChange={e => setFormRecojo({ ...formRecojo, telefono: e.target.value })}
-                />
-              </label>
+              <NombreTelefono valores={formRecojo} onCambiar={setFormRecojo} t={t} />
             </div>
           </div>
         )}

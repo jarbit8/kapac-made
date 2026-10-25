@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTema } from '../../context/TemaContext';
 import { fotoRapida } from '../../utils/fotos';
+import { INSTAGRAM } from '../../config/redes';
 import logoLocal from '../../assets/images/kapac_made_1.png';
 import video from '../../assets/videos/proximamente.mp4';
 import videoMovil from '../../assets/videos/proximamente-movil.mp4';
@@ -187,7 +188,7 @@ export default function SitioCerrado() {
       </h1>
 
       <footer className="cerrado-pie">
-        <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+        <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer">Instagram ↗</a>
         <span className="cerrado-pie-der">Powered by jarbit</span>
       </footer>
     </div>

@@ -201,7 +201,6 @@
 
 .recojo-info-box strong { font-size: 15px; color: var(--ink); display: block; margin-bottom: 4px; }
 .recojo-info-box p { font-size: 13px; color: #888; margin: 2px 0; }
-.recojo-nota { font-size: 12px; color: #aaa; }
 
 /* Error y botón */
 .checkout-error {

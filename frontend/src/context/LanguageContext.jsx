@@ -35,7 +35,7 @@ export function LanguageProvider({ children }) {
   }, [idioma]);
 
   return (
-    <LanguageContext.Provider value={{ idioma, setIdioma, t, idiomas: SUPPORTED }}>
+    <LanguageContext.Provider value={{ idioma, setIdioma, t }}>
       {children}
     </LanguageContext.Provider>
   );

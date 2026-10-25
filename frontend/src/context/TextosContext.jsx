@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { obtenerTextos, guardarTexto } from '../firebase/textos';
 import { traducirEsEn } from '../i18n/traducir';
 import { useAuth } from './AuthContext';
+import { avisarFallo } from '../utils/avisos';
 
 const TextosContext = createContext({ textos: {}, esAdmin: false, guardar: async () => {} });
 
@@ -35,8 +36,11 @@ export function TextosProvider({ children }) {
     try { localStorage.setItem(CACHE_KEY, JSON.stringify(textos)); } catch (_) {}
   }, [textos, frescos]);
 
-  const guardar = async (clave, valor) => {
-    const anterior = textos[clave];
+  const textosRef = useRef(textos);
+  textosRef.current = textos;
+
+  const guardar = useCallback(async (clave, valor) => {
+    const anterior = textosRef.current[clave];
     setTextos((prev) => ({ ...prev, [clave]: valor })); // refleja al instante
     try {
       await guardarTexto(clave, valor);
@@ -44,10 +48,10 @@ export function TextosProvider({ children }) {
     } catch (e) {
       console.error('No se pudo guardar el texto:', clave, e);
       setTextos((prev) => ({ ...prev, [clave]: anterior })); // revertir: no se guardó de verdad
-      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+      avisarFallo('guardar el cambio');
       return false;
     }
-  };
+  }, []);
 
   // Textos editados cuya traducción quedó pendiente (la API falló al guardar):
   // cuando entra el admin se completan solas, una vez por sesión. Solo con los
@@ -66,7 +70,7 @@ export function TextosProvider({ children }) {
         if (tr) await guardar(`${id}__en`, tr);
       }
     })();
-  }, [esAdmin, cargando, textos, frescos]);
+  }, [esAdmin, cargando, textos, frescos, guardar]);
 
   return (
     <TextosContext.Provider value={{ textos, listos, esAdmin: puedeEditar, guardar }}>

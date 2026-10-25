@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
@@ -6,7 +6,8 @@ import Editable from '../components/Editable';
 import Icono from '../components/Icono';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
-import { obtenerContenido, contenidoGuardado, guardarContenido } from '../firebase/contenido';
+import useContenido from '../hooks/useContenido';
+import { INSTAGRAM } from '../config/redes';
 import '../styles/Contacto.css';
 
 export default function Contacto() {
@@ -14,33 +15,12 @@ export default function Contacto() {
   const es = idioma === 'es';
   const { textos, esAdmin } = useTextos();
 
-  const [contenido, setContenido] = useState(contenidoGuardado);
-  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
-  useEffect(() => {
-    obtenerContenido().then((c) => { if (!cambiado.current) setContenido(c); }).catch(() => {});
-  }, []);
-
+  const [contenido, guardarParcial] = useContenido();
   const extras = contenido ? contenido.infoExtra : [];
   const vacio = (id) => !(textos[`${id}__${idioma}`] ?? '').trim();
 
-  const guardarExtras = async (cambiar) => {
-    cambiado.current = true;
-    // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
-    // para no perder lo que se haya cambiado desde otro dispositivo.
-    let base;
-    try {
-      base = await obtenerContenido();
-      const nuevo = { ...base, infoExtra: cambiar(base.infoExtra) };
-      setContenido(nuevo);
-      await guardarContenido(nuevo, base);
-    } catch (_) {
-      if (base) setContenido(base);
-      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
-    }
-  };
-
-  const agregarExtra = () => guardarExtras((e) => [...e, `campo_${Date.now()}`]);
-  const quitarExtra = (key) => window.confirm('¿Quitar este campo?') && guardarExtras((e) => e.filter((k) => k !== key));
+  const agregarExtra = () => guardarParcial((b) => ({ infoExtra: [...b.infoExtra, `campo_${Date.now()}`] }));
+  const quitarExtra = (key) => window.confirm('¿Quitar este campo?') && guardarParcial((b) => ({ infoExtra: b.infoExtra.filter((k) => k !== key) }));
 
   return (
     <>
@@ -58,7 +38,7 @@ export default function Contacto() {
             <Editable id="info_contacto_telefono" as="p">{es ? 'WhatsApp / Teléfono: +51 997 050 752' : 'WhatsApp / Phone: +51 997 050 752'}</Editable>
             <Editable id="info_contacto_email" as="p">Email: contacto@qhapaqbrands.com</Editable>
             <p className="info-redes">
-              <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer"><Editable id="info_red_instagram" as="span" sinColor>Instagram</Editable></a>
+              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer"><Editable id="info_red_instagram" as="span" sinColor>Instagram</Editable></a>
               <a href="https://www.facebook.com/KapaqMade/reels/" target="_blank" rel="noopener noreferrer"><Editable id="info_red_facebook" as="span" sinColor>Facebook</Editable></a>
               <a href="https://www.tiktok.com/@kapac.made" target="_blank" rel="noopener noreferrer"><Editable id="info_red_tiktok" as="span" sinColor>TikTok</Editable></a>
             </p>

@@ -12,6 +12,7 @@ import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { mensajeServidor } from '../i18n/mensajes';
 import { correoCompra, nombreCompra, marcarReemplazado } from '../utils/compra';
+import { soles, numeroPedido, localeDe } from '../utils/formato';
 import qrImg from '../assets/images/qr.jpeg';
 import imgYape from '../assets/images/yape.avif';
 import imgEfectivo from '../assets/images/pago efectivo.avif';
@@ -84,20 +85,7 @@ export default function Pago() {
     setTimeout(() => setCopiadoCIP(false), 2500);
   };
 
-  const yaGenereCIP = async () => {
-    setCargando(true);
-    setError('');
-    try {
-      await actualizarEstadoPedido(pedidoId, 'verificando_pago');
-      sessionStorage.removeItem('pago_total');
-      navigate(`/confirmacion/${pedidoId}`);
-    } catch (e) {
-      console.error(e);
-      setError(idioma === 'en' ? "We couldn't register your payment. Please try again." : 'No pudimos registrar tu pago. Intenta de nuevo.');
-    }
-    setCargando(false);
-  };
-
+  // "Ya pagué" (Yape QR) y "Ya generé mi código" (PagoEfectivo): el pedido pasa a verificarse
   const yaPague = async () => {
     setCargando(true);
     setError('');
@@ -167,7 +155,7 @@ export default function Pago() {
               {total && (
                 <div className="pago-monto">
                   <span>{t('pago.yape.monto')}</span>
-                  <strong>S/{total}.00</strong>
+                  <strong>{soles(total)}</strong>
                 </div>
               )}
               <img src={imgYape} alt="Yape" className="pago-logo" />
@@ -192,7 +180,7 @@ export default function Pago() {
               {total && (
                 <div className="pago-monto">
                   <span>{t('pago.yape.monto')}</span>
-                  <strong>S/{total}.00</strong>
+                  <strong>{soles(total)}</strong>
                 </div>
               )}
               <img src={imgEfectivo} alt="PagoEfectivo" className="pago-logo" />
@@ -221,7 +209,7 @@ export default function Pago() {
                     </button>
                     {vencimientoCIP && (
                       <p className="codigo-cip-vence">
-                        <Icono nombre="reloj" tam={15} /> {t('pago.ef.vence')} {new Date(vencimientoCIP * 1000).toLocaleString(idioma === 'en' ? 'en-US' : 'es-PE', { dateStyle: 'medium', timeStyle: 'short' })}
+                        <Icono nombre="reloj" tam={15} /> {t('pago.ef.vence')} {new Date(vencimientoCIP * 1000).toLocaleString(localeDe(idioma), { dateStyle: 'medium', timeStyle: 'short' })}
                       </p>
                     )}
                   </div>
@@ -242,7 +230,7 @@ export default function Pago() {
                   )}
 
                   {error && <p className="pago-error"><Icono nombre="alerta" tam={16} /> {error}</p>}
-                  <button className="pago-btn-pague" onClick={yaGenereCIP} disabled={cargando}>
+                  <button className="pago-btn-pague" onClick={yaPague} disabled={cargando}>
                     {cargando ? t('pago.yape.enviando') : <><Icono nombre="check" tam={18} /> {t('pago.ef.boton')}</>}
                   </button>
                   <p className="pago-aviso"><Icono nombre="info" tam={16} /> {t('pago.ef.aviso')}</p>
@@ -252,7 +240,7 @@ export default function Pago() {
           </>
         )}
 
-        <p className="pago-id-ref">{t('pago.referencia')} <code>#{pedidoId.slice(0, 8).toUpperCase()}</code></p>
+        <p className="pago-id-ref">{t('pago.referencia')} <code>#{numeroPedido(pedidoId)}</code></p>
       </main>
       <Footer />
     </>

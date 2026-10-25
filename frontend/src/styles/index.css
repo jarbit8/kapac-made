@@ -24,18 +24,13 @@ button, input, textarea, select, [class*="kai-"], [class*="navbar"],
   /* ── Paleta andina premium ── */
   --cream:      #ffffff;   /* fondo blanco */
   --cream-deep: #f5f5f5;   /* secciones más profundas */
-  --paper:      #fff;      /* superficies / tarjetas */
   --ink:        #111111;   /* texto negro */
   --ink-soft:   #444444;   /* texto secundario */
-  --muted:      #8c8676;   /* etiquetas / terciario */
   --green:      #1a3a26;   /* verde marca profundo */
-  --green-mid:  #2d5a3d;
   --green-soft: #e6ece3;   /* verde tintado claro */
   --clay:       #b0532e;   /* terracota — acento andino */
   --fondo:      #ffffff;   /* fondo del sitio (editable desde admin) */
-  --clay-soft:  #f0e2da;
   --line:       rgba(29, 27, 21, 0.13);
-  --line-soft:  rgba(29, 27, 21, 0.07);
 }
 
 * {
@@ -88,7 +83,6 @@ p, span, a, li, label, div, small, strong, em, blockquote {
 h1, h2, h3, h4,
 .producto-page h1,
 .producto-page .precio,
-.alma-hero h1,
 .legal-hero h1,
 .b2b-hero-content h1,
 .b2b-section h2,
@@ -142,13 +136,6 @@ code {
 /* ════════════════════════════════════════════════════════════════
    Escala tipográfica
    ════════════════════════════════════════════════════════════════ */
-
-/* ── Header ── */
-.logo-texto {
-  font-size: 14px !important;
-  letter-spacing: 3px !important;
-  font-weight: 700 !important;
-}
 
 /* ── Página de producto ── */
 .producto-page h1 {

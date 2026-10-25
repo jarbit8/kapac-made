@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useIdioma } from '../context/LanguageContext';
 import { useTraducido } from '../i18n/useTraducido';
 import { subirImagen } from '../firebase/almacenamiento';
-import { imagen } from '../firebase/imagenesProductos';
+import { imagen } from '../utils/imagen';
+import { avisarFallo } from '../utils/avisos';
+import useMarcado from '../hooks/useMarcado';
 import Icono from './Icono';
 import './Editable.css';
 import './ProductoEditable.css';
-
-const MENSAJE_ERROR = 'No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.';
 
 // Campo de la ficha del producto, editable en la propia página y guardado al instante.
 // valor: lo guardado · mostrar: lo que se ve en vez del valor (el precio con su moneda)
@@ -16,23 +16,14 @@ const MENSAJE_ERROR = 'No se pudo guardar el cambio. Verifica tu conexión o que
 export function CampoProducto({ valor, mostrar, multiline = false, numero = false, opcional = false, placeholder = '', onGuardar }) {
   const { idioma } = useIdioma();
   const [editando, setEditando] = useState(false);
-  const [marcado, setMarcado] = useState(false);   // toque en pantallas sin hover
   const [draft, setDraft] = useState('');
   const [aviso, setAviso] = useState('');
   const [guardando, setGuardando] = useState(false);
-  const elRef = useRef(null);
+  const { ref: elRef, marcado, setMarcado, alTocar } = useMarcado('.editable-boton'); // toque en pantallas sin hover
 
   const texto = valor === null || valor === undefined ? '' : String(valor);
   const traducido = useTraducido(numero ? '' : texto, idioma);
   const vacio = placeholder && !texto.trim();
-
-  // El botón marcado con un toque se oculta al tocar en otra parte
-  useEffect(() => {
-    if (!marcado) return;
-    const fuera = (e) => { if (!elRef.current?.contains(e.target)) setMarcado(false); };
-    document.addEventListener('pointerdown', fuera);
-    return () => document.removeEventListener('pointerdown', fuera);
-  }, [marcado]);
 
   const abrir = (e) => {
     e.preventDefault();
@@ -46,14 +37,6 @@ export function CampoProducto({ valor, mostrar, multiline = false, numero = fals
     setAviso('');
     setMarcado(false);
     setEditando(true);
-  };
-
-  const alTocar = (e) => {
-    if (!window.matchMedia('(hover: none)').matches) return;
-    if (e.target.closest('.editable-boton')) return;
-    e.preventDefault();
-    e.stopPropagation();
-    setMarcado(true);
   };
 
   const cerrar = (e) => {
@@ -141,7 +124,7 @@ async function subirFotos(archivos) {
     for (const archivo of archivos) urls.push(await subirImagen(archivo, 'productos'));
   } catch (err) {
     console.error('No se pudo subir la foto:', err);
-    window.alert(MENSAJE_ERROR);
+    avisarFallo('guardar el cambio');
   }
   return urls;
 }

@@ -3,7 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { obtenerProducto, obtenerProductos, productosGuardados, actualizarProducto, eliminarProducto } from '../firebase/productos';
-import { imagen } from '../firebase/imagenesProductos';
+import { imagen } from '../utils/imagen';
+import { avisarFallo } from '../utils/avisos';
+import { soles } from '../utils/formato';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
@@ -43,6 +45,111 @@ function cssEstilosProducto(estilos) {
     .join('\n');
 }
 
+// Del catálogo guardado, para mostrar la ficha sin esperar a Firestore
+const guardadoDe = (id, esAdmin) => productosGuardados()?.find((p) => p.id === id && (p.activo !== false || esAdmin)) || null;
+const otrosDe = (id) => (productosGuardados() || []).filter((p) => p.id !== id && p.activo !== false).slice(0, 3);
+
+// Fotos de la ficha: la lista nueva o, en productos viejos, la de catálogo y la de contexto
+const fotosDe = (p) => (Array.isArray(p.fotos) && p.fotos.length ? p.fotos : [p.imagenMochila, p.imagenContexto]).filter(Boolean);
+
+function textoDeStock(stock, idioma, t) {
+  if (stock <= 0) return t('productos.sin_stock');
+  if (stock <= 3) return idioma === 'en' ? `Only ${stock} left!` : `¡Últimas ${stock} unidades!`;
+  return idioma === 'en' ? `In stock — ${stock} available` : `Disponible — ${stock} en stock`;
+}
+
+// Carrusel de fotos: flechas, puntos y deslizar con el dedo o el mouse
+function Carrusel({ fotos, nombre, indice, onIndice, esAdmin, onCambiarFotos }) {
+  const touchX = useRef(0);
+  const total = fotos.length;
+
+  if (!total) {
+    return (
+      <div className="producto-galeria">
+        {esAdmin ? <FotosProducto fotos={[]} onCambiar={onCambiarFotos} /> : <div className="galeria-marco" />}
+      </div>
+    );
+  }
+
+  const idx = ((indice % total) + total) % total;
+  const deslizar = (dx) => {
+    if (total > 1 && Math.abs(dx) > 40) onIndice(dx < 0 ? idx + 1 : idx - 1);
+  };
+
+  return (
+    <div className="producto-galeria">
+      <div
+        className="galeria-marco"
+        onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => deslizar(e.changedTouches[0].clientX - touchX.current)}
+        onMouseDown={(e) => { touchX.current = e.clientX; }}
+        onMouseUp={(e) => deslizar(e.clientX - touchX.current)}
+      >
+        <img key={idx} src={imagen(fotos[idx])} alt={nombre} className="galeria-img" draggable="false" />
+        {total > 1 && (
+          <>
+            <button className="galeria-flecha izq" aria-label="Anterior" onClick={() => onIndice(idx - 1)}>‹</button>
+            <button className="galeria-flecha der" aria-label="Siguiente" onClick={() => onIndice(idx + 1)}>›</button>
+          </>
+        )}
+      </div>
+      {total > 1 && (
+        <div className="galeria-dots">
+          {fotos.map((_, i) => (
+            <button
+              key={i}
+              className={`galeria-dot ${i === idx ? 'activo' : ''}`}
+              aria-label={`Imagen ${i + 1}`}
+              onClick={() => onIndice(i)}
+            />
+          ))}
+        </div>
+      )}
+      {esAdmin && <FotosProducto fotos={fotos} elegida={idx} onElegir={onIndice} onCambiar={onCambiarFotos} />}
+    </div>
+  );
+}
+
+// Fotos escalonadas debajo del producto (el admin las edita ahí mismo)
+function GaleriaInferior({ producto, idioma, esAdmin, onCambiar }) {
+  const nombre = nombreProducto(producto, idioma);
+  const galeria = (Array.isArray(producto.galeria) ? producto.galeria : []).filter(Boolean);
+  if (esAdmin) return <GaleriaProducto fotos={galeria} nombre={nombre} onCambiar={onCambiar} />;
+  const fotos = galeria.map((f) => imagen(f)).slice(0, MAX_GALERIA);
+  if (!fotos.length) return null;
+  return (
+    <section className="producto-galeria-edit">
+      <div className="galeria-edit-grid">
+        {fotos.map((src, i) => (
+          <figure key={i} className={`galeria-edit-item pos-${i}`}>
+            <img src={src} alt={`${nombre} ${i + 1}`} loading="lazy" decoding="async" />
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// También te puede gustar
+function Relacionados({ productos, idioma }) {
+  return (
+    <section className="producto-relacionados">
+      <h2>{idioma === 'en' ? 'You may also like' : 'También te puede gustar'}</h2>
+      <div className="relacionados-grid">
+        {productos.map((p) => (
+          <Link key={p.id} to={`/producto/${p.id}`} className="relacionado-card">
+            <div className="relacionado-img">
+              <img src={imagen(p.imagenMochila)} alt={nombreProducto(p, idioma)} loading="lazy" decoding="async" />
+            </div>
+            <span className="relacionado-nombre"><TextoProducto texto={p.nombre} idioma={idioma} /></span>
+            <span className="relacionado-precio">{soles(p.precio, p.moneda)}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function Producto() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -50,17 +157,13 @@ export default function Producto() {
   const { t, idioma } = useIdioma();
   const { textos, esAdmin } = useTextos();
   const specsColor = textos['producto_specs_color'] || '';
-  // Del catálogo guardado, para mostrar la ficha sin esperar a Firestore
-  const guardado = () => productosGuardados()?.find((p) => p.id === id && (p.activo !== false || esAdmin)) || null;
-  const otrosGuardados = () => (productosGuardados() || []).filter((p) => p.id !== id && p.activo !== false).slice(0, 3);
-  const [producto, setProducto] = useState(guardado);
-  const [relacionados, setRelacionados] = useState(otrosGuardados);
-  const [cargando, setCargando] = useState(() => !guardado());
-  const [error, setError] = useState('');
+  const [producto, setProducto] = useState(() => guardadoDe(id, esAdmin));
+  const [relacionados, setRelacionados] = useState(() => otrosDe(id));
+  const [cargando, setCargando] = useState(() => !guardadoDe(id, esAdmin));
+  const [error, setError] = useState(''); // '' | 'no_encontrado' | 'carga'
   const [agregado, setAgregado] = useState(false);
   const [maximo, setMaximo] = useState(false);
   const [imgIdx, setImgIdx] = useState(0); // carrusel de galería
-  const touchX = useRef(0); // para deslizar (swipe)
   const nombreTraducido = useTraducido(producto?.nombre, idioma);
   const descripcionTraducida = useTraducido(producto?.descripcion, idioma);
   const cssProducto = cssEstilosProducto(producto?.estilos);
@@ -72,30 +175,26 @@ export default function Producto() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setCargando(!guardado());
-    setProducto(guardado());
-    setRelacionados(otrosGuardados());
+    setCargando(!guardadoDe(id, esAdmin));
+    setProducto(guardadoDe(id, esAdmin));
+    setRelacionados(otrosDe(id));
     setError('');
     setImgIdx(0);
     obtenerProducto(id)
       .then((p) => {
-        if (!p || (p.activo === false && !esAdmin)) { setProducto(null); setError(t('producto.no_encontrado')); }
+        if (!p || (p.activo === false && !esAdmin)) { setProducto(null); setError('no_encontrado'); }
         else setProducto(p);
         setCargando(false);
       })
       .catch((e) => {
         console.error(e);
-        if (!guardado()) setError(idioma === 'en' ? 'Could not load product.' : 'No se pudo cargar el producto.');
+        if (!guardadoDe(id, esAdmin)) setError('carga');
         setCargando(false);
       });
     // Productos relacionados (otros del catálogo)
     obtenerProductos()
-      .then((todos) => {
-        const otros = todos.filter((p) => p.id !== id && p.activo !== false).slice(0, 3);
-        setRelacionados(otros);
-      })
+      .then((todos) => setRelacionados(todos.filter((p) => p.id !== id && p.activo !== false).slice(0, 3)))
       .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, esAdmin]);
 
   // Modo edición: cada cambio se guarda al instante y solo escribe los campos que cambiaron
@@ -112,7 +211,7 @@ export default function Producto() {
     } catch (e) {
       console.error('No se pudo guardar el producto:', e);
       setProducto((p) => (p ? { ...p, ...antes } : p));
-      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+      avisarFallo('guardar el cambio');
     }
   };
 
@@ -157,19 +256,11 @@ export default function Producto() {
       navigate('/shop', { replace: true });
     } catch (e) {
       console.error('No se pudo eliminar el producto:', e);
-      window.alert('No se pudo eliminar el producto. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+      avisarFallo('eliminar el producto');
     }
   };
 
-  const textoStock = producto
-    ? (producto.stock <= 0
-        ? `${t('productos.sin_stock')}`
-        : producto.stock <= 3
-          ? (idioma === 'en' ? `Only ${producto.stock} left!` : `¡Últimas ${producto.stock} unidades!`)
-          : (idioma === 'en'
-              ? `In stock — ${producto.stock} available`
-              : `Disponible — ${producto.stock} en stock`))
-    : '';
+  const textoStock = producto ? textoDeStock(producto.stock, idioma, t) : '';
 
   const handleAgregar = () => {
     const enCarrito = items.find((i) => i.id === producto.id)?.cantidad || 0;
@@ -190,62 +281,16 @@ export default function Producto() {
       <main className="producto-page" style={specsColor ? { '--specs-color': specsColor } : undefined}>
         {cssProducto && <style>{cssProducto}</style>}
         {cargando && <Cargando />}
-        {error && <p className="producto-msg">{error}</p>}
+        {error && (
+          <p className="producto-msg">
+            {error === 'no_encontrado' ? t('producto.no_encontrado') : (idioma === 'en' ? 'Could not load product.' : 'No se pudo cargar el producto.')}
+          </p>
+        )}
 
         {producto && (
           <div className="producto-detalle">
-            {(() => {
-              const imgs = (Array.isArray(producto.fotos) && producto.fotos.length
-                ? producto.fotos
-                : [producto.imagenMochila, producto.imagenContexto]).filter(Boolean);
-              const total = imgs.length;
-              if (!total) {
-                return (
-                  <div className="producto-galeria">
-                    {esAdmin ? <FotosProducto fotos={[]} onCambiar={cambiarFotos} /> : <div className="galeria-marco" />}
-                  </div>
-                );
-              }
-              const idx = ((imgIdx % total) + total) % total;
-              return (
-                <div className="producto-galeria">
-                  <div
-                    className="galeria-marco"
-                    onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
-                    onTouchEnd={(e) => {
-                      const dx = e.changedTouches[0].clientX - touchX.current;
-                      if (total > 1 && Math.abs(dx) > 40) setImgIdx(dx < 0 ? idx + 1 : idx - 1);
-                    }}
-                    onMouseDown={(e) => { touchX.current = e.clientX; }}
-                    onMouseUp={(e) => {
-                      const dx = e.clientX - touchX.current;
-                      if (total > 1 && Math.abs(dx) > 40) setImgIdx(dx < 0 ? idx + 1 : idx - 1);
-                    }}
-                  >
-                    <img key={idx} src={imagen(imgs[idx])} alt={producto.nombre} className="galeria-img" draggable="false" />
-                    {total > 1 && (
-                      <>
-                        <button className="galeria-flecha izq" aria-label="Anterior" onClick={() => setImgIdx(idx - 1)}>‹</button>
-                        <button className="galeria-flecha der" aria-label="Siguiente" onClick={() => setImgIdx(idx + 1)}>›</button>
-                      </>
-                    )}
-                  </div>
-                  {total > 1 && (
-                    <div className="galeria-dots">
-                      {imgs.map((_, i) => (
-                        <button
-                          key={i}
-                          className={`galeria-dot ${i === idx ? 'activo' : ''}`}
-                          aria-label={`Imagen ${i + 1}`}
-                          onClick={() => setImgIdx(i)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {esAdmin && <FotosProducto fotos={imgs} elegida={idx} onElegir={setImgIdx} onCambiar={cambiarFotos} />}
-                </div>
-              );
-            })()}
+            <Carrusel fotos={fotosDe(producto)} nombre={producto.nombre} indice={imgIdx} onIndice={setImgIdx}
+              esAdmin={esAdmin} onCambiarFotos={cambiarFotos} />
 
             <div className="producto-info">
               {esAdmin && <EstadoProducto activo={producto.activo !== false} onAlternar={alternarActivo} />}
@@ -276,19 +321,19 @@ export default function Producto() {
                 {esAdmin ? (
                   <>
                     <span className="producto-precio">
-                      <CampoProducto numero valor={producto.precio || ''} mostrar={`${producto.moneda}${producto.precio}.00`}
+                      <CampoProducto numero valor={producto.precio || ''} mostrar={soles(producto.precio, producto.moneda)}
                         placeholder="Agregar precio" onGuardar={(v) => guardarCampos({ precio: v })} />
                     </span>
                     <span className="producto-precio-original">
-                      <CampoProducto numero opcional valor={producto.precioOriginal || ''} mostrar={`${producto.moneda}${producto.precioOriginal}.00`}
+                      <CampoProducto numero opcional valor={producto.precioOriginal || ''} mostrar={soles(producto.precioOriginal, producto.moneda)}
                         placeholder="Agregar precio anterior" onGuardar={(v) => guardarCampos({ precioOriginal: v || null })} />
                     </span>
                   </>
                 ) : (
                   <>
-                    <span className="producto-precio">{producto.moneda}{producto.precio}.00</span>
+                    <span className="producto-precio">{soles(producto.precio, producto.moneda)}</span>
                     {producto.precioOriginal && (
-                      <span className="producto-precio-original">{producto.moneda}{producto.precioOriginal}.00</span>
+                      <span className="producto-precio-original">{soles(producto.precioOriginal, producto.moneda)}</span>
                     )}
                   </>
                 )}
@@ -381,42 +426,9 @@ export default function Producto() {
           </div>
         )}
 
-        {/* Galería propia del producto — filas escalonadas (sin título) */}
-        {producto && (() => {
-          const galeria = (Array.isArray(producto.galeria) ? producto.galeria : []).filter(Boolean);
-          if (esAdmin) return <GaleriaProducto fotos={galeria} nombre={nombreProducto(producto, idioma)} onCambiar={cambiarGaleria} />;
-          const fotos = galeria.map(imagen).slice(0, MAX_GALERIA);
-          if (!fotos.length) return null;
-          return (
-            <section className="producto-galeria-edit">
-              <div className="galeria-edit-grid">
-                {fotos.map((src, i) => (
-                  <figure key={i} className={`galeria-edit-item pos-${i}`}>
-                    <img src={src} alt={`${nombreProducto(producto, idioma)} ${i + 1}`} loading="lazy" decoding="async" />
-                  </figure>
-                ))}
-              </div>
-            </section>
-          );
-        })()}
+        {producto && <GaleriaInferior producto={producto} idioma={idioma} esAdmin={esAdmin} onCambiar={cambiarGaleria} />}
 
-        {/* También te puede gustar */}
-        {producto && relacionados.length > 0 && (
-          <section className="producto-relacionados">
-            <h2>{idioma === 'en' ? 'You may also like' : 'También te puede gustar'}</h2>
-            <div className="relacionados-grid">
-              {relacionados.map((p) => (
-                <Link key={p.id} to={`/producto/${p.id}`} className="relacionado-card">
-                  <div className="relacionado-img">
-                    <img src={imagen(p.imagenMochila)} alt={nombreProducto(p, idioma)} loading="lazy" decoding="async" />
-                  </div>
-                  <span className="relacionado-nombre"><TextoProducto texto={p.nombre} idioma={idioma} /></span>
-                  <span className="relacionado-precio">{p.moneda}{p.precio}.00</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        {producto && relacionados.length > 0 && <Relacionados productos={relacionados} idioma={idioma} />}
       </main>
       <Footer />
     </>

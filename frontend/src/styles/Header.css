@@ -73,21 +73,6 @@
   font-size: 11px;
 }
 
-.logo-texto {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: #fff;
-  transition: color 0.35s ease;
-  white-space: nowrap;
-}
-
-.header-solido .logo-texto {
-  color: var(--ink);
-}
-
 /* ── Iconos derecha ── */
 
 .icon-btn {
@@ -142,7 +127,6 @@
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  font-family: 'DM Sans', sans-serif;
 }
 
 /* Páginas con header sólido necesitan espacio arriba */

@@ -57,12 +57,6 @@ export async function actualizarEstadoPedido(pedidoId, nuevoEstado) {
   await updateDoc(ref, { estado: nuevoEstado });
 }
 
-// Actualizar pedido con datos extra (ej. codigoAprobacion de Yape)
-export async function actualizarPedido(pedidoId, datos) {
-  const ref = doc(db, COLECCION, pedidoId);
-  await updateDoc(ref, datos);
-}
-
 // Obtener TODOS los pedidos (para el admin)
 export async function obtenerTodosPedidos() {
   const snap = await getDocs(collection(db, COLECCION));

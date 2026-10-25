@@ -3,18 +3,13 @@ import '../../styles/Hero.css';
 import { obtenerContenido, contenidoGuardado, normalizarMedio, cambiarContenido } from '../../firebase/contenido';
 import { fotoRapida } from '../../utils/fotos';
 import CambiarMedio from '../CambiarMedio';
+import useEsMobile from '../../hooks/useEsMobile';
 
 export default function Hero() {
-  const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
+  const esMobile = useEsMobile();
   const [videoCfg, setVideoCfg] = useState(() => contenidoGuardado()?.heroVideo ?? null);
   const [fallo, setFallo] = useState(false);
   const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
-
-  useEffect(() => {
-    const handleResize = () => setEsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     obtenerContenido().then((c) => {
@@ -62,9 +57,6 @@ export default function Hero() {
           anterior={normalizarMedio(videoCfg?.pc)?.url} alSubir={cambiarFondo('pc')} />
         <CambiarMedio texto="Foto o video · celular" carpeta="fondos"
           anterior={normalizarMedio(videoCfg?.mobile)?.url} alSubir={cambiarFondo('mobile')} />
-      </div>
-
-      <div className="hero-content hero-content-center">
       </div>
 
       <svg className="hero-flecha" viewBox="0 0 12 18" fill="none" xmlns="http://www.w3.org/2000/svg">

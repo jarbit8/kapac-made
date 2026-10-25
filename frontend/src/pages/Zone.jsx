@@ -4,20 +4,19 @@ import Editable from '../components/Editable';
 import { fotoRapida } from '../utils/fotos';
 import '../styles/Zone.css';
 
+const esMovil = () => window.innerWidth < 768;
+
 export default function Zone() {
-  const esMobile = window.innerWidth < 768;
   const [foto, setFoto] = useState(() => {
     const c = contenidoGuardado();
-    return c ? (urlDispositivo(c.inTheZoneFoto, esMobile) || IN_THE_ZONE_DEFAULT) : null;
+    return c ? (urlDispositivo(c.inTheZoneFoto, esMovil()) || IN_THE_ZONE_DEFAULT) : null;
   });
 
   useEffect(() => {
     document.title = 'In the zone · Kapac Made';
     obtenerContenido().then((c) => {
-      const url = urlDispositivo(c.inTheZoneFoto, esMobile);
-      setFoto(url || IN_THE_ZONE_DEFAULT);
+      setFoto(urlDispositivo(c.inTheZoneFoto, esMovil()) || IN_THE_ZONE_DEFAULT);
     }).catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

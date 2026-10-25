@@ -6,14 +6,14 @@ import Icono from '../components/Icono';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { nombreProducto } from '../i18n/producto';
-import { imagen } from '../firebase/imagenesProductos';
+import { imagen } from '../utils/imagen';
+import { soles } from '../utils/formato';
 import '../styles/Carrito.css';
 
 export default function Carrito() {
   const { items, quitar, cambiarCantidad, totalPrecio, avisos, refrescar, limpiarAvisos } = useCart();
   const { t, idioma } = useIdioma();
   const navigate = useNavigate();
-  const finalizar = () => navigate('/checkout');
 
   // Precio y stock al día cada vez que se abre el carrito; los avisos se van al salir
   useEffect(() => {
@@ -26,12 +26,11 @@ export default function Carrito() {
   }, [refrescar, limpiarAvisos]);
 
   const textoAviso = (a) => {
-    const monto = (v) => `${a.moneda || 'S/'}${v}.00`;
     return t(`carrito.aviso_${a.tipo}`)
       .replace('{n}', nombreProducto(a, idioma))
       .replace('{stock}', a.stock)
-      .replace('{antes}', monto(a.antes))
-      .replace('{ahora}', monto(a.ahora));
+      .replace('{antes}', soles(a.antes, a.moneda))
+      .replace('{ahora}', soles(a.ahora, a.moneda));
   };
 
   return (
@@ -68,7 +67,7 @@ export default function Carrito() {
                   <img src={imagen(item.imagenMochila)} alt={item.nombre} />
                   <div className="carrito-item-info">
                     <h3>{nombreProducto(item, idioma)}</h3>
-                    <p className="carrito-precio">{item.moneda}{item.precio}.00</p>
+                    <p className="carrito-precio">{soles(item.precio, item.moneda)}</p>
                   </div>
                   <div className="carrito-cantidad" aria-label={t('carrito.cantidad')}>
                     <button onClick={() => cambiarCantidad(item.id, item.cantidad - 1)} aria-label="−">−</button>
@@ -81,7 +80,7 @@ export default function Carrito() {
                     >+</button>
                   </div>
                   <p className="carrito-subtotal">
-                    {item.moneda}{item.precio * item.cantidad}.00
+                    {soles(item.precio * item.cantidad, item.moneda)}
                   </p>
                   <button className="carrito-quitar" onClick={() => quitar(item.id)} aria-label={t('carrito.eliminar')} title={t('carrito.eliminar')}>
                     <Icono nombre="cerrar" tam={18} />
@@ -93,9 +92,9 @@ export default function Carrito() {
             <div className="carrito-resumen">
               <div className="carrito-total">
                 <span>{t('carrito.total')}</span>
-                <strong>S/{totalPrecio}.00</strong>
+                <strong>{soles(totalPrecio)}</strong>
               </div>
-              <button className="carrito-finalizar" onClick={finalizar}>
+              <button className="carrito-finalizar" onClick={() => navigate('/checkout')}>
                 <Icono nombre="candado" tam={17} /> {t('carrito.ir_pagar')}
               </button>
               <button className="carrito-vaciar" onClick={() => navigate('/shop')}>{t('carrito.continuar')}</button>

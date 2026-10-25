@@ -37,19 +37,21 @@ async function optimizar(file, carpeta) {
 // Los nombres llevan la fecha, así que el archivo nunca cambia: se puede cachear para siempre
 const cacheo = (file) => ({ contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' });
 
-// Sube un archivo y devuelve su URL pública.
+// Sube el archivo a carpeta/fecha-azar.ext y devuelve su URL pública
+async function subir(file, carpeta, extPorDefecto) {
+  const ext = (file.name.split('.').pop() || extPorDefecto).toLowerCase();
+  const refArchivo = ref(storage, `${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`);
+  await uploadBytes(refArchivo, file, cacheo(file));
+  return getDownloadURL(refArchivo);
+}
+
+// Sube una imagen y devuelve su URL pública.
 // carpeta: 'productos' | 'home' | 'galeria'
 export async function subirImagen(file, carpeta = 'varios') {
   if (!file) throw new Error('Sin archivo');
   if (!file.type.startsWith('image/')) throw new Error('El archivo debe ser una imagen');
   if (file.size > 20 * 1024 * 1024) throw new Error('La imagen supera los 20 MB');
-  file = await optimizar(file, carpeta);
-
-  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-  const nombre = `${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const refArchivo = ref(storage, nombre);
-  await uploadBytes(refArchivo, file, cacheo(file));
-  return getDownloadURL(refArchivo);
+  return subir(await optimizar(file, carpeta), carpeta, 'jpg');
 }
 
 // Sube imagen O video (para fondos). Devuelve { tipo, url }.
@@ -60,11 +62,5 @@ export async function subirMedia(file, carpeta = 'fondos') {
   if (!esImagen && !esVideo) throw new Error('Debe ser una imagen o un video');
   if (file.size > 50 * 1024 * 1024) throw new Error('El archivo supera los 50 MB');
   if (esImagen) file = await optimizar(file, carpeta);
-
-  const ext = (file.name.split('.').pop() || (esVideo ? 'mp4' : 'jpg')).toLowerCase();
-  const nombre = `${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const refArchivo = ref(storage, nombre);
-  await uploadBytes(refArchivo, file, cacheo(file));
-  const url = await getDownloadURL(refArchivo);
-  return { tipo: esVideo ? 'video' : 'imagen', url };
+  return { tipo: esVideo ? 'video' : 'imagen', url: await subir(file, carpeta, esVideo ? 'mp4' : 'jpg') };
 }

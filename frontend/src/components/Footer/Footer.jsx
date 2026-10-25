@@ -8,18 +8,12 @@ import { obtenerContenido, contenidoGuardado, medioDispositivo, slotMedio, cambi
 import Editable from '../Editable';
 import CambiarMedio from '../CambiarMedio';
 import Icono from '../Icono';
+import IconoInstagram from '../IconoInstagram';
 import { EMPRESA } from '../../config/empresa';
+import { INSTAGRAM } from '../../config/redes';
 import { fotoRapida } from '../../utils/fotos';
 import { useTextos } from '../../context/TextosContext';
-
-/* ─── Iconos SVG (sociales) ─────────────────────────────────────────────── */
-const IconInstagram = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-  </svg>
-);
+import useEsMobile from '../../hooks/useEsMobile';
 
 // Botón del boletín. En modo edición el texto se edita fuera de un <button>: ahí el campo
 // no recibe el toque ni el teclado en el celular.
@@ -46,14 +40,8 @@ export default function Footer() {
   const [espera, setEspera] = useState(0); // segundos para poder reenviar el código
   const [fondoCfg, setFondoCfg] = useState(() => contenidoGuardado()?.footerFondo ?? null);
   const [videoFallo, setVideoFallo] = useState(false);
-  const [esMobile, setEsMobile] = useState(window.innerWidth < 768);
+  const esMobile = useEsMobile();
   const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
-
-  useEffect(() => {
-    const onResize = () => setEsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   useEffect(() => {
     obtenerContenido().then((c) => c.footerFondo && !cambiado.current && setFondoCfg(c.footerFondo)).catch(() => {});
@@ -145,8 +133,8 @@ export default function Footer() {
 
       {/* Instagram centrado */}
       <div className="footer-ig">
-        <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="footer-ig-link">
-          <IconInstagram />
+        <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="footer-ig-link">
+          <IconoInstagram />
         </a>
       </div>
 

@@ -11,6 +11,7 @@ import { crearPedido } from '../firebase/pedidos';
 import { loginAnonimo } from '../firebase/auth';
 import Cargando from '../components/Cargando/Cargando';
 import { cuentaDe, correoCompra, guardarRespaldo, hayRespaldo } from '../utils/compra';
+import { soles } from '../utils/formato';
 import '../styles/MetodoPago.css';
 import imgYape from '../assets/images/yape.avif';
 import imgTarjeta from '../assets/images/tarjeta.jpg';
@@ -145,7 +146,7 @@ export default function MetodoPago() {
         <PasosCompra actual={2} />
 
         <h1>{t('metodo.titulo')}</h1>
-        <p className="metodo-sub">{t('metodo.total')} <strong>S/{total}.00</strong></p>
+        <p className="metodo-sub">{t('metodo.total')} <strong>{soles(total)}</strong></p>
 
         <div className="metodo-opciones" role="radiogroup" aria-label={t('metodo.titulo')}>
           {opciones.map((o) => (

@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import './Lifestyle.css';
 import Editable from '../Editable';
 import EditableImage from '../EditableImage';
 import { useIdioma } from '../../context/LanguageContext';
 import { useTextos } from '../../context/TextosContext';
 import { useTraducido } from '../../i18n/useTraducido';
-import { obtenerContenido, guardarContenido, contenidoGuardado, cambiarContenido } from '../../firebase/contenido';
+import { cambiarContenido, claveFoto } from '../../firebase/contenido';
+import useContenido from '../../hooks/useContenido';
 import CambiarMedio from '../CambiarMedio';
 
 // Texto/imagen por defecto de las 4 fotos originales (las nuevas arrancan vacías).
@@ -27,40 +28,16 @@ export default function Lifestyle() {
   const { idioma } = useIdioma();
   const es = idioma === 'es';
   const { textos, esAdmin } = useTextos();
-  const [contenido, setContenido] = useState(contenidoGuardado);
-  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
-
-  useEffect(() => {
-    obtenerContenido().then((c) => { if (!cambiado.current) setContenido(c); }).catch(() => {});
-  }, []);
-
+  const [contenido, guardarParcial] = useContenido();
   const fotos = contenido ? contenido.homeFotos : [];
-
-  const guardarFotos = async (cambiar) => {
-    cambiado.current = true;
-    // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
-    // para no perder lo que se haya cambiado desde otro dispositivo.
-    let base;
-    try {
-      base = await obtenerContenido();
-      const nuevo = { ...base, homeFotos: cambiar(base.homeFotos) };
-      setContenido(nuevo);
-      await guardarContenido(nuevo, base);
-    } catch (_) {
-      if (base) setContenido(base);
-      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
-    }
-  };
-
-  const claveDe = (foto, i) => (typeof foto === 'object' && foto !== null) ? `legacy${i}` : foto;
 
   const cambiarZone = (slot) => (nuevo) => cambiarContenido((b) => {
     const actual = typeof b.inTheZoneFoto === 'object' && (b.inTheZoneFoto?.pc || b.inTheZoneFoto?.mobile) ? b.inTheZoneFoto : {};
     return { inTheZoneFoto: { ...actual, [slot]: nuevo } };
   });
 
-  const agregarFoto = () => guardarFotos((f) => [...f, `foto_${Date.now()}`]);
-  const quitarFoto = (key) => window.confirm('¿Quitar esta foto?') && guardarFotos((f) => f.filter((x, i) => claveDe(x, i) !== key));
+  const agregarFoto = () => guardarParcial((b) => ({ homeFotos: [...b.homeFotos, `foto_${Date.now()}`] }));
+  const quitarFoto = (key) => window.confirm('¿Quitar esta foto?') && guardarParcial((b) => ({ homeFotos: b.homeFotos.filter((x, i) => claveFoto(x, i) !== key) }));
 
   return (
     <section className="lm-section">
@@ -70,7 +47,7 @@ export default function Lifestyle() {
         {fotos.map((foto, i) => {
           // "foto" puede ser una clave nueva (string) o un objeto viejo {url,titulo,desc}
           const esViejo = typeof foto === 'object' && foto !== null;
-          const key = claveDe(foto, i);
+          const key = claveFoto(foto, i);
           const defReal = DEFAULTS_FOTO[key];
           // Si la clave coincide con una de las 4 fotos originales, el texto bilingüe
           // conocido tiene prioridad (así sí traduce). Si no, se usa el dato viejo (1 solo idioma).

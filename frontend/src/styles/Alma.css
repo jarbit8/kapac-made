@@ -123,30 +123,6 @@
   padding-bottom: 88px;
 }
 
-.alma-galeria-header {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 0 40px 40px;
-}
-
-.alma-galeria-header::before,
-.alma-galeria-header::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(176, 83, 46, 0.25);
-}
-
-.alma-galeria-titulo {
-  font-size: 10px !important;
-  font-weight: 700 !important;
-  letter-spacing: 5px !important;
-  text-transform: uppercase;
-  color: var(--ink) !important;
-  white-space: nowrap;
-}
-
 .alma-galeria-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -244,7 +220,6 @@
   .alma-page { padding: 90px 24px 0; }
   .alma-bloques { grid-template-columns: 1fr; gap: 32px; }
   .alma-intro { margin-bottom: 56px; }
-  .alma-galeria-header { padding: 0 20px 32px; }
   .alma-galeria-section { padding-bottom: 72px; }
   .alma-galeria-grid { gap: 1px; }
   .alma-foto--hero { aspect-ratio: 16 / 9; }

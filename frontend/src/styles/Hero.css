@@ -9,12 +9,6 @@
   background: #0a0a0a;
 }
 
-.hero-content-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .hero-bg {
   position: absolute;
   inset: 0;
@@ -59,22 +53,10 @@
   .hero-flecha { bottom: 20px; right: 20px; }
 }
 
-.hero-content {
-  position: relative;
-  z-index: 1;
-  padding: 0 60px 70px;
-  color: #fff;
-  max-width: 800px;
-}
-
 @media (max-width: 768px) {
   .hero {
     height: 95vh;
     align-items: flex-end;
-  }
-
-  .hero-content {
-    padding: 0 24px 50px;
   }
 }
 

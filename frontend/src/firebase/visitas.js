@@ -180,6 +180,7 @@ export async function obtenerEstadisticas(diasAtras = 30) {
     const porRuta = {};
     const porPais = {};
     const porDispositivo = {};
+    const sumar = (cuenta, clave) => { cuenta[clave] = (cuenta[clave] || 0) + 1; };
     const visitantesUnicos = new Set();
     const sesionesPorDia = {}; // dia -> Set(sesionId): cuenta accesos reales, no cada página vista
     const sesionesTotal = new Set();
@@ -188,9 +189,9 @@ export async function obtenerEstadisticas(diasAtras = 30) {
     const hoy = new Date().toISOString().slice(0, 10);
 
     visitas.forEach((v) => {
-      porRuta[v.ruta]  = (porRuta[v.ruta]  || 0) + 1;
-      porPais[v.pais || 'Desconocido'] = (porPais[v.pais || 'Desconocido'] || 0) + 1;
-      porDispositivo[v.dispositivo || 'Otro'] = (porDispositivo[v.dispositivo || 'Otro'] || 0) + 1;
+      sumar(porRuta, v.ruta);
+      sumar(porPais, v.pais || 'Desconocido');
+      sumar(porDispositivo, v.dispositivo || 'Otro');
       if (v.email) identificados.add(v.email);
 
       // Sesión = 1 entrada real al sitio. Las visitas viejas (sin sesionId) se agrupan
@@ -253,37 +254,4 @@ export function nombreRuta(ruta) {
   // Fallback: capitalizar la primera letra
   if (!ruta) return 'Inicio';
   return ruta.charAt(0).toUpperCase() + ruta.slice(1);
-}
-
-/** Mapa de país → emoji bandera. Soporta nombres en ES y EN */
-export function banderaPais(pais) {
-  if (!pais || pais === 'Desconocido') return '🌍';
-  const mapa = {
-    'Peru': '🇵🇪', 'Perú': '🇵🇪',
-    'Mexico': '🇲🇽', 'México': '🇲🇽',
-    'Argentina': '🇦🇷',
-    'Chile': '🇨🇱',
-    'Colombia': '🇨🇴',
-    'Bolivia': '🇧🇴',
-    'Ecuador': '🇪🇨',
-    'Venezuela': '🇻🇪',
-    'Uruguay': '🇺🇾',
-    'Paraguay': '🇵🇾',
-    'Brazil': '🇧🇷', 'Brasil': '🇧🇷',
-    'United States': '🇺🇸', 'Estados Unidos': '🇺🇸', 'USA': '🇺🇸',
-    'Canada': '🇨🇦', 'Canadá': '🇨🇦',
-    'Spain': '🇪🇸', 'España': '🇪🇸',
-    'France': '🇫🇷', 'Francia': '🇫🇷',
-    'Germany': '🇩🇪', 'Alemania': '🇩🇪',
-    'Italy': '🇮🇹', 'Italia': '🇮🇹',
-    'United Kingdom': '🇬🇧', 'Reino Unido': '🇬🇧',
-    'Portugal': '🇵🇹',
-    'Netherlands': '🇳🇱', 'Países Bajos': '🇳🇱',
-    'China': '🇨🇳',
-    'Japan': '🇯🇵', 'Japón': '🇯🇵',
-    'India': '🇮🇳',
-    'Australia': '🇦🇺',
-    'Russia': '🇷🇺', 'Rusia': '🇷🇺',
-  };
-  return mapa[pais] || '🌎';
 }

@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import Editable from '../components/Editable';
 import EditableImage from '../components/EditableImage';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
-import { obtenerContenido, contenidoGuardado, guardarContenido } from '../firebase/contenido';
+import useContenido from '../hooks/useContenido';
+import { claveFoto } from '../firebase/contenido';
 import '../styles/Alma.css';
 
 // Texto por defecto de los 3 bloques originales (los nuevos arrancan vacíos).
@@ -20,38 +21,16 @@ export default function Alma() {
   const es = idioma === 'es';
   const { textos, esAdmin, guardar } = useTextos();
 
-  const [contenido, setContenido] = useState(contenidoGuardado);
-  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
-  useEffect(() => {
-    obtenerContenido().then((c) => { if (!cambiado.current) setContenido(c); }).catch(() => {});
-  }, []);
-
+  const [contenido, guardarParcial] = useContenido();
   const bloques = contenido ? contenido.almaBloques : [];
   const vacio = (id, def) => !(textos[`${id}__${idioma}`] ?? def).trim();
   const fotos = contenido ? contenido.almaFotos : [];
 
-  const guardarContenidoParcial = async (cambiar) => {
-    cambiado.current = true;
-    // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
-    // para no perder lo que se haya cambiado desde otro dispositivo.
-    let base;
-    try {
-      base = await obtenerContenido();
-      const nuevo = { ...base, ...cambiar(base) };
-      setContenido(nuevo);
-      await guardarContenido(nuevo, base);
-    } catch (_) {
-      if (base) setContenido(base);
-      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
-    }
-  };
+  const agregarBloque = () => guardarParcial((b) => ({ almaBloques: [...b.almaBloques, `bloque_${Date.now()}`] }));
+  const quitarBloque = (key) => window.confirm('¿Quitar este bloque?') && guardarParcial((b) => ({ almaBloques: b.almaBloques.filter((k) => k !== key) }));
 
-  const agregarBloque = () => guardarContenidoParcial((b) => ({ almaBloques: [...b.almaBloques, `bloque_${Date.now()}`] }));
-  const quitarBloque = (key) => window.confirm('¿Quitar este bloque?') && guardarContenidoParcial((b) => ({ almaBloques: b.almaBloques.filter((k) => k !== key) }));
-
-  const claveFotoDe = (foto, i) => (typeof foto === 'object' && foto !== null) ? `legacy${i}` : foto;
-  const agregarFoto = () => guardarContenidoParcial((b) => ({ almaFotos: [...b.almaFotos, `foto_${Date.now()}`] }));
-  const quitarFoto = (key) => window.confirm('¿Quitar esta foto?') && guardarContenidoParcial((b) => ({ almaFotos: b.almaFotos.filter((f, i) => claveFotoDe(f, i) !== key) }));
+  const agregarFoto = () => guardarParcial((b) => ({ almaFotos: [...b.almaFotos, `foto_${Date.now()}`] }));
+  const quitarFoto = (key) => window.confirm('¿Quitar esta foto?') && guardarParcial((b) => ({ almaFotos: b.almaFotos.filter((f, i) => claveFoto(f, i) !== key) }));
 
   return (
     <>
@@ -102,7 +81,7 @@ export default function Alma() {
             <div className="alma-galeria-grid">
               {fotos.map((foto, i) => {
                 const esViejo = typeof foto === 'object' && foto !== null;
-                const key = claveFotoDe(foto, i);
+                const key = claveFoto(foto, i);
                 const urlDefault = esViejo ? (foto.url || '') : '';
                 const captionDefault = esViejo ? (foto.caption || '') : '';
                 const tamano = textos[`alma_${key}_tamano`] || 'normal';

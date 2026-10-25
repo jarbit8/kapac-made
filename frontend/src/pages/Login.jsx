@@ -10,6 +10,28 @@ import { esCorreoAdmin } from '../config/admins';
 import { cuentaDe } from '../utils/compra';
 import '../styles/Login.css';
 
+// Mensajes de Firebase Auth por idioma
+const ERRORES = {
+  es: {
+    'auth/invalid-email': 'El correo no es válido.',
+    'auth/user-not-found': 'No existe una cuenta con ese correo.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+    'auth/email-already-in-use': 'Ya existe una cuenta con ese correo.',
+    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+    otro: 'Ocurrió un error. Intenta de nuevo.',
+  },
+  en: {
+    'auth/invalid-email': 'Invalid email address.',
+    'auth/user-not-found': 'No account exists with that email.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/invalid-credential': 'Incorrect email or password.',
+    'auth/email-already-in-use': 'An account with that email already exists.',
+    'auth/weak-password': 'Password must be at least 6 characters.',
+    otro: 'An error occurred. Please try again.',
+  },
+};
+
 export default function Login() {
   const location = useLocation();
   // Detectar si vienen desde "Regístrate" (?modo=registro)
@@ -52,27 +74,8 @@ export default function Login() {
     await cerrarSesion();
   };
 
-  const traducirError = (code) => {
-    const mapaES = {
-      'auth/invalid-email': 'El correo no es válido.',
-      'auth/user-not-found': 'No existe una cuenta con ese correo.',
-      'auth/wrong-password': 'Contraseña incorrecta.',
-      'auth/invalid-credential': 'Correo o contraseña incorrectos.',
-      'auth/email-already-in-use': 'Ya existe una cuenta con ese correo.',
-      'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
-    };
-    const mapaEN = {
-      'auth/invalid-email': 'Invalid email address.',
-      'auth/user-not-found': 'No account exists with that email.',
-      'auth/wrong-password': 'Incorrect password.',
-      'auth/invalid-credential': 'Incorrect email or password.',
-      'auth/email-already-in-use': 'An account with that email already exists.',
-      'auth/weak-password': 'Password must be at least 6 characters.',
-    };
-    const mapa = idioma === 'en' ? mapaEN : mapaES;
-    const fallback = idioma === 'en' ? 'An error occurred. Please try again.' : 'Ocurrió un error. Intenta de nuevo.';
-    return mapa[code] || fallback;
-  };
+  const mensajes = ERRORES[idioma === 'en' ? 'en' : 'es'];
+  const traducirError = (code) => mensajes[code] || mensajes.otro;
 
   // Siempre el mismo aviso, exista o no la cuenta
   const handleOlvide = async () => {

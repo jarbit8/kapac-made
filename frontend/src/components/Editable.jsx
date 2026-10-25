@@ -3,6 +3,7 @@ import { useTextos } from '../context/TextosContext';
 import { useIdioma } from '../context/LanguageContext';
 import { traducirEsEn } from '../i18n/traducir';
 import { asegurarFuente, cssFuente, nombreFuente } from '../utils/fuentes';
+import useMarcado from '../hooks/useMarcado';
 import './Editable.css';
 
 const FUENTE_SITIO = 'IBM Plex Mono';
@@ -33,14 +34,13 @@ export default function Editable({ id, children, as = 'span', className = '', mu
   const fuentePropia = textos[claveFuente] || '';
 
   const [editando, setEditando] = useState(false);
-  const [marcado, setMarcado] = useState(false);   // toque en pantallas sin hover
   const [draft, setDraft] = useState('');
   const [colorDraft, setColorDraft] = useState('');
   const [fuenteDraft, setFuenteDraft] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [comoArea, setComoArea] = useState(false); // textos largos se editan en un cuadro que crece
   const Tag = as;
-  const elRef = useRef(null);
+  const { ref: elRef, marcado, setMarcado, alTocar } = useMarcado('.editable-boton'); // toque en pantallas sin hover
   const areaRef = useRef(null);
 
   // Muchas reglas CSS del sitio usan "!important" — un style prop normal no les gana.
@@ -56,15 +56,7 @@ export default function Editable({ id, children, as = 'span', className = '', mu
     } else {
       el.style.removeProperty('font-family');
     }
-  }, [colorPropio, fuentePropia, sinColor, editando]);
-
-  // El botón marcado con un toque se oculta al tocar en otra parte
-  useEffect(() => {
-    if (!marcado) return;
-    const fuera = (e) => { if (!elRef.current?.contains(e.target)) setMarcado(false); };
-    document.addEventListener('pointerdown', fuera);
-    return () => document.removeEventListener('pointerdown', fuera);
-  }, [marcado]);
+  }, [elRef, colorPropio, fuentePropia, sinColor, editando]);
 
   // El cuadro de texto crece con lo que se escribe, así se ve todo sin desplazarse dentro
   useEffect(() => {
@@ -92,15 +84,6 @@ export default function Editable({ id, children, as = 'span', className = '', mu
     setFuenteDraft(nombreFuente(fuentePropia));
     setMarcado(false);
     setEditando(true);
-  };
-
-  // Sin hover, el primer toque marca el texto y muestra el botón (sin activar enlaces ni botones que lo envuelvan)
-  const alTocar = (e) => {
-    if (!window.matchMedia('(hover: none)').matches) return;
-    if (e.target.closest('.editable-boton')) return;
-    e.preventDefault();
-    e.stopPropagation();
-    setMarcado(true);
   };
 
   const salvar = async () => {

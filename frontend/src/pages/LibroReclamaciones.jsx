@@ -7,6 +7,7 @@ import { useIdioma } from '../context/LanguageContext';
 import { EMPRESA } from '../config/empresa';
 import { enviarReclamo } from '../firebase/reclamos';
 import { mensajeServidor } from '../i18n/mensajes';
+import { localeDe, limpiar, letras } from '../utils/formato';
 import '../styles/LibroReclamaciones.css';
 
 const VACIO = {
@@ -19,8 +20,6 @@ const VACIO = {
 const DOCUMENTOS = ['DNI', 'CE', 'Pasaporte', 'RUC'];
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-const limpiar = (v) => v.trim().replace(/\s+/g, ' ');
-const letras = (v) => (v.match(/\p{L}/gu) || []).length;
 const fuera = (v, min, max) => v.length < min || v.length > max;
 
 // Devuelve los datos ya limpios y, por campo, la clave del mensaje de error
@@ -65,9 +64,8 @@ function validar(f) {
   return { datos: d, errores: e };
 }
 
-const locale = (idioma) => (idioma === 'en' ? 'en-US' : 'es-PE');
-const fechaLarga = (f, idioma) => new Date(f).toLocaleDateString(locale(idioma), { day: 'numeric', month: 'long', year: 'numeric' });
-const fechaHora = (f, idioma) => new Date(f).toLocaleString(locale(idioma), { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const fechaLarga = (f, idioma) => new Date(f).toLocaleDateString(localeDe(idioma), { day: 'numeric', month: 'long', year: 'numeric' });
+const fechaHora = (f, idioma) => new Date(f).toLocaleString(localeDe(idioma), { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 function Campo({ id, etiqueta, requerido, error, completo, t, children }) {
   return (

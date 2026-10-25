@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
@@ -7,7 +7,7 @@ import EditableImage from '../components/EditableImage';
 import { useTextos } from '../context/TextosContext';
 import coser1 from '../assets/images/coser1.png';
 import { useIdioma } from '../context/LanguageContext';
-import { obtenerContenido, contenidoGuardado, guardarContenido } from '../firebase/contenido';
+import useContenido from '../hooks/useContenido';
 import '../styles/B2B.css';
 
 // Texto por defecto de los 4 beneficios originales (nuevas tarjetas arrancan vacías).
@@ -23,33 +23,12 @@ export default function B2B() {
   const es = idioma === 'es';
   const { textos, esAdmin } = useTextos();
 
-  const [contenido, setContenido] = useState(contenidoGuardado);
-  const cambiado = useRef(false); // la lectura inicial puede llegar tarde y no debe borrar lo que el admin acaba de cambiar
-  useEffect(() => {
-    obtenerContenido().then((c) => { if (!cambiado.current) setContenido(c); }).catch(() => {});
-  }, []);
-
+  const [contenido, guardarParcial] = useContenido();
   const beneficios = contenido ? contenido.b2bBeneficios : [];
   const vacio = (id, def) => !(textos[`${id}__${idioma}`] ?? def).trim();
 
-  const guardarBeneficios = async (cambiar) => {
-    cambiado.current = true;
-    // Se aplica sobre lo último de Firestore y no sobre la copia de la visita anterior,
-    // para no perder lo que se haya cambiado desde otro dispositivo.
-    let base;
-    try {
-      base = await obtenerContenido();
-      const nuevo = { ...base, b2bBeneficios: cambiar(base.b2bBeneficios) };
-      setContenido(nuevo);
-      await guardarContenido(nuevo, base);
-    } catch (_) {
-      if (base) setContenido(base);
-      window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
-    }
-  };
-
-  const agregarBeneficio = () => guardarBeneficios((b) => [...b, `beneficio_${Date.now()}`]);
-  const quitarBeneficio = (key) => window.confirm('¿Quitar este beneficio?') && guardarBeneficios((b) => b.filter((k) => k !== key));
+  const agregarBeneficio = () => guardarParcial((b) => ({ b2bBeneficios: [...b.b2bBeneficios, `beneficio_${Date.now()}`] }));
+  const quitarBeneficio = (key) => window.confirm('¿Quitar este beneficio?') && guardarParcial((b) => ({ b2bBeneficios: b.b2bBeneficios.filter((k) => k !== key) }));
 
   return (
     <>
