@@ -338,8 +338,6 @@ export default function LibroReclamaciones() {
                         </label>
                       ))}
                     </div>
-                    <p className="libro-definicion">{t('libro.def_reclamo')}</p>
-                    <p className="libro-definicion">{t('libro.def_queja')}</p>
                     {errores.tipo && <p className="libro-error">{t(errores.tipo)}</p>}
                   </div>
                   <Campo id="detalle" etiqueta={t('libro.detalle')} requerido error={errores.detalle} completo t={t}>

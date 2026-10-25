@@ -40,7 +40,7 @@ export default function Catalogo() {
   const [error, setError] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const { t, idioma } = useIdioma();
-  const { textos, esAdmin, guardar } = useTextos();
+  const { textos, esAdmin } = useTextos();
   const colorProductos = textos['catalogo_color'] || '';
 
   const busqueda = searchParams.get('q') || '';
@@ -109,19 +109,7 @@ export default function Catalogo() {
     <>
       <Header />
       <main className="catalogo-page" style={colorProductos ? { '--catalogo-texto': colorProductos } : undefined}>
-        <h1 className="catalogo-page-title">
-          <span>{t('catalogo.titulo')}</span>
-          {esAdmin && (
-            <input
-              type="color"
-              className="editable-color"
-              value={colorProductos || '#1d1b15'}
-              onChange={(e) => guardar('catalogo_color', e.target.value)}
-              title="Color del nombre y precio de TODOS los productos"
-              style={{ marginLeft: 10, verticalAlign: 'middle' }}
-            />
-          )}
-        </h1>
+        <h1 className="solo-lector">{t('catalogo.titulo')}</h1>
 
         {busqueda && (
           <p className="catalogo-busqueda-info">

@@ -1,9 +1,8 @@
 // Categorías del catálogo. Se guardan en inglés (key) y se muestran según idioma.
 export const CATEGORIAS = [
-  { key: 'Climbing',       es: 'Escalada' },
-  { key: 'Mountaineering', es: 'Montañismo' },
-  { key: 'Trekking',       es: 'Senderismo' },
-  { key: 'Daypack',        es: 'Mochila de día' },
+  { key: 'Mountaineering', es: 'Alpinismo' },
+  { key: 'Trekking',       es: 'Trekking' },
+  { key: 'Climbing',       es: 'Climbing' },
 ];
 
 // Devuelve el nombre de la categoría en el idioma pedido.

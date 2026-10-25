@@ -22,7 +22,9 @@
   padding: 0 24px;
   background: var(--fondo);
   border: none;
+  transition: background-color 0.2s;
 }
+.navbar-sticky.bajado { background: rgb(225, 225, 225); }
 
 /* ── Hamburguesa (oculta en desktop) ── */
 .navbar-burger {
@@ -142,65 +144,76 @@
   /* mostrar hamburguesa */
   .navbar-burger { display: flex; }
 
-  /* el bloque de links se vuelve un cuadrito compacto (abraza las letras) */
+  /* el menú ocupa toda la pantalla: logo arriba, enlaces grandes al centro */
   .navbar-left {
     position: fixed;
-    top: 56px;
-    left: 14px;
-    width: max-content;
-    max-width: 70vw;
+    inset: 0;
+    height: 100dvh;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 13px;
-    background: #ffffff;
-    padding: 18px 24px 20px;
-    border: 1px solid rgba(176, 83, 46, 0.2);
-    border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: #f6f6f6;
+    padding: 90px 24px 40px;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transform: translateY(-6px) scale(0.97);
-    transform-origin: top left;
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
-    z-index: 291;
+    transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+    z-index: 1000;
   }
   .navbar-left.abierto {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transform: translateY(0) scale(1);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s;
+    transition: opacity 0.2s ease, visibility 0s;
   }
 
-  /* Botón cierre dentro del dropdown */
+  .navbar-menu-logo {
+    position: absolute;
+    top: 21px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: block;
+  }
+  .navbar-menu-logo img { display: block; height: 30px; width: auto; }
+
+  /* la barra queda por encima del logo y la pastilla del header mientras el menú está abierto */
+  .navbar-sticky.menu-abierto { z-index: 1000; }
+
+  /* X arriba a la derecha */
   .navbar-cerrar {
+    position: absolute;
+    top: 16px;
+    right: 14px;
     display: flex;
-    align-self: flex-end;
-    margin-bottom: 8px;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 6px;
+    padding: 8px;
     color: var(--ink);
-    opacity: 0.6;
-    transition: opacity 0.15s;
   }
-  .navbar-cerrar:hover { opacity: 1; }
-  .navbar-cerrar svg { width: 20px; height: 20px; }
+  .navbar-cerrar svg { width: 24px; height: 24px; }
 
-  .navbar-link { font-size: 13px; letter-spacing: 1.5px; }
-  .navbar-admin { font-size: 12px; }
+  .navbar-link { font-size: 22px; letter-spacing: 1px; color: var(--ink); }
+  .navbar-admin { font-size: 13px; letter-spacing: 1.5px; }
 
-  /* idioma dentro del menú: separado abajo con una línea */
-  .navbar-langs {
-    margin-left: 0;
-    padding-top: 12px;
-    margin-top: 2px;
-    border-top: 1px solid rgba(176, 83, 46, 0.18);
-    width: 100%;
+  .navbar-menu-carrito {
+    margin-top: 14px;
+    background: none;
+    border: none;
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink);
+    cursor: pointer;
   }
-  .navbar-langs .navbar-lang { font-size: 12px; }
+
+  /* idioma dentro del menú, debajo del carrito */
+  .navbar-langs { margin-left: 0; justify-content: center; }
+  .navbar-langs .navbar-lang { font-size: 13px; }
 
   /* fondo invisible solo para cerrar al tocar afuera (no oscurece) */
   .navbar-backdrop {
@@ -235,4 +248,8 @@
   .navbar-cart::after { inset: -14px -12px; }
   .navbar-link::after { inset: -10px -10px; }
   .navbar-cerrar { padding: 10px; }
+}
+
+@media (min-width: 821px) {
+  .navbar-menu-logo, .navbar-menu-carrito { display: none; }
 }

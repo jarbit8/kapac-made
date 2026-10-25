@@ -106,6 +106,7 @@ function completar(data) {
     b2bBeneficios: Array.isArray(data.b2bBeneficios) && data.b2bBeneficios.length ? data.b2bBeneficios : B2B_BENEFICIOS_DEFAULT,
     almaBloques: Array.isArray(data.almaBloques) && data.almaBloques.length ? data.almaBloques : ALMA_BLOQUES_DEFAULT,
     infoExtra: Array.isArray(data.infoExtra) ? data.infoExtra : INFO_EXTRA_DEFAULT,
+    infoOcultos: Array.isArray(data.infoOcultos) ? data.infoOcultos : [], // bloques de fábrica de Info que el admin quitó
     cerrado: data.cerrado === true, // tienda cerrada al público (pantalla "Próximamente")
   };
 }

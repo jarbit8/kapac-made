@@ -215,7 +215,7 @@ function hojaReclamo(r) {
       fila('Detalle', parrafos(r.detalle)),
       fila('Pedido del consumidor', parrafos(r.pedido)),
     ].join(''))
-    + `<p style="margin:26px 0 0;font-size:11px;line-height:1.6;color:#9a958c;">Reclamo: disconformidad relacionada con los productos o servicios. Queja: disconformidad no relacionada con los productos o servicios, o malestar o descontento respecto a la atención al público.<br><br>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI. El proveedor deberá dar respuesta al reclamo o queja en un plazo no mayor a quince (15) días hábiles improrrogables.</p>`;
+    + `<p style="margin:26px 0 0;font-size:11px;line-height:1.6;color:#9a958c;">Reclamo: disconformidad relacionada con los productos o servicios. Queja: disconformidad no relacionada con los productos o servicios, o malestar o descontento respecto a la atención al público.<br><br>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante INDECOPI. El proveedor deberá dar respuesta al reclamo o queja en un plazo no mayor a quince (15) días hábiles improrrogables.</p>`;
 }
 
 function correoReclamo(r, { paraTienda = false } = {}) {

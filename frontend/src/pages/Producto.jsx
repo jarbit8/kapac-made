@@ -259,7 +259,7 @@ export default function Producto() {
                   value={CATEGORIAS.find((c) => c.key === producto.categoria || c.es === producto.categoria)?.key || ''}
                   onChange={(e) => guardarCampos({ categoria: e.target.value })}
                 >
-                  <option value="">Sin categoría</option>
+                  {!CATEGORIAS.some((c) => c.key === producto.categoria || c.es === producto.categoria) && <option value="">Sin categoría</option>}
                   {CATEGORIAS.map((c) => <option key={c.key} value={c.key}>{idioma === 'en' ? c.key : c.es}</option>)}
                 </select>
               ) : producto.categoria && (

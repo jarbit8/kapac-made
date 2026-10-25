@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useIdioma } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import Icono from '../Icono';
+import { useTema } from '../../context/TemaContext';
+import { fotoRapida } from '../../utils/fotos';
+import logoTerracota from '../../assets/images/kapac_made_1.png';
 import './NavBar.css';
 
 const IconIg = () => (
@@ -20,6 +23,16 @@ export default function NavBar() {
   const { esAdmin, modoEdicion, setModoEdicion } = useAuth();
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
+  const [bajado, setBajado] = useState(false);
+  const { logo } = useTema();
+
+  // Al bajar, la barra cambia de color para separarse del contenido
+  useEffect(() => {
+    const alBajar = () => setBajado(window.scrollY > 10);
+    alBajar();
+    window.addEventListener('scroll', alBajar, { passive: true });
+    return () => window.removeEventListener('scroll', alBajar);
+  }, []);
 
   const links = [
     { id: 'nav_shop',       label: 'Shop',       to: '/shop' },
@@ -30,9 +43,17 @@ export default function NavBar() {
 
   const cerrar = () => setMenu(false);
 
+  // En el celular el menú ocupa toda la pantalla: la página de atrás no se mueve
+  useEffect(() => {
+    if (!menu) return undefined;
+    const antes = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = antes; };
+  }, [menu]);
+
   return (
     <>
-    <nav className="navbar-sticky">
+    <nav className={`navbar-sticky${bajado ? ' bajado' : ''}${menu ? ' menu-abierto' : ''}`}>
 
       {/* Hamburguesa (solo móvil) — se oculta cuando el menú está abierto */}
       {!menu && (
@@ -55,11 +76,21 @@ export default function NavBar() {
             </svg>
           </button>
         )}
+        {menu && (
+          <Link to="/" className="navbar-menu-logo" onClick={cerrar}>
+            <img src={fotoRapida(logo) || logoTerracota} alt="Kapac Made" />
+          </Link>
+        )}
         {links.map((l) => (
           <Link key={l.to} to={l.to} className="navbar-link" onClick={cerrar}>
             <span>{l.label}</span>
           </Link>
         ))}
+        {menu && (
+          <button type="button" className="navbar-menu-carrito" onClick={() => { cerrar(); navigate('/carrito'); }}>
+            {idioma === 'en' ? 'Cart' : 'Carrito'} ({totalItems})
+          </button>
+        )}
 
         {/* Idioma — después de Contacto */}
         <span className="navbar-langs">
