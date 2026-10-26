@@ -52,7 +52,9 @@ export default function PagoYapeCulqi() {
     return () => clearTimeout(espera);
   }, []);
 
-  const cobrar = async (tokenId) => {
+  // El correo del cobro es el que el cliente escribe en el formulario de Culqi: si todos
+  // usaran el mismo, Culqi lo bloquearía por "demasiados intentos de compra"
+  const cobrar = async (tokenId, correoCulqi) => {
     setProcesando(true);
     setError('');
     try {
@@ -63,7 +65,7 @@ export default function PagoYapeCulqi() {
           token: tokenId,
           amount: totalCentimos,
           pedidoId,
-          email: correoCompra(usuario),
+          email: correoCulqi || correoCompra(usuario),
         }),
       });
 
@@ -73,10 +75,12 @@ export default function PagoYapeCulqi() {
       } else {
         const data = await res.json().catch(() => ({}));
         setError(mensajeServidor(data.mensaje, idioma, t('pago.err_cobro')));
+        window.Culqi?.close?.();
       }
     } catch (e) {
       console.error(e);
       setError(t('pago.err_confirmar'));
+      window.Culqi?.close?.();
     }
     setProcesando(false);
   };
@@ -108,7 +112,7 @@ export default function PagoYapeCulqi() {
     }
     window.culqi = async () => {
       if (window.Culqi.token) {
-        await cobrar(window.Culqi.token.id);
+        await cobrar(window.Culqi.token.id, window.Culqi.token.email);
       } else if (window.Culqi.error) {
         console.error('Culqi error:', window.Culqi.error);
         setError(window.Culqi.error.user_message || t('pago.err_yape'));

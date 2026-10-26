@@ -69,7 +69,7 @@
   width: 220px;
   height: 220px;
   object-fit: contain;
-  margin: 0 auto 26px;
+  margin: 0 auto 10px;
   padding: 10px;
   border: 1px solid #e6e6e6;
   border-radius: 12px;
@@ -270,4 +270,13 @@
   .pago-card { padding: 24px 18px; }
   .pago-qr { width: 190px; height: 190px; }
   .codigo-cip-numero { font-size: 28px; letter-spacing: 3px; }
+}
+
+/* Nombre de la cuenta que recibe el Yape, para que el cliente lo compare en su app */
+.pago-qr-nombre {
+  margin: 0 0 26px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
 }

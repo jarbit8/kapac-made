@@ -493,6 +493,12 @@ export default function Admin() {
                       <Icono nombre={METODO_PAGO[p.metodoPago]?.icono || 'info'} tam={16} />
                       {METODO_PAGO[p.metodoPago]?.texto || p.metodoPago || 'Sin método de pago'}
                     </p>
+                    {p.metodoPago === 'efectivo' && ['procesando_pago', 'verificando_pago'].includes(p.estado)
+                      && p.codigoPagoVence && p.codigoPagoVence * 1000 < Date.now() && (
+                      <p className="admin-pedido-vencido">
+                        <Icono nombre="alerta" tam={14} /> El código de PagoEfectivo venció sin pagarse: cancela el pedido para devolver el stock.
+                      </p>
+                    )}
                     <ul className="admin-pedido-items">
                       {p.items?.map((it, i) => (
                         <li key={i}>{it.cantidad}× {it.nombre} — S/{it.precio * it.cantidad}.00</li>

@@ -112,11 +112,13 @@ exports.notificarCambioEstado = onDocumentUpdated(
       }
     }
 
-    // ── Descontar stock al confirmarse el pago (una sola vez por pedido) ────
-    // Lo hace el servidor con el Admin SDK: los clientes no pueden escribir
-    // en productos. Cubre todos los métodos: tarjeta/yape-código (cobrarCulqi),
-    // PagoEfectivo (webhook) y yape QR (confirmación manual del admin).
-    if (antes.estado !== despues.estado && nuevoEstado === 'pendiente_envio' && !despues.stockDescontado) {
+    // ── Descontar stock una sola vez por pedido ─────────────────────────────
+    // Lo hace el servidor con el Admin SDK: los clientes no pueden escribir en
+    // productos. Se reserva apenas el cliente avisa que pagó (Yape QR) o que ya
+    // tiene su código (PagoEfectivo), para que nadie más compre esa unidad mientras
+    // tanto; si no paga, el pedido se cancela y el stock vuelve. Con tarjeta o
+    // Yape con código se descuenta al confirmarse el pago (cobrarCulqi).
+    if (antes.estado !== despues.estado && ['verificando_pago', 'pendiente_envio'].includes(nuevoEstado) && !despues.stockDescontado) {
       const db = admin.firestore();
       try {
         await db.runTransaction(async (tx) => {
@@ -474,7 +476,7 @@ exports.crearOrdenCulqi = onRequest(
 
       let amount, itemsReales;
       try {
-        ({ centimos: amount, items: itemsReales } = await recalcularPedido(pedidoSnap.data().items));
+        ({ centimos: amount, items: itemsReales } = await recalcularPedido(ped.items, { revisarStock: !ped.stockDescontado }));
       } catch (e) {
         res.status(400).json({ ok: false, mensaje: /stock/i.test(e.message) ? 'No hay stock suficiente para tu pedido.' : 'No se pudo validar el monto del pedido.' });
         return;
@@ -595,7 +597,7 @@ exports.culqiWebhook = onRequest(
       });
       const orden = await verif.json();
 
-      if (orden.object === 'error' || orden.state !== 'paid') {
+      if (orden.object === 'error' || !['paid', 'expired'].includes(orden.state)) {
         res.status(200).send('OK (no confirmada por Culqi)');
         return;
       }
@@ -616,10 +618,18 @@ exports.culqiWebhook = onRequest(
         return;
       }
 
+      // El código venció sin pagarse: se cancela y la unidad reservada vuelve a la tienda
+      if (orden.state === 'expired') {
+        await target.ref.update({ estado: 'cancelado' });
+        console.log('Pedido', target.id, 'cancelado: el código de PagoEfectivo venció sin pagarse');
+        res.status(200).send('OK (vencido)');
+        return;
+      }
+
       // Defensa extra: el monto pagado debe coincidir con el precio real recalculado.
       let esperado;
       try {
-        ({ centimos: esperado } = await recalcularPedido(target.data().items));
+        ({ centimos: esperado } = await recalcularPedido(target.data().items, { revisarStock: !target.data().stockDescontado }));
       } catch (e) {
         console.error('No se pudo recalcular monto en webhook', orderId, e.message);
         res.status(200).send('OK (monto no validable)');

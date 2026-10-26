@@ -172,6 +172,7 @@ export default function Pago() {
               )}
               <img src={imgYape} alt="Yape" className="pago-logo" />
               <img src={qrImg} alt="QR Yape Kapac Made" className="pago-qr" />
+              <p className="pago-qr-nombre">QHAPAQ BRANDS</p>
               {pasos(['pago.yape.paso1', 'pago.yape.paso2', 'pago.yape.paso3', 'pago.yape.paso4'])}
               {error && <p className="pago-error"><Icono nombre="alerta" tam={16} /> {error}</p>}
               <button className="pago-btn-pague" onClick={yaPague} disabled={cargando || estado !== 'listo'}>

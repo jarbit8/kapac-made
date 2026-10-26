@@ -165,7 +165,9 @@ export default function Producto() {
     ? (producto.stock <= 0
         ? `${t('productos.sin_stock')}`
         : producto.stock <= 3
-          ? (idioma === 'en' ? `Only ${producto.stock} left!` : `¡Últimas ${producto.stock} unidades!`)
+          ? (producto.stock === 1
+            ? (idioma === 'en' ? 'Last one left!' : '¡Última unidad!')
+            : (idioma === 'en' ? `Only ${producto.stock} left!` : `¡Últimas ${producto.stock} unidades!`))
           : (idioma === 'en'
               ? `In stock — ${producto.stock} available`
               : `Disponible — ${producto.stock} en stock`))

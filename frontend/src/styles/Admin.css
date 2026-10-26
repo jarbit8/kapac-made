@@ -697,3 +697,12 @@
 
 /* Un correo largo sin espacios no ensancha la tarjeta en celular */
 .admin-pedido-email { overflow-wrap: anywhere; }
+
+.admin-pedido-vencido {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0;
+  font-size: 12.5px;
+  color: #b42318;
+}
