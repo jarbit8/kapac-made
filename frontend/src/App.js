@@ -25,8 +25,7 @@ import Zone from './pages/Zone';
 import Pago from './pages/Pago';
 import Checkout from './pages/Checkout';
 import MetodoPago from './pages/MetodoPago';
-import PagoTarjeta from './pages/PagoTarjeta';
-import PagoYapeCulqi from './pages/PagoYapeCulqi';
+import PagoCulqi from './pages/PagoCulqi';
 import Confirmacion from './pages/Confirmacion';
 import Perfil from './pages/Perfil';
 import LibroReclamaciones from './pages/LibroReclamaciones';
@@ -80,8 +79,8 @@ function AppRoutes() {
       <Route path="/pedidos"       element={<><NavBar /><Pedidos /></>} />
       <Route path="/checkout"      element={<><NavBar /><Checkout /></>} />
       <Route path="/metodo-pago"   element={<><NavBar /><MetodoPago /></>} />
-      <Route path="/pago/tarjeta/:pedidoId" element={<><NavBar /><PagoTarjeta /></>} />
-      <Route path="/pago/yape-codigo/:pedidoId" element={<><NavBar /><PagoYapeCulqi /></>} />
+      <Route path="/pago/tarjeta/:pedidoId" element={<><NavBar /><PagoCulqi metodo="tarjeta" /></>} />
+      <Route path="/pago/yape-codigo/:pedidoId" element={<><NavBar /><PagoCulqi metodo="yape" /></>} />
       <Route path="/pago/:metodo/:pedidoId" element={<><NavBar /><Pago /></>} />
       <Route path="/confirmacion/:pedidoId" element={<><NavBar /><Confirmacion /></>} />
       <Route path="/perfil"   element={<><NavBar /><Perfil /></>} />

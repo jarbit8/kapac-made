@@ -22,8 +22,7 @@ def visitante(ctx):
     assert not fallas, fallas
 
 
-@prueba('Próximamente: el enlace de Instagram se toca bien en celular', tam=('c390', 'c360'), idioma=('es',),
-        bug='el enlace "INSTAGRAM ↗" de la pantalla Próximamente mide 81x18 px (components/SitioCerrado)')
+@prueba('Próximamente: el enlace de Instagram se toca bien en celular', tam=('c390', 'c360'), idioma=('es',))
 def instagram_tocable(ctx):
     s = sesion_cerrada(ctx)
     s.ir('/', 600)

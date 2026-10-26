@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useIdioma } from '../context/LanguageContext';
 import { useTraducido } from '../i18n/useTraducido';
 import { subirImagen } from '../firebase/almacenamiento';
-import { imagen } from '../firebase/imagenesProductos';
+import { fotoRapida } from '../utils/fotos';
 import Icono from './Icono';
 import './Editable.css';
 import './ProductoEditable.css';
@@ -206,7 +206,7 @@ export function FotosProducto({ fotos, elegida, onElegir, onCambiar }) {
           {fotos.map((url, i) => (
             <div key={`${i}-${url}`} className={`pe-foto${i === elegida ? ' activa' : ''}`}>
               <button type="button" className="pe-foto-img" onClick={() => onElegir(i)} aria-label={`Ver foto ${i + 1}`}>
-                <img src={imagen(url)} alt="" />
+                <img src={fotoRapida(url)} alt="" />
                 {i === 0 && <span className="pe-portada">Portada</span>}
               </button>
               <AccionesFoto i={i} total={fotos.length} onMover={(paso) => mover(i, paso)} onQuitar={() => onCambiar(fotos.filter((_, k) => k !== i))} />
@@ -243,7 +243,7 @@ export function GaleriaProducto({ fotos, nombre, onCambiar }) {
       <div className="galeria-edit-grid">
         {fotos.map((url, i) => (
           <figure key={`${i}-${url}`} className={`galeria-edit-item pos-${i} pe-galeria-item`}>
-            <img src={imagen(url)} alt={`${nombre} ${i + 1}`} />
+            <img src={fotoRapida(url)} alt={`${nombre} ${i + 1}`} />
             {i >= MAX_GALERIA && <span className="pe-galeria-oculta">No se muestra</span>}
             <AccionesFoto i={i} total={fotos.length} onMover={(paso) => onCambiar(moverFoto(fotos, i, paso))} onQuitar={() => onCambiar(fotos.filter((_, k) => k !== i))} />
           </figure>

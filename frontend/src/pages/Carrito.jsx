@@ -6,7 +6,7 @@ import Icono from '../components/Icono';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { nombreProducto } from '../i18n/producto';
-import { imagen } from '../firebase/imagenesProductos';
+import { fotoRapida } from '../utils/fotos';
 import '../styles/Carrito.css';
 
 export default function Carrito() {
@@ -65,7 +65,7 @@ export default function Carrito() {
             <div className="carrito-lista">
               {items.map((item) => (
                 <div key={item.id} className="carrito-item">
-                  <img src={imagen(item.imagenMochila)} alt={item.nombre} />
+                  <img src={fotoRapida(item.imagenMochila)} alt={item.nombre} />
                   <div className="carrito-item-info">
                     <h3>{nombreProducto(item, idioma)}</h3>
                     <p className="carrito-precio">{item.moneda}{item.precio}.00</p>

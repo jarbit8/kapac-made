@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { obtenerTextos, guardarTexto } from '../firebase/textos';
 import { traducirEsEn } from '../i18n/traducir';
 import { useAuth } from './AuthContext';
@@ -35,7 +35,7 @@ export function TextosProvider({ children }) {
     try { localStorage.setItem(CACHE_KEY, JSON.stringify(textos)); } catch (_) {}
   }, [textos, frescos]);
 
-  const guardar = async (clave, valor) => {
+  const guardar = useCallback(async (clave, valor) => {
     const anterior = textos[clave];
     setTextos((prev) => ({ ...prev, [clave]: valor })); // refleja al instante
     try {
@@ -47,7 +47,7 @@ export function TextosProvider({ children }) {
       window.alert('No se pudo guardar el cambio. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
       return false;
     }
-  };
+  }, [textos]);
 
   // Textos editados cuya traducción quedó pendiente (la API falló al guardar):
   // cuando entra el admin se completan solas, una vez por sesión. Solo con los
@@ -66,7 +66,7 @@ export function TextosProvider({ children }) {
         if (tr) await guardar(`${id}__en`, tr);
       }
     })();
-  }, [esAdmin, cargando, textos, frescos]);
+  }, [esAdmin, cargando, textos, frescos, guardar]);
 
   return (
     <TextosContext.Provider value={{ textos, listos, esAdmin: puedeEditar, guardar }}>

@@ -358,8 +358,8 @@ test('culqiWebhook: también cobra los pedidos en procesando_pago', async (t) =>
   assert.equal(e.db.leer('pedidos/ped1').estado, 'pendiente_envio');
 });
 
-test('culqiWebhook: una orden que Culqi no marca como pagada no cambia nada', async (t) => {
-  for (const orden of [ordenPagada({ state: 'pending' }), ordenPagada({ state: 'expired' }), { object: 'error' }]) {
+test('culqiWebhook: una orden que Culqi no marca como pagada ni vencida no cambia nada', async (t) => {
+  for (const orden of [ordenPagada({ state: 'pending' }), ordenPagada({ state: 'deleted' }), { object: 'error' }]) {
     const e = entorno(t, conOrden());
     e.responder('/v2/orders/ord_1', orden);
     const res = await llamar(e.funciones.culqiWebhook, { cuerpo: aviso() });

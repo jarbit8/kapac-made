@@ -8,19 +8,23 @@ from base import CIP, CLIENTE, PRECIO, PRODUCTO, prueba, sin_fallas
 TOTAL = PRECIO * 2
 
 
-def a_pago(s, metodo, veces=2, recojo=True):
+def a_pago(s, metodo, veces=2):
     """Deja la sesión en la pantalla de pago de ese método (0 Yape QR, 1 Yape código, 2 tarjeta, 3 PagoEfectivo)."""
-    s.a_metodo_pago(veces, recojo=recojo)
+    s.a_metodo_pago(veces)
     s.elegir_metodo(metodo)
     s.esperar_url('/pago/')
     s.pg.wait_for_selector('.pago-volver')
     return s.url().split('/')[-1]
 
 
-def pagar_con_culqi(s, token='tkn_test_1'):
+def pagar_con_culqi(s, token='tkn_test_1', correo=None):
     s.tocar(s.pg.locator('.tarjeta-btn-pagar'))
     s.pg.wait_for_function('window.__culqiAbierto >= 1')
-    s.ev("(t) => { window.Culqi.token = { id: t }; window.Culqi.error = null; window.culqi(); }", token)
+    s.ev("([t, c]) => { window.Culqi.token = c ? { id: t, email: c } : { id: t }; window.Culqi.error = null; window.culqi(); }", [token, correo])
+
+
+def cierres_de_culqi(s):
+    return s.ev('window.__culqiCerrado || 0')
 
 
 @prueba('Yape con QR: muestra el monto y los pasos, y "Ya realicé el pago" pasa el pedido a verificar')
@@ -29,6 +33,9 @@ def yape_qr(ctx):
     pedido = a_pago(s, 0)
     assert s.txt('.pago-monto strong') == f'S/{TOTAL}.00', s.txt('.pago-monto strong')
     assert s.n('.pago-qr') == 1 and s.n('.pago-paso') == 4
+    assert s.txt('.pago-qr-nombre') == 'QHAPAQ BRANDS'
+    assert s.ev("""() => { const qr = document.querySelector('.pago-qr').getBoundingClientRect(), n = document.querySelector('.pago-qr-nombre').getBoundingClientRect();
+        return n.top >= qr.bottom - 1 && n.top - qr.bottom < 60 && Math.abs((n.left + n.right) / 2 - (qr.left + qr.right) / 2) < 6; }"""), 'el nombre no está centrado bajo el QR'
     sin_fallas(s)
     boton = s.pg.locator('.pago-btn-pague')
     s.tocar(boton)
@@ -94,7 +101,7 @@ def pago_efectivo_sin_red(ctx):
 @prueba('tarjeta: Culqi se abre solo con tarjeta y por el monto del pedido; con el token se cobra y se confirma')
 def tarjeta(ctx):
     s = ctx.sesion_pagos(usuario=CLIENTE)
-    pedido = a_pago(s, 2, recojo=False)
+    pedido = a_pago(s, 2)
     assert s.txt('.tarjeta-monto strong') == f'S/{TOTAL}.00', s.txt('.tarjeta-monto strong')
     sin_fallas(s)
     pagar_con_culqi(s)
@@ -110,7 +117,30 @@ def tarjeta(ctx):
     assert s.txt('.recibo-estado') != ''
 
 
-@prueba('tarjeta: el invitado cobra con el correo vacío y no con "null"', idioma=('es',))
+@prueba('tarjeta: el cobro usa el correo que el cliente escribió en Culqi, no el de la sesión', idioma=('es',))
+def tarjeta_correo_del_token(ctx):
+    for usuario, esperado in ((None, 'otro@correo.com'), (CLIENTE, 'otro@correo.com')):
+        s = ctx.sesion_pagos(usuario=usuario) if usuario else ctx.sesion_pagos()
+        a_pago(s, 2)
+        pagar_con_culqi(s, correo='otro@correo.com')
+        s.esperar_url('/confirmacion/')
+        llamada = json.loads([c[2] for c in s.llamadas if 'cobrarculqi' in c[1]][0])
+        assert llamada['email'] == esperado, llamada
+        assert cierres_de_culqi(s) == 0, 'cerró Culqi aunque el cobro salió bien'
+        s.cerrar()
+
+
+@prueba('Yape con código: el cobro también usa el correo del token de Culqi', idioma=('es',))
+def yape_correo_del_token(ctx):
+    s = ctx.sesion_pagos(usuario=CLIENTE)
+    a_pago(s, 1)
+    pagar_con_culqi(s, 'tkn_yape_2', correo='comprador@correo.com')
+    s.esperar_url('/confirmacion/')
+    llamada = json.loads([c[2] for c in s.llamadas if 'cobrarculqi' in c[1]][0])
+    assert llamada['email'] == 'comprador@correo.com' and llamada['token'] == 'tkn_yape_2', llamada
+
+
+@prueba('tarjeta: el invitado sin correo en el token cobra con el correo vacío y no con "null"', idioma=('es',))
 def tarjeta_invitado(ctx):
     s = ctx.sesion_pagos()
     a_pago(s, 2)
@@ -118,6 +148,28 @@ def tarjeta_invitado(ctx):
     s.esperar_url('/confirmacion/')
     llamada = json.loads([c[2] for c in s.llamadas if 'cobrarculqi' in c[1]][0])
     assert llamada['email'] == '' and 'null' not in json.dumps(llamada), llamada
+
+
+@prueba('si el cobro falla se cierra la ventana de Culqi (tarjeta y Yape con código)', idioma=('es', 'en'))
+def culqi_se_cierra_si_falla(ctx):
+    for metodo in (2, 1):
+        s = ctx.sesion_pagos(cobro=(400, {'ok': False, 'mensaje': 'Tarjeta rechazada.'}))
+        a_pago(s, metodo)
+        pagar_con_culqi(s, correo='otro@correo.com')
+        s.pg.wait_for_selector('.tarjeta-error')
+        assert cierres_de_culqi(s) == 1, f'método {metodo}: Culqi se cerró {cierres_de_culqi(s)} veces'
+        s.cerrar()
+
+
+@prueba('si el servidor no responde también se cierra la ventana de Culqi', idioma=('es',), permitir_errores=('Failed to fetch',))
+def culqi_se_cierra_sin_red(ctx):
+    for metodo in (2, 1):
+        s = ctx.sesion()
+        a_pago(s, metodo)
+        pagar_con_culqi(s)
+        s.pg.wait_for_selector('.tarjeta-error')
+        assert cierres_de_culqi(s) == 1, f'método {metodo}: Culqi se cerró {cierres_de_culqi(s)} veces'
+        s.cerrar()
 
 
 @prueba('tarjeta rechazada: se muestra el motivo, en inglés el mensaje conocido, y el cliente puede reintentar', idioma=('es', 'en'))
@@ -205,7 +257,7 @@ def cip_reabierto(ctx):
 def cambiar_metodo(ctx):
     for i in range(4):
         s = ctx.sesion_pagos()
-        primero = a_pago(s, i, recojo=False)
+        primero = a_pago(s, i)
         s.tocar(s.pg.locator('.pago-volver'))
         s.esperar_url('/metodo-pago')
         s.pg.wait_for_selector('.metodo-opcion')
@@ -239,8 +291,7 @@ def cerrada_la_compra(ctx):
         assert s.url() == '/carrito', f'{ruta} -> {s.url()}'
 
 
-@prueba('PagoEfectivo: el "vence" sale en hora de Lima aunque el cliente esté en otra zona horaria', idioma=('es',),
-        bug='/pago/efectivo usa la zona horaria del navegador (toLocaleString sin timeZone) y la confirmación usa la de Lima: no coinciden fuera de Perú (pages/Pago.jsx)')
+@prueba('PagoEfectivo: el "vence" sale en hora de Lima aunque el cliente esté en otra zona horaria', idioma=('es',))
 def vence_en_hora_de_lima(ctx):
     s = ctx.sesion_pagos(zona='Europe/Madrid')
     a_pago(s, 3)
@@ -254,13 +305,24 @@ def vence_en_hora_de_lima(ctx):
     assert hora(en_pago) and hora(en_confirmacion) and hora(en_pago).groups() == hora(en_confirmacion).groups(), f'pago: "{en_pago}" / confirmación: "{en_confirmacion}"'
 
 
-@prueba('si el precio cambia mientras el cliente está en el método de pago, ve un aviso antes de pagar', idioma=('es',),
-        bug='la lectura automática del carrito (1,5 s después de abrir) cambia el total y guarda el aviso, pero esa pantalla no lo muestra: el cliente paga otro monto sin enterarse (context/CartContext.jsx + pages/MetodoPago.jsx)')
+@prueba('si el precio cambia mientras el cliente está en el método de pago, vuelve al carrito con el aviso', idioma=('es', 'en'))
 def aviso_en_metodo_pago(ctx):
     import datos
     s = ctx.sesion()
     s.a_metodo_pago(1)
     s.cambiar_catalogo('productos/kapac-test', datos.producto(precio='120'))
-    s.pg.wait_for_timeout(3500)
-    assert s.txt('.metodo-sub').endswith('S/120.00'), 'el total no se actualizó (otra falla distinta)'
-    assert s.n('.carrito-avisos') + s.n('.metodo-aviso') + s.n('[role=status]') >= 1, 'el total cambió de S/90 a S/120 sin ningún aviso en pantalla'
+    s.esperar_url('/carrito', timeout=9000)
+    s.pg.wait_for_selector('.carrito-avisos')
+    assert s.n('.carrito-avisos li') == 1 and 'S/120.00' in s.txt('.carrito-precio')
+    assert not s.pedidos_creados()
+
+
+@prueba('si el stock baja mientras el cliente está en el método de pago, vuelve al carrito con el aviso', idioma=('es',))
+def aviso_stock_en_metodo_pago(ctx):
+    import datos
+    s = ctx.sesion()
+    s.a_metodo_pago(2)
+    s.cambiar_catalogo('productos/kapac-test', datos.producto(stock='1'))
+    s.esperar_url('/carrito', timeout=9000)
+    s.pg.wait_for_selector('.carrito-avisos')
+    assert not s.pedidos_creados()

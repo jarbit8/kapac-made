@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { obtenerProducto, obtenerProductos, productosGuardados, actualizarProducto, eliminarProducto } from '../firebase/productos';
-import { imagen } from '../firebase/imagenesProductos';
+import { fotoRapida } from '../utils/fotos';
 import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
@@ -224,7 +224,7 @@ export default function Producto() {
                       if (total > 1 && Math.abs(dx) > 40) setImgIdx(dx < 0 ? idx + 1 : idx - 1);
                     }}
                   >
-                    <img key={idx} src={imagen(imgs[idx])} alt={producto.nombre} className="galeria-img" draggable="false" />
+                    <img key={idx} src={fotoRapida(imgs[idx])} alt={producto.nombre} className="galeria-img" draggable="false" />
                     {total > 1 && (
                       <>
                         <button className="galeria-flecha izq" aria-label="Anterior" onClick={() => setImgIdx(idx - 1)}>‹</button>
@@ -387,7 +387,7 @@ export default function Producto() {
         {producto && (() => {
           const galeria = (Array.isArray(producto.galeria) ? producto.galeria : []).filter(Boolean);
           if (esAdmin) return <GaleriaProducto fotos={galeria} nombre={nombreProducto(producto, idioma)} onCambiar={cambiarGaleria} />;
-          const fotos = galeria.map(imagen).slice(0, MAX_GALERIA);
+          const fotos = galeria.map(fotoRapida).slice(0, MAX_GALERIA);
           if (!fotos.length) return null;
           return (
             <section className="producto-galeria-edit">
@@ -410,7 +410,7 @@ export default function Producto() {
               {relacionados.map((p) => (
                 <Link key={p.id} to={`/producto/${p.id}`} className="relacionado-card">
                   <div className="relacionado-img">
-                    <img src={imagen(p.imagenMochila)} alt={nombreProducto(p, idioma)} loading="lazy" decoding="async" />
+                    <img src={fotoRapida(p.imagenMochila)} alt={nombreProducto(p, idioma)} loading="lazy" decoding="async" />
                   </div>
                   <span className="relacionado-nombre"><TextoProducto texto={p.nombre} idioma={idioma} /></span>
                   <span className="relacionado-precio">{p.moneda}{p.precio}.00</span>

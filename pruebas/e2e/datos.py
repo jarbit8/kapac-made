@@ -107,7 +107,7 @@ def semilla():
     datos = {
         f'productos/{PRODUCTO_ID}': producto(),
         f'productos/{OTRO_PRODUCTO_ID}': producto(nombre='Daypack Ligero', nombreEn='Light Daypack', precio='150', precioOriginal='190',
-                                                   stock='10', categoria='Daypack', fotos=[foto('d')], imagenMochila=foto('d')),
+                                                   stock='10', categoria='Trekking', fotos=[foto('d')], imagenMochila=foto('d')),
         'contenido/sitio': {'cerrado': False},
         'contenido/textos': {},
     }

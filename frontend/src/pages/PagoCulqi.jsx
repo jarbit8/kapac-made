@@ -11,12 +11,20 @@ import { useCart } from '../context/CartContext';
 import { useIdioma } from '../context/LanguageContext';
 import { mensajeServidor } from '../i18n/mensajes';
 import { correoCompra, marcarReemplazado } from '../utils/compra';
+import imgTarjeta from '../assets/images/tarjeta.jpg';
 import imgYape from '../assets/images/yape.avif';
 import '../styles/PagoTarjeta.css';
 
 const CULQI_PUBLIC_KEY = 'pk_live_9a20b52121a4528b';
 
-export default function PagoYapeCulqi() {
+// Culqi se abre con un solo medio de pago: tarjeta o Yape
+const METODOS = {
+  tarjeta: { textos: 'tarjeta', imagen: imgTarjeta, alt: 'Visa, Mastercard, American Express', error: 'pago.err_tarjeta' },
+  yape: { textos: 'yapeculqi', imagen: imgYape, alt: 'Yape', error: 'pago.err_yape' },
+};
+
+export default function PagoCulqi({ metodo }) {
+  const { textos, imagen, alt, error: textoError } = METODOS[metodo];
   const { pedidoId } = useParams();
   const navigate = useNavigate();
   const { usuario } = useAuth();
@@ -94,15 +102,14 @@ export default function PagoYapeCulqi() {
       description: `Pedido #${pedidoId.slice(0, 8)}`,
       amount: totalCentimos,
     });
-    // Solo Yape activado en el modal de Culqi
     if (typeof window.Culqi.options === 'function') {
       window.Culqi.options({
         lang: idioma,
         modal: true,
-        installments: false,
+        installments: metodo === 'tarjeta',
         paymentMethods: {
-          tarjeta:    false,
-          yape:       true,
+          tarjeta:    metodo === 'tarjeta',
+          yape:       metodo === 'yape',
           bancaMovil: false,
           agente:     false,
           billetera:  false,
@@ -115,7 +122,7 @@ export default function PagoYapeCulqi() {
         await cobrar(window.Culqi.token.id, window.Culqi.token.email);
       } else if (window.Culqi.error) {
         console.error('Culqi error:', window.Culqi.error);
-        setError(window.Culqi.error.user_message || t('pago.err_yape'));
+        setError(window.Culqi.error.user_message || t(textoError));
         setProcesando(false);
       }
     };
@@ -141,7 +148,7 @@ export default function PagoYapeCulqi() {
           <Icono nombre="flechaIzq" tam={16} /> {t('pago.volver')}
         </button>
 
-        <h1>{t('pago.yapeculqi.titulo')}</h1>
+        <h1>{t(`pago.${textos}.titulo`)}</h1>
         <p className="tarjeta-sub"><Icono nombre="escudo" tam={17} /> {t('pago.tarjeta.sub')} <strong>Culqi</strong></p>
 
         <div className="tarjeta-card">
@@ -157,12 +164,12 @@ export default function PagoYapeCulqi() {
               )}
 
               <div className="tarjeta-marcas">
-                <img src={imgYape} alt="Yape" />
+                <img src={imagen} alt={alt} />
               </div>
 
               <div className="tarjeta-seguro">
                 <Icono nombre="candado" tam={17} />
-                <span>{t('pago.yapeculqi.seguro')}</span>
+                <span>{t(`pago.${textos}.seguro`)}</span>
               </div>
 
               {(error || fallaScript) && (
@@ -174,11 +181,11 @@ export default function PagoYapeCulqi() {
               ) : (
                 <button className="tarjeta-btn-pagar" onClick={abrirCulqi} disabled={!listo || estado !== 'listo' || procesando}>
                   {!listo || estado !== 'listo' ? t('pago.tarjeta.cargando') : procesando ? t('pago.tarjeta.procesando')
-                    : <><Icono nombre="candado" tam={17} /> {t('pago.yapeculqi.boton')} S/{total}.00</>}
+                    : <><Icono nombre="candado" tam={17} /> {t(`pago.${textos}.boton`)} S/{total}.00</>}
                 </button>
               )}
 
-              <p className="tarjeta-aviso">{t('pago.yapeculqi.aviso')}</p>
+              <p className="tarjeta-aviso">{t(`pago.${textos}.aviso`)}</p>
             </>
           )}
         </div>

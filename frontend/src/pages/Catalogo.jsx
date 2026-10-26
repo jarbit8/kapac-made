@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { obtenerProductos, productosGuardados, agregarProducto } from '../firebase/productos';
-import { imagen } from '../firebase/imagenesProductos';
+import { fotoRapida } from '../utils/fotos';
 import { useIdioma } from '../context/LanguageContext';
 import { useTextos } from '../context/TextosContext';
 import TextoProducto from '../components/TextoProducto';
@@ -37,15 +37,13 @@ export default function Catalogo() {
   const [productos, setProductos] = useState(() => productosGuardados() || []);
   const [creando, setCreando] = useState(false);
   const [cargando, setCargando] = useState(() => productosGuardados() === null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const { t, idioma } = useIdioma();
   const { textos, esAdmin } = useTextos();
   const colorProductos = textos['catalogo_color'] || '';
 
   const busqueda = searchParams.get('q') || '';
-  const [catSel, setCatSel] = useState('__todas__');
-  const [orden, setOrden] = useState('relevancia');
 
   useEffect(() => {
     obtenerProductos()
@@ -55,15 +53,12 @@ export default function Catalogo() {
       })
       .catch((e) => {
         // Sin conexión se quedan los de la visita anterior
-        if (productosGuardados() === null) setError(idioma === 'en' ? 'Could not load products.' : 'No se pudieron cargar los productos.');
+        if (productosGuardados() === null) setError(true);
         setCargando(false);
         console.error(e);
       });
   }, []);
 
-  const TODAS_KEY = '__todas__';
-
-  // Aplicar búsqueda + filtro + orden
   const filtrados = useMemo(() => {
     // Los borradores (activo: false) solo los ve el admin en modo edición
     let res = productos.filter((p) => p.activo !== false || esAdmin);
@@ -78,15 +73,8 @@ export default function Catalogo() {
       );
     }
 
-    if (catSel !== TODAS_KEY) {
-      res = res.filter((p) => p.categoria === catSel);
-    }
-
-    if (orden === 'precio-asc') res.sort((a, b) => a.precio - b.precio);
-    if (orden === 'precio-desc') res.sort((a, b) => b.precio - a.precio);
-
     return res;
-  }, [productos, busqueda, catSel, orden, esAdmin]);
+  }, [productos, busqueda, esAdmin]);
 
   const crearProducto = async () => {
     setCreando(true);
@@ -121,7 +109,7 @@ export default function Catalogo() {
         )}
 
         {cargando && <Cargando />}
-        {error && <p style={{ color: 'crimson' }}>{error}</p>}
+        {error && <p style={{ color: 'crimson' }}>{idioma === 'en' ? 'Could not load products.' : 'No se pudieron cargar los productos.'}</p>}
 
         {!cargando && !error && filtrados.length === 0 && (
           <p style={{ color: '#666', padding: '40px 0' }}><span>{t('catalogo.vacio')}</span></p>
@@ -135,7 +123,7 @@ export default function Catalogo() {
                 <Link to={`/producto/${p.id}`} className="cat-img-wrap">
                   {!p.imagenMochila
                     ? <span className={`cat-sin-foto${esAdmin ? '' : ' vacia'}`}>{esAdmin ? 'Sin foto' : ''}</span>
-                    : <img src={imagen(p.imagenMochila)} alt={p.nombre} loading="lazy" decoding="async" />}
+                    : <img src={fotoRapida(p.imagenMochila)} alt={p.nombre} loading="lazy" decoding="async" />}
                 </Link>
                 <div className="catalogo-page-info">
                   <Link to={`/producto/${p.id}`} className="catalogo-page-name">

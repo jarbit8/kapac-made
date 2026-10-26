@@ -16,17 +16,12 @@ def error(s):
     return s.txt('.checkout-error')
 
 
-@prueba('el checkout pide que elijas entrega y valida cada campo')
+@prueba('el checkout valida cada campo')
 def checkout_validaciones(ctx):
     s = ctx.sesion()
     s.agregar_al_carrito(PRODUCTO, 1)
     s.ir('/checkout', 500)
-    assert s.n('.checkout-opcion') == 2
     sin_fallas(s)
-    s.tocar(s.pg.locator('.checkout-btn-continuar'))
-    s.pg.wait_for_selector('.checkout-error')
-    assert error(s) == ctx.t('Por favor selecciona una opción de entrega.', 'Please select a delivery option.'), error(s)
-    s.tocar(s.pg.locator('.checkout-opcion').nth(0))
     s.tocar(s.pg.locator('.checkout-btn-continuar'))
     s.pg.wait_for_selector('.checkout-error')
     assert error(s) == ctx.t('Por favor completa todos los campos obligatorios (*).', 'Please fill in all required fields (*).'), error(s)
@@ -41,7 +36,6 @@ def checkout_validaciones(ctx):
     fallas = []
     for desc, valores, esperado in casos:
         s.ir('/checkout', 300)
-        s.tocar(s.pg.locator('.checkout-opcion').nth(0))
         llenar(s, valores)
         s.tocar(s.pg.locator('.checkout-btn-continuar'))
         s.pg.wait_for_timeout(250)
@@ -57,7 +51,6 @@ def checkout_telefono(ctx):
     s = ctx.sesion()
     s.agregar_al_carrito(PRODUCTO, 1)
     s.ir('/checkout', 400)
-    s.tocar(s.pg.locator('.checkout-opcion').nth(0))
     llenar(s, [DATOS_VALIDOS[0], '987 654 321', *DATOS_VALIDOS[2:]])
     s.tocar(s.pg.locator('.checkout-btn-continuar'))
     s.esperar_url('/metodo-pago')
@@ -66,33 +59,33 @@ def checkout_telefono(ctx):
     assert envio['tipo'] == 'envio' and envio['distrito'] == 'Cayma'
 
 
-@prueba('el recojo pide nombre y celular y el pedido queda como Recojo en Arequipa')
-def recojo(ctx):
+@prueba('el checkout solo ofrece envío a domicilio y el pedido guarda la dirección')
+def solo_domicilio(ctx):
     s = ctx.sesion()
     s.agregar_al_carrito(PRODUCTO, 1)
-    s.ir('/checkout', 400)
-    s.tocar(s.pg.locator('.checkout-opcion').nth(1))
-    assert s.n('.checkout-form input') == 2, 'el recojo no necesita dirección'
-    s.tocar(s.pg.locator('.checkout-btn-continuar'))
-    s.pg.wait_for_selector('.checkout-error')
-    assert error(s) == ctx.t('Por favor completa tu nombre y teléfono.', 'Please enter your name and phone number.'), error(s)
-    llenar(s, ['Ana Perez', '+51 987 654 321'])
+    s.ir('/checkout', 500)
+    assert s.n('.checkout-opcion') == 1 and s.n('.checkout-opcion.seleccionada') == 1
+    assert s.n('button.checkout-opcion') == 0, 'la única opción no es un botón'
+    assert ctx.tr('checkout.envio_dom') in s.txt('.checkout-opcion')
+    assert s.n('.checkout-form input') == 5, 'nombre, celular, dirección, distrito y referencia'
+    cuerpo = s.cuerpo().lower()
+    assert 'recojo' not in cuerpo and 'pick up' not in cuerpo and 'pickup' not in cuerpo, 'quedó una opción de recojo'
+    llenar(s, ['Ana Perez', '+51 987 654 321', 'Av Siempre Viva 123', 'Cayma'])
     s.tocar(s.pg.locator('.checkout-btn-continuar'))
     s.esperar_url('/metodo-pago')
     envio = json.loads(s.session('checkout_envio'))
-    assert envio['tipo'] == 'recojo' and envio['telefono'] == '987654321', envio
-    assert envio['direccion'] == 'Recojo en Arequipa'
+    assert envio == {'tipo': 'envio', 'nombre': 'Ana Perez', 'telefono': '987654321', 'direccion': 'Av Siempre Viva 123', 'distrito': 'Cayma', 'referencia': ''}, envio
 
 
 @prueba('al volver desde el método de pago el checkout recuerda lo escrito')
 def checkout_recuerda(ctx):
     s = ctx.sesion()
-    s.a_metodo_pago(1, recojo=False)
+    s.a_metodo_pago(1)
     s.tocar(s.pg.locator('.metodo-btn-volver'))
     s.esperar_url('/checkout')
     s.pg.wait_for_selector('.checkout-form input')
     assert s.ev("[...document.querySelectorAll('.checkout-form input')].map(i => i.value).slice(0, 4)") == ['Ana Perez', '987654321', 'Av Siempre Viva 123', 'Cayma']
-    assert s.n('.checkout-opcion.seleccionada') == 1
+    assert s.n('.checkout-opcion.seleccionada') == 1 and s.n('.checkout-opcion') == 1
 
 
 @prueba('el método de pago muestra el total y exige elegir uno')
@@ -117,7 +110,7 @@ def pedido_por_metodo(ctx):
     metodos = ['yape', 'yape-codigo', 'tarjeta', 'efectivo']
     for i, (ruta, metodo) in enumerate(zip(rutas, metodos)):
         s = ctx.sesion_pagos()
-        s.a_metodo_pago(2, recojo=(i % 2 == 0))
+        s.a_metodo_pago(2)
         s.elegir_metodo(i)
         s.esperar_url(ruta)
         assert len(s.pedidos_creados()) == 1, f'{metodo}: {len(s.pedidos_creados())} pedidos'
@@ -126,7 +119,7 @@ def pedido_por_metodo(ctx):
         assert p['total'] == PRECIO * 2
         assert [(it['id'], it['cantidad']) for it in p['items']] == [('kapac-test', 2)]
         assert p['nombre'] == 'Ana Perez' and p['esInvitado'] is True
-        assert p['envio']['tipo'] == ('recojo' if i % 2 == 0 else 'envio')
+        assert p['envio']['tipo'] == 'envio' and p['envio']['direccion'] == 'Av Siempre Viva 123'
         assert p['email'] == '', 'el invitado no dio correo en el checkout: no puede quedar "null"'
         assert set(p) == {'usuarioId', 'email', 'nombre', 'items', 'total', 'estado', 'metodoPago', 'envio', 'esInvitado', 'fecha'}, sorted(p)
         sin_fallas(s)
@@ -150,7 +143,6 @@ def cliente_con_cuenta(ctx):
     s = ctx.sesion(usuario=CLIENTE, datos=perfil)
     s.agregar_al_carrito(PRODUCTO, 1)
     s.ir('/checkout', 1000)
-    s.tocar(s.pg.locator('.checkout-opcion').nth(0))
     s.pg.wait_for_timeout(300)
     assert s.ev("[...document.querySelectorAll('.checkout-form input')].map(i => i.value).slice(0, 4)") == ['Ana Quispe', '987654321', 'Calle Mercaderes 123', 'Cercado']
     s.tocar(s.pg.locator('.checkout-btn-continuar'))

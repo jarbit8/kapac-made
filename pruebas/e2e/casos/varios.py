@@ -106,14 +106,53 @@ def boletin_cabe(ctx):
     assert l >= 0 and r <= vw and b <= r + 1, f'paso 2: {fila()}'
 
 
-@prueba('menú del celular: abre, cambia de idioma sin cerrarse, navega y se cierra de tres maneras', tam=('c390', 'c360'))
+def abrir_menu(s):
+    s.tocar(s.pg.locator('.navbar-burger'))
+    s.pg.wait_for_selector('.navbar-left.abierto')
+    s.pg.wait_for_timeout(250)
+
+
+def menu_cerrado(s):
+    s.pg.wait_for_selector('.navbar-left.abierto', state='detached')
+    assert s.ev("document.body.style.overflow") != 'hidden', 'la página quedó sin scroll después de cerrar el menú'
+
+
+@prueba('menú del celular: ocupa toda la pantalla con logo y carrito, y la página de atrás no se mueve', tam=('c390', 'c360'))
+def menu_celular_abierto(ctx):
+    s = ctx.sesion()
+    s.agregar_al_carrito(PRODUCTO, 2)
+    s.ir('/shop', 500)
+    assert s.pg.locator('.navbar-burger').is_visible() and not s.pg.locator('.navbar-left .navbar-link').first.is_visible()
+    s.ev("window.scrollTo({ top: 260, behavior: 'instant' })")
+    s.pg.wait_for_timeout(200)
+    antes = s.ev('window.scrollY')
+    assert antes > 100, f'la tienda no baja lo suficiente para probar: {antes}'
+    abrir_menu(s)
+    caja = s.ev("(() => { const r = document.querySelector('.navbar-left.abierto').getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; })()")
+    assert caja[0] <= 0 and caja[1] <= 0 and caja[2] >= s.w - 1 and caja[3] >= s.h - 1, f'el menú no cubre la pantalla: {caja}'
+    assert s.ev("document.body.style.overflow") == 'hidden'
+    logo = s.pg.locator('.navbar-menu-logo')
+    assert logo.is_visible() and logo.locator('img').get_attribute('alt') == 'Kapac Made'
+    assert s.ev("getComputedStyle(document.querySelector('.navbar-left.abierto')).backgroundColor") == 'rgb(246, 246, 246)'
+    assert s.ev("Number(getComputedStyle(document.querySelector('.navbar-sticky')).zIndex)") >= 1000, 'el menú quedaría debajo del encabezado'
+    carrito = s.pg.locator('.navbar-menu-carrito')
+    assert carrito.inner_text().strip() == ctx.t('Carrito (2)', 'Cart (2)'), carrito.inner_text()
+    s.pg.mouse.wheel(0, 700)
+    s.pg.wait_for_timeout(300)
+    assert s.ev('window.scrollY') == antes, 'la página de atrás se movió con el menú abierto'
+    assert s.n('.navbar-burger') == 0 and s.n('.navbar-cerrar') == 1
+    sin_fallas(s)
+    s.tocar(s.pg.locator('.navbar-cerrar'))
+    menu_cerrado(s)
+    s.pg.wait_for_timeout(200)
+    assert s.ev('window.scrollY') == antes, 'la página volvió a otra altura al cerrar el menú'
+
+
+@prueba('menú del celular: cambia de idioma sin cerrarse y navega o se cierra con el logo, los enlaces y el carrito', tam=('c390', 'c360'))
 def menu_celular(ctx):
     s = ctx.sesion()
     s.ir('/shop', 500)
-    assert s.pg.locator('.navbar-burger').is_visible() and not s.pg.locator('.navbar-left .navbar-link').first.is_visible()
-    s.tocar(s.pg.locator('.navbar-burger'))
-    s.pg.wait_for_selector('.navbar-left.abierto')
-    assert s.desborde()[0] <= s.desborde()[1]
+    abrir_menu(s)
     links = [l.strip().lower() for l in s.pg.locator('.navbar-left .navbar-link').all_inner_texts()]
     assert links[:4] == ['shop', 'kapac made', 'b2b', 'info'], links
     otro = 'en' if ctx.es else 'es'
@@ -124,18 +163,39 @@ def menu_celular(ctx):
     s.pg.wait_for_function(f"document.documentElement.lang === '{ctx.idioma}'")
     for ruta, texto in (('/kapac-made', 'kapac made'), ('/b2b', 'b2b'), ('/info', 'info'), ('/shop', 'shop')):
         if not s.n('.navbar-left.abierto'):
-            s.tocar(s.pg.locator('.navbar-burger'))
+            abrir_menu(s)
         s.tocar(s.pg.locator('.navbar-left .navbar-link').filter(has_text=re.compile(f'^{texto}$', re.I)))
         s.esperar_url(rf'{ruta}$')
-        s.pg.wait_for_selector('.navbar-left.abierto', state='detached')
-    s.tocar(s.pg.locator('.navbar-burger'))
-    s.tocar(s.pg.locator('.navbar-cerrar'))
-    s.pg.wait_for_selector('.navbar-left.abierto', state='detached')
-    s.tocar(s.pg.locator('.navbar-burger'))
-    s.pg.touchscreen.tap(s.w - 8, s.h - 40)
-    s.pg.wait_for_selector('.navbar-left.abierto', state='detached')
-    s.tocar(s.pg.locator('.logo').first)
+        menu_cerrado(s)
+    abrir_menu(s)
+    s.tocar(s.pg.locator('.navbar-menu-carrito'))
+    s.esperar_url('/carrito')
+    menu_cerrado(s)
+    abrir_menu(s)
+    s.tocar(s.pg.locator('.navbar-menu-logo'))
     s.esperar_url(r'/$')
+    menu_cerrado(s)
+    s.ir('/info', 400)
+    abrir_menu(s)
+    s.tocar(s.pg.locator('.navbar-cerrar'))
+    menu_cerrado(s)
+
+
+@prueba('la barra de arriba se pone gris al bajar y vuelve a su color arriba')
+def barra_al_bajar(ctx):
+    s = ctx.sesion()
+    s.ir('/shop', 500)
+    color = "getComputedStyle(document.querySelector('.navbar-sticky')).backgroundColor"
+    arriba = s.ev(color)
+    assert arriba != 'rgb(225, 225, 225)' and not s.n('.navbar-sticky.bajado'), arriba
+    s.ev("window.scrollTo({ top: 300, behavior: 'instant' })")
+    s.pg.wait_for_selector('.navbar-sticky.bajado')
+    s.pg.wait_for_timeout(450)
+    assert s.ev(color) == 'rgb(225, 225, 225)', s.ev(color)
+    s.ev("window.scrollTo({ top: 0, behavior: 'instant' })")
+    s.pg.wait_for_selector('.navbar-sticky.bajado', state='detached')
+    s.pg.wait_for_timeout(450)
+    assert s.ev(color) == arriba
 
 
 @prueba('en la computadora el menú se ve completo y el idioma se mantiene al navegar y al recargar', tam=('pc',))

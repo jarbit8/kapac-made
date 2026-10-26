@@ -225,9 +225,23 @@ test('leerReclamo: un cuerpo vacío o con valores nulos se rechaza', () => {
   assert.equal(leerReclamo({ ...reclamo, detalle: null }), null);
 });
 
-test('leerReclamo: un objeto en vez de texto se rechaza', { todo: 'hoy el nombre {a:1} se guarda como "[object Object]" (functions/lib/validar.js, leerReclamo)' }, () => {
+test('leerReclamo: un objeto o una lista en vez de texto cuenta como vacío y se rechaza', () => {
   assert.equal(leerReclamo({ ...reclamo, nombre: { a: 1 } }), null);
+  assert.equal(leerReclamo({ ...reclamo, nombre: ['Ana'] }), null);
   assert.equal(leerReclamo({ ...reclamo, bienDescripcion: ['abc', 'def'] }), null);
+  assert.equal(leerReclamo({ ...reclamo, detalle: { a: 1 } }), null);
+  assert.equal(leerReclamo({ ...reclamo, pedido: true }), null);
+});
+
+test('leerReclamo: lo opcional que llega como objeto se guarda vacío, nunca como "[object Object]"', () => {
+  const r = leerReclamo({ ...reclamo, telefono: { a: 1 }, pedidoId: ['x'] });
+  assert.equal(r.telefono, '');
+  assert.equal(r.pedidoId, '');
+  assert.ok(!JSON.stringify(r).includes('[object'));
+});
+
+test('leerReclamo: un número en un campo de texto se acepta como texto', () => {
+  assert.equal(leerReclamo({ ...reclamo, telefono: 987654321 }).telefono, '987654321');
 });
 
 const limaTexto = (fecha) => fecha.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });

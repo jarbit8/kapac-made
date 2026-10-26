@@ -56,7 +56,7 @@ window.Culqi = {
   settings: function (c) { window.__culqiConfig = c; },
   options: function (o) { window.__culqiOpciones = o; },
   open: function () { window.__culqiAbierto = (window.__culqiAbierto || 0) + 1; },
-  close: function () {},
+  close: function () { window.__culqiCerrado = (window.__culqiCerrado || 0) + 1; },
 };
 """
 
@@ -291,22 +291,20 @@ class Sesion:
             self.tocar(self.pg.locator('.producto-add'))
             self.pg.wait_for_timeout(180)
 
-    def llenar_checkout(self, recojo=True, nombre='Ana Perez', telefono='987654321', direccion='Av Siempre Viva 123', distrito='Cayma'):
+    def llenar_checkout(self, nombre='Ana Perez', telefono='987654321', direccion='Av Siempre Viva 123', distrito='Cayma'):
         pg = self.pg
         self.ir('/checkout', 400)
-        self.tocar(pg.locator('.checkout-opcion').nth(1 if recojo else 0))
         campos = pg.locator('.checkout-form input')
         campos.nth(0).fill(nombre)
         campos.nth(1).fill(telefono)
-        if not recojo:
-            campos.nth(2).fill(direccion)
-            campos.nth(3).fill(distrito)
+        campos.nth(2).fill(direccion)
+        campos.nth(3).fill(distrito)
         self.tocar(pg.locator('.checkout-btn-continuar'))
         pg.wait_for_url(re.compile('/metodo-pago'))
 
-    def a_metodo_pago(self, veces=1, recojo=True, producto=PRODUCTO):
+    def a_metodo_pago(self, veces=1, producto=PRODUCTO):
         self.agregar_al_carrito(producto, veces)
-        self.llenar_checkout(recojo=recojo)
+        self.llenar_checkout()
 
     def elegir_metodo(self, indice):
         """0 Yape QR, 1 Yape código, 2 tarjeta, 3 PagoEfectivo."""
