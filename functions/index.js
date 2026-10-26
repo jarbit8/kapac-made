@@ -3,9 +3,10 @@ const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { onMessagePublished } = require('firebase-functions/v2/pubsub');
 const { defineSecret } = require('firebase-functions/params');
 const admin = require('firebase-admin');
-const fetch = require('node-fetch');
 const { Resend } = require('resend');
 const { correoPedido, correoCodigo, correoReclamo, correoRespuestaReclamo } = require('./correos');
+const { correoValido, nombreCulqi, ordenDelAviso, leerReclamo, sumarDiasHabiles } = require('./lib/validar');
+const pedidos = require('./lib/pedidos');
 
 admin.initializeApp();
 
@@ -15,52 +16,11 @@ const resendSecret = defineSecret('RESEND_API_KEY');
 const REMITENTE = 'Kapac Made <pedidos@kapac-made.com>';
 // Si el cliente responde el correo, le llega aquí (pedidos@ solo envía)
 const RESPONDER_A = 'jarb2299@gmail.com';
+const CORS = ['https://jarbit8.github.io', 'https://www.kapac-made.com', 'https://kapac-made.com'];
 
-// Recalcula el pedido REAL leyendo cada producto desde la base de datos:
-// precio Y nombre salen de la BD, nunca de lo que mandó el cliente. Así no se
-// puede ni pagar de menos ni listar un producto distinto al que se cobra.
-// Devuelve { centimos, items } ya saneados.
-async function recalcularPedido(items, { revisarStock = true } = {}) {
-  const db = admin.firestore();
-  let soles = 0;
-  const limpios = [];
-  for (const it of (items || [])) {
-    if (!it?.id) throw new Error('Item sin id de producto');
-    const snap = await db.collection('productos').doc(it.id).get();
-    if (!snap.exists) throw new Error('Producto inexistente: ' + it.id);
-    const prod = snap.data();
-    const precio = Number(prod.precio);
-    const cant = Math.min(Math.max(parseInt(it.cantidad, 10) || 0, 1), 99);
-    if (!(precio > 0)) throw new Error('Precio inválido: ' + it.id);
-    const stock = Number(prod.stock);
-    if (revisarStock && Number.isFinite(stock) && cant > stock) throw new Error('Sin stock suficiente: ' + (prod.nombre || it.id));
-    soles += precio * cant;
-    limpios.push({ id: it.id, nombre: prod.nombre || '', precio, cantidad: cant });
-  }
-  const centimos = Math.round(soles * 100);
-  if (!Number.isInteger(centimos) || centimos <= 0) throw new Error('Monto inválido');
-  return { centimos, items: limpios };
-}
-
-// El primer correo válido de la lista (el navegador a veces manda "null")
-const correoValido = (...lista) => lista.map((c) => String(c || '').trim()).find((c) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c)) || 'pedidos@kapac-made.com';
-
-// IP real del cliente: Google agrega la verdadera al FINAL de x-forwarded-for;
-// lo que viene antes lo puede inventar cualquiera.
-function ipCliente(req) {
-  const ip = (req.headers['x-forwarded-for'] || '').split(',').pop().trim() || req.ip || 'na';
-  return (ip.replace(/[^\w.:-]/g, '_').slice(0, 60)) || 'na';
-}
-
-// Límite por IP: true si se permite, false si llamó hace menos de `segundos`.
-// Usa la colección `limites_ip` (solo accesible por el Admin SDK).
-async function permitirIP(req, segundos, prefijo = '') {
-  const ref = admin.firestore().collection('limites_ip').doc(prefijo + ipCliente(req));
-  const snap = await ref.get();
-  if (snap.exists && Date.now() - (snap.data().ultimo || 0) < segundos * 1000) return false;
-  await ref.set({ ultimo: Date.now() });
-  return true;
-}
+const base = () => admin.firestore();
+const recalcularPedido = (items, opciones) => pedidos.recalcularPedido(base(), items, opciones);
+const permitirIP = (req, segundos, prefijo) => pedidos.permitirIP(base(), req, segundos, prefijo);
 
 // ─── Correos para el cliente (Resend) ─────────────────────────────────────────
 // Las plantillas están en correos.js
@@ -112,57 +72,19 @@ exports.notificarCambioEstado = onDocumentUpdated(
       }
     }
 
-    // ── Descontar stock una sola vez por pedido ─────────────────────────────
+    // ── Stock: una sola vez por pedido ───────────────────────────────────────
     // Lo hace el servidor con el Admin SDK: los clientes no pueden escribir en
     // productos. Se reserva apenas el cliente avisa que pagó (Yape QR) o que ya
     // tiene su código (PagoEfectivo), para que nadie más compre esa unidad mientras
-    // tanto; si no paga, el pedido se cancela y el stock vuelve. Con tarjeta o
-    // Yape con código se descuenta al confirmarse el pago (cobrarCulqi).
-    if (antes.estado !== despues.estado && ['verificando_pago', 'pendiente_envio'].includes(nuevoEstado) && !despues.stockDescontado) {
-      const db = admin.firestore();
+    // tanto; con tarjeta o Yape con código se descuenta al confirmarse el pago.
+    // Si el pedido se cancela (o el código vence sin pagarse), el stock vuelve.
+    const signo = ['verificando_pago', 'pendiente_envio'].includes(nuevoEstado) && !despues.stockDescontado ? -1
+      : nuevoEstado === 'cancelado' && despues.stockDescontado ? 1 : 0;
+    if (antes.estado !== despues.estado && signo) {
       try {
-        await db.runTransaction(async (tx) => {
-          const pedidoRef = event.data.after.ref;
-          const pedidoSnap = await tx.get(pedidoRef);
-          if (pedidoSnap.data()?.stockDescontado) return; // ya lo hizo otra ejecución
-          const itemsPedido = pedidoSnap.data()?.items || [];
-          const refs = itemsPedido.map((i) => db.collection('productos').doc(i.id));
-          const snaps = await Promise.all(refs.map((r) => tx.get(r)));
-          snaps.forEach((s, idx) => {
-            if (!s.exists) return;
-            const actual = Number(s.data().stock);
-            if (!Number.isFinite(actual)) return;
-            const nuevo = Math.max(0, actual - (parseInt(itemsPedido[idx].cantidad, 10) || 0));
-            tx.update(refs[idx], { stock: nuevo });
-          });
-          tx.update(pedidoRef, { stockDescontado: true });
-        });
+        await pedidos.moverStock(base(), event.data.after.ref, signo);
       } catch (e) {
-        console.error('No se pudo descontar stock del pedido', pedidoId, e);
-      }
-    }
-
-    // ── Devolver el stock si se cancela un pedido que ya lo había descontado ──
-    if (antes.estado !== despues.estado && nuevoEstado === 'cancelado' && despues.stockDescontado) {
-      const db = admin.firestore();
-      try {
-        await db.runTransaction(async (tx) => {
-          const pedidoRef = event.data.after.ref;
-          const pedidoSnap = await tx.get(pedidoRef);
-          if (!pedidoSnap.data()?.stockDescontado) return; // ya lo devolvió otra ejecución
-          const itemsPedido = pedidoSnap.data()?.items || [];
-          const refs = itemsPedido.map((i) => db.collection('productos').doc(i.id));
-          const snaps = await Promise.all(refs.map((r) => tx.get(r)));
-          snaps.forEach((s, idx) => {
-            if (!s.exists) return;
-            const actual = Number(s.data().stock);
-            if (!Number.isFinite(actual)) return;
-            tx.update(refs[idx], { stock: actual + (parseInt(itemsPedido[idx].cantidad, 10) || 0) });
-          });
-          tx.update(pedidoRef, { stockDescontado: false });
-        });
-      } catch (e) {
-        console.error('No se pudo devolver el stock del pedido', pedidoId, e);
+        console.error(`No se pudo ${signo < 0 ? 'descontar' : 'devolver'} el stock del pedido`, pedidoId, e);
       }
     }
 
@@ -187,7 +109,7 @@ exports.notificarCambioEstado = onDocumentUpdated(
 // ─── Cobro con Culqi ──────────────────────────────────────────────────────────
 exports.cobrarCulqi = onRequest(
   {
-    cors: ['https://jarbit8.github.io', 'https://www.kapac-made.com', 'https://kapac-made.com'],
+    cors: CORS,
     invoker: 'public',
     region: 'us-central1',
     secrets: [culqiSecret],
@@ -214,7 +136,7 @@ exports.cobrarCulqi = onRequest(
 
     try {
       // El monto SIEMPRE se toma del pedido guardado, nunca del cliente.
-      const pedidoRef = admin.firestore().collection('pedidos').doc(pedidoId);
+      const pedidoRef = base().collection('pedidos').doc(pedidoId);
       const pedidoSnap = await pedidoRef.get();
       if (!pedidoSnap.exists) {
         res.status(404).json({ ok: false, mensaje: 'Pedido no encontrado.' });
@@ -262,7 +184,7 @@ exports.cobrarCulqi = onRequest(
         return;
       }
 
-      await admin.firestore().collection('pedidos').doc(pedidoId).update({
+      await base().collection('pedidos').doc(pedidoId).update({
         estado: 'pendiente_envio',
         culqiChargeId: culqiData.id,
         total: amount / 100,   // total real verificado en servidor
@@ -282,7 +204,7 @@ exports.cobrarCulqi = onRequest(
 // ─── Newsletter: enviar código de verificación al correo ──────────────────────
 exports.enviarCodigoNewsletter = onRequest(
   {
-    cors: ['https://jarbit8.github.io', 'https://www.kapac-made.com', 'https://kapac-made.com'],
+    cors: CORS,
     invoker: 'public',
     region: 'us-central1',
     secrets: [resendSecret],
@@ -296,7 +218,7 @@ exports.enviarCodigoNewsletter = onRequest(
     }
 
     try {
-      const db = admin.firestore();
+      const db = base();
 
       // ¿Ya está suscrito?
       const yaSnap = await db.collection('newsletter').where('email', '==', email).limit(1).get();
@@ -314,9 +236,7 @@ exports.enviarCodigoNewsletter = onRequest(
       }
 
       // Límite por IP: 1 envío cada 30s desde la misma IP (frena el flood de un atacante).
-      const ipRef = db.collection('limites_ip').doc(ipCliente(req));
-      const ipSnap = await ipRef.get();
-      if (ipSnap.exists && Date.now() - (ipSnap.data().ultimo || 0) < 30 * 1000) {
+      if (!(await permitirIP(req, 30, 'news_'))) {
         res.status(429).json({ ok: false, mensaje: 'Demasiados intentos. Espera un momento.' });
         return;
       }
@@ -337,8 +257,6 @@ exports.enviarCodigoNewsletter = onRequest(
         res.status(429).json({ ok: false, mensaje: 'Suscripción no disponible por ahora. Intenta más tarde.' });
         return;
       }
-      await ipRef.set({ ultimo: Date.now() });
-
       // Código de 6 dígitos, válido 15 min
       const codigo = String(Math.floor(100000 + Math.random() * 900000));
       const expira = Date.now() + 15 * 60 * 1000;
@@ -369,7 +287,7 @@ exports.enviarCodigoNewsletter = onRequest(
 // ─── Newsletter: verificar código y suscribir ─────────────────────────────────
 exports.verificarCodigoNewsletter = onRequest(
   {
-    cors: ['https://jarbit8.github.io', 'https://www.kapac-made.com', 'https://kapac-made.com'],
+    cors: CORS,
     invoker: 'public',
     region: 'us-central1',
   },
@@ -380,7 +298,7 @@ exports.verificarCodigoNewsletter = onRequest(
     if (!email || !codigo) { res.status(400).json({ ok: false, mensaje: 'Faltan datos' }); return; }
 
     try {
-      const db = admin.firestore();
+      const db = base();
       const ref = db.collection('newsletter_codigos').doc(email);
       const snap = await ref.get();
       if (!snap.exists) { res.status(400).json({ ok: false, mensaje: 'Solicita un código primero.' }); return; }
@@ -415,7 +333,7 @@ exports.verificarCodigoNewsletter = onRequest(
 // Genera un código CIP que el cliente paga en agentes BCP/BBVA/etc.
 exports.crearOrdenCulqi = onRequest(
   {
-    cors: ['https://jarbit8.github.io', 'https://www.kapac-made.com', 'https://kapac-made.com'],
+    cors: CORS,
     invoker: 'public',
     region: 'us-central1',
     secrets: [culqiSecret],
@@ -442,7 +360,7 @@ exports.crearOrdenCulqi = onRequest(
 
     try {
       // Monto recalculado desde los precios reales de los productos (anti-fraude).
-      const pedidoSnap = await admin.firestore().collection('pedidos').doc(pedidoId).get();
+      const pedidoSnap = await base().collection('pedidos').doc(pedidoId).get();
       if (!pedidoSnap.exists) {
         res.status(404).json({ ok: false, mensaje: 'No encontramos tu pedido. Vuelve al carrito e intenta de nuevo.' });
         return;
@@ -489,10 +407,7 @@ exports.crearOrdenCulqi = onRequest(
         return;
       }
 
-      // Culqi exige nombres válidos (mínimo 2 caracteres, sin números)
-      const nombrePartes = (nombreCliente || 'Cliente Kapac').split(' ').filter(Boolean);
-      const firstName = (nombrePartes[0] || 'Cliente').replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g,'').padEnd(2, 'a');
-      const lastName  = (nombrePartes.slice(1).join(' ') || 'Kapac').replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g,'').padEnd(2, 'a');
+      const { nombre: firstName, apellido: lastName } = nombreCulqi(nombreCliente);
 
       // Expira en 48h
       const expiration = Math.floor(Date.now() / 1000) + (48 * 60 * 60);
@@ -545,7 +460,7 @@ exports.crearOrdenCulqi = onRequest(
       }
 
       // Guardar info en Firestore para que el cliente pueda recargar la página
-      await admin.firestore().collection('pedidos').doc(pedidoId).update({
+      await base().collection('pedidos').doc(pedidoId).update({
         culqiOrderId: confData.id,
         codigoPago: confData.payment_code,
         codigoPagoVence: confData.expiration_date,
@@ -580,13 +495,7 @@ exports.culqiWebhook = onRequest(
   },
   async (req, res) => {
     try {
-      const evento = req.body || {};
-      let datos = evento.data || {};
-      // Culqi manda "data" como texto JSON, no como objeto
-      if (typeof datos === 'string') {
-        try { datos = JSON.parse(datos); } catch { datos = {}; }
-      }
-      const orderId = datos.id;
+      const orderId = ordenDelAviso(req.body);
 
       if (!orderId) { res.status(200).send('OK (sin id)'); return; }
 
@@ -603,7 +512,7 @@ exports.culqiWebhook = onRequest(
       }
 
       // Buscar el pedido por el id de orden Culqi confirmado.
-      const snap = await admin.firestore().collection('pedidos').where('culqiOrderId', '==', orderId).limit(1).get();
+      const snap = await base().collection('pedidos').where('culqiOrderId', '==', orderId).limit(1).get();
       const target = snap.docs[0];
 
       if (!target) {
@@ -660,58 +569,6 @@ exports.culqiWebhook = onRequest(
 // La hoja la arma el servidor: número correlativo por año, copia por correo al
 // consumidor y aviso a la tienda. Los reclamos no se borran (se guardan 2 años).
 
-// Valida y limpia lo que manda la página. null si falta algo obligatorio.
-function leerReclamo(b) {
-  const linea = (v) => String(v ?? '').trim().replace(/\s+/g, ' ');
-  const parrafo = (v) => String(v ?? '').trim().replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n');
-  const letras = (v) => (v.match(/\p{L}/gu) || []).length;
-  const largo = (v, min, max) => v.length >= min && v.length <= max;
-  const r = {
-    tipo: ['reclamo', 'queja'].includes(b.tipo) ? b.tipo : '',
-    nombre: linea(b.nombre),
-    documentoTipo: ['DNI', 'CE', 'Pasaporte', 'RUC'].includes(b.documentoTipo) ? b.documentoTipo : '',
-    documento: linea(b.documento).toUpperCase(),
-    domicilio: linea(b.domicilio),
-    telefono: linea(b.telefono),
-    email: linea(b.email).toLowerCase(),
-    menorDeEdad: b.menorDeEdad === true,
-    apoderado: b.menorDeEdad === true ? linea(b.apoderado) : '',
-    bienTipo: b.bienTipo === 'servicio' ? 'servicio' : 'producto',
-    bienDescripcion: linea(b.bienDescripcion),
-    monto: b.monto === null || b.monto === undefined || b.monto === '' ? null : Number(b.monto),
-    pedidoId: linea(b.pedidoId),
-    detalle: parrafo(b.detalle),
-    pedido: parrafo(b.pedido),
-    idioma: b.idioma === 'en' ? 'en' : 'es',
-  };
-  const documento = { DNI: /^\d{8}$/, RUC: /^\d{11}$/, CE: /^[A-Z0-9]{6,15}$/, Pasaporte: /^[A-Z0-9]{6,15}$/ }[r.documentoTipo];
-  const valido = r.tipo
-    && largo(r.nombre, 2, 120) && letras(r.nombre) >= 2
-    && documento && documento.test(r.documento)
-    && largo(r.domicilio, 5, 200)
-    && r.telefono.length <= 20
-    && r.email.length <= 120 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email)
-    && (!r.menorDeEdad || (largo(r.apoderado, 2, 120) && letras(r.apoderado) >= 2))
-    && largo(r.bienDescripcion, 3, 300)
-    && (r.monto === null || (Number.isFinite(r.monto) && r.monto >= 0 && r.monto <= 100000))
-    && r.pedidoId.length <= 40
-    && largo(r.detalle, 10, 3000)
-    && largo(r.pedido, 3, 1500);
-  return valido ? r : null;
-}
-
-// 15 días hábiles (lunes a viernes, hora de Lima; los feriados no se descuentan)
-function sumarDiasHabiles(desde, dias) {
-  const d = new Date(desde);
-  let sumados = 0;
-  while (sumados < dias) {
-    d.setUTCDate(d.getUTCDate() + 1);
-    const dia = new Date(d.getTime() - 5 * 3600 * 1000).getUTCDay();
-    if (dia !== 0 && dia !== 6) sumados++;
-  }
-  return d;
-}
-
 async function enviar(para, correo) {
   const resend = new Resend(resendSecret.value());
   const { error } = await resend.emails.send({ from: REMITENTE, replyTo: RESPONDER_A, to: [para], subject: correo.asunto, html: correo.html });
@@ -720,7 +577,7 @@ async function enviar(para, correo) {
 
 exports.registrarReclamo = onRequest(
   {
-    cors: ['https://jarbit8.github.io', 'https://www.kapac-made.com', 'https://kapac-made.com'],
+    cors: CORS,
     invoker: 'public',
     region: 'us-central1',
     secrets: [resendSecret],
@@ -735,7 +592,7 @@ exports.registrarReclamo = onRequest(
         res.status(429).json({ ok: false, mensaje: 'Demasiados intentos. Espera un momento.' });
         return;
       }
-      const db = admin.firestore();
+      const db = base();
       const ahora = new Date();
       const anio = Number(ahora.toLocaleString('en-US', { timeZone: 'America/Lima', year: 'numeric' }));
       const hoy = ahora.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
