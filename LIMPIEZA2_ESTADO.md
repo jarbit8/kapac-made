@@ -33,3 +33,7 @@ Esta rama vive en un worktree aparte: `D:\Documentos\3. PROYECTOS\KAPAC-MADE-lim
 4. `archivo/Publicar correos.bat` (functions).
 5. Desplegar `storage.rules`.
 6. `buscar_claves.py` y `probar_reglas.py`.
+
+## Actualización (26 oct, más tarde)
+- Los 3 bugs del frontend (CIP en hora de Lima, aviso si el precio cambia en MetodoPago, Instagram de Próximamente) ya se arreglaron en `main` (`bd48c16`) y se trajeron aquí con un merge (`2a87512`): ya no son pendientes de esta rama.
+- `storage.rules` con borrado del admin también está en `main`; `archivo/Publicar correos.bat` ahora la despliega después de las funciones.
