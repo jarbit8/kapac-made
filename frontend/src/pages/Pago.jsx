@@ -222,7 +222,7 @@ export default function Pago() {
                     </button>
                     {vencimientoCIP && (
                       <p className="codigo-cip-vence">
-                        <Icono nombre="reloj" tam={15} /> {t('pago.ef.vence')} {new Date(vencimientoCIP * 1000).toLocaleString(idioma === 'en' ? 'en-US' : 'es-PE', { dateStyle: 'medium', timeStyle: 'short' })}
+                        <Icono nombre="reloj" tam={15} /> {t('pago.ef.vence')} {new Date(vencimientoCIP * 1000).toLocaleString(idioma === 'en' ? 'en-US' : 'es-PE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Lima' })}
                       </p>
                     )}
                   </div>

@@ -187,7 +187,7 @@ export default function SitioCerrado() {
       </h1>
 
       <footer className="cerrado-pie">
-        <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+        <a href="https://www.instagram.com/kapac.made/" target="_blank" rel="noopener noreferrer" className="cerrado-ig">Instagram ↗</a>
         <span className="cerrado-pie-der">Powered by jarbit</span>
       </footer>
     </div>

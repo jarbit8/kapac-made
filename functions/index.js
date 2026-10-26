@@ -662,8 +662,10 @@ exports.culqiWebhook = onRequest(
 
 // Valida y limpia lo que manda la página. null si falta algo obligatorio.
 function leerReclamo(b) {
-  const linea = (v) => String(v ?? '').trim().replace(/\s+/g, ' ');
-  const parrafo = (v) => String(v ?? '').trim().replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+  // Solo texto o números: un objeto cuenta como vacío (antes quedaba guardado "[object Object]")
+  const texto = (v) => (typeof v === 'string' || typeof v === 'number' ? String(v) : '');
+  const linea = (v) => texto(v).trim().replace(/\s+/g, ' ');
+  const parrafo = (v) => texto(v).trim().replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n');
   const letras = (v) => (v.match(/\p{L}/gu) || []).length;
   const largo = (v, min, max) => v.length >= min && v.length <= max;
   const r = {

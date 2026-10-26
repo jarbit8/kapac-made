@@ -234,3 +234,9 @@
 @media (prefers-reduced-motion: reduce) {
   .cerrado-page * { animation: none !important; }
 }
+
+/* Más área de toque en el celular sin cambiar cómo se ve */
+@media (pointer: coarse) {
+  .cerrado-ig { position: relative; }
+  .cerrado-ig::after { content: ''; position: absolute; inset: -14px -8px; }
+}
