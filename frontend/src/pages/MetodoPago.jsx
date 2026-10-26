@@ -20,7 +20,7 @@ const logoStyle = { width: 72, height: 44, objectFit: 'contain', borderRadius: 8
 
 export default function MetodoPago() {
   const navigate = useNavigate();
-  const { items, vaciar, totalPrecio, refrescar, restaurar } = useCart();
+  const { items, vaciar, totalPrecio, refrescar, restaurar, avisos } = useCart();
   const { usuario } = useAuth();
   const { t, idioma } = useIdioma();
   const [metodo, setMetodo] = useState(null);
@@ -30,6 +30,12 @@ export default function MetodoPago() {
   const total = totalPrecio;
   const pedidoCreado = useRef(false);
   const enCurso = useRef(false);
+
+  // Si el precio o el stock cambió mientras elige cómo pagar, el total no cambia en silencio:
+  // vuelve al carrito, donde se ve qué cambió
+  useEffect(() => {
+    if (avisos?.length && !pedidoCreado.current) navigate('/carrito');
+  }, [avisos, navigate]);
 
   // Al volver con "atrás" desde el pago el carrito está vacío: se recupera el del pedido recién creado
   const [recuperando, setRecuperando] = useState(() => !items.length && hayRespaldo());
