@@ -31,7 +31,8 @@ export default function useTrackVisita() {
     // Esperar a saber quién es y si la tienda está abierta
     if (cargando || !cerradoListo) return;
     if (esDueno(usuario?.email) || dispositivoDelDueno()) return;
-    const ruta = cerrado && !esAdmin && location.pathname !== '/login' ? '/proximamente' : location.pathname;
-    registrarVisita(ruta, usuario || null);
+    const enProximamente = cerrado && !esAdmin && location.pathname !== '/login';
+    // Con la tienda cerrada igual se guarda la dirección que quiso abrir (p. ej. /admin)
+    registrarVisita(enProximamente ? '/proximamente' : location.pathname, usuario || null, enProximamente ? location.pathname : '');
   }, [location.pathname, usuario, cargando, esAdmin, cerrado, cerradoListo]);
 }

@@ -11,15 +11,21 @@ import { esDueno } from '../config/admins';
 
 const COLECCION = 'visitas';
 
-// Con la tienda cerrada el visitante solo ve el video: eso se cuenta en su propia zona
-const esProximamente = (v) => v.ruta === 'proximamente';
+// Zonas del panel, cada una por separado: la pantalla "Próximamente" (con la tienda
+// cerrada el visitante solo ve el video), el inicio de sesión y la página por dentro
+const ZONAS = ['proximamente', 'login', 'pagina'];
+const zonaDe = (v) => (v.ruta === 'proximamente' || v.ruta === 'login' ? v.ruta : 'pagina');
 
 // Los días van con la hora de Perú (UTC-5, sin horario de verano): con la hora
 // universal, lo que entraba después de las 7 de la noche caía al día siguiente
 const diaPeru = (fecha = new Date()) => new Date(fecha.getTime() - 5 * 3600000).toISOString().slice(0, 10);
 
-// Buscadores, vistas previas de enlaces y navegadores automáticos no son visitas
-const esRobot = () => navigator.webdriver || /bot\/|crawler|spider|headless|lighthouse|facebookexternalhit/i.test(navigator.userAgent);
+// Buscadores, vistas previas de enlaces y navegadores automáticos: se cuentan, marcados como robot
+const esRobot = () => !!navigator.webdriver || /bot\/|crawler|spider|headless|lighthouse|facebookexternalhit/i.test(navigator.userAgent);
+
+// Conexión desde un servidor (casi siempre un robot que se hace pasar por navegador).
+// Sin Cloudflare ni Akamai: por ahí salen los iPhone con el relay privado de iCloud.
+const SERVIDORES = /amazon|aws|google cloud|google llc|microsoft|azure|digitalocean|ovh|hetzner|linode|vultr|oracle|alibaba|tencent|contabo|leaseweb|scaleway/i;
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
@@ -99,15 +105,15 @@ async function obtenerUbicacion() {
   const servicios = [
     {
       url: 'https://ipwho.is/',
-      parse: (d) => (d.success ? { pais: d.country, ciudad: d.city } : null),
+      parse: (d) => (d.success ? { pais: d.country, ciudad: d.city, red: `${d.connection?.org || ''} ${d.connection?.isp || ''}` } : null),
     },
     {
       url: 'https://ipapi.co/json/',
-      parse: (d) => (d.country_name ? { pais: d.country_name, ciudad: d.city } : null),
+      parse: (d) => (d.country_name ? { pais: d.country_name, ciudad: d.city, red: d.org } : null),
     },
     {
       url: 'https://get.geojs.io/v1/ip/geo.json',
-      parse: (d) => (d.country ? { pais: d.country, ciudad: d.city } : null),
+      parse: (d) => (d.country ? { pais: d.country, ciudad: d.city, red: d.organization_name } : null),
     },
     {
       url: 'https://api.country.is/',
@@ -125,6 +131,7 @@ async function obtenerUbicacion() {
         const limpio = {
           pais:   nombrePais(info.pais) || 'Desconocido',
           ciudad: info.ciudad || 'Desconocida',
+          servidor: SERVIDORES.test(info.red || ''),
         };
         sessionStorage.setItem('kapac_ubicacion', JSON.stringify(limpio));
         return limpio;
@@ -145,9 +152,8 @@ async function obtenerUbicacion() {
  */
 export { detectarDispositivo, detectarNavegador };
 
-export async function registrarVisita(ruta = '/', usuario = null) {
+export async function registrarVisita(ruta = '/', usuario = null, pidio = '') {
   try {
-    if (esRobot()) return;
     const segmento = ruta.split('/').filter(Boolean)[0] || 'home';
 
     // 1 visita por ruta por sesión (no duplicar refrescos)
@@ -157,7 +163,7 @@ export async function registrarVisita(ruta = '/', usuario = null) {
 
     const { id: sesionId, esNueva } = obtenerSesionId();
 
-    const { pais, ciudad } = await obtenerUbicacion();
+    const { pais, ciudad, servidor } = await obtenerUbicacion();
 
     const visitaDoc = {
       fecha: serverTimestamp(),
@@ -174,6 +180,8 @@ export async function registrarVisita(ruta = '/', usuario = null) {
       // Info pública del navegador
       dispositivo: detectarDispositivo(),
       navegador:   detectarNavegador(),
+      robot:       esRobot() || !!servidor,
+      pidio:       pidio && pidio !== '/' ? pidio.slice(0, 200) : null, // con la tienda cerrada: la dirección que quiso abrir
     };
 
     await addDoc(collection(db, COLECCION), visitaDoc);
@@ -202,17 +210,19 @@ function agrupar(visitas) {
   });
 }
 
-/** Obtener las últimas N entradas al sitio (no cada página que recorren) para la lista del admin.
- *  Cada zona va por separado: quien vio "Próximamente" y después fue al login aparece en
- *  Próximamente y también en la tienda, donde su visita empieza en el login. */
-export async function obtenerVisitasRecientes(n = 10, proximamente = false) {
+/** Obtener las últimas N entradas a una zona (no cada página que recorren) para la lista del admin.
+ *  Quien vio "Próximamente", fue al login y entró aparece en las tres zonas. */
+export async function obtenerVisitasRecientes(n = 10, zona = 'pagina') {
   try {
     // Traemos más para luego filtrar al admin y quedarnos solo con entradas, sin perder cantidad
     const snap = await getDocs(
       query(collection(db, COLECCION), orderBy('fecha', 'desc'), limit(Math.max(n * 6, 120)))
     );
-    const visitas = agrupar(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
-      .filter((v) => !esDueno(v.correo) && esProximamente(v) === proximamente);
+    const todas = agrupar(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+      .filter((v) => !esDueno(v.correo));
+    // Si en esa visita después anduvo con su cuenta, el login le funcionó
+    const entraron = new Set(todas.filter((v) => v.email && v.sesionId).map((v) => v.sesionId));
+    const visitas = todas.filter((v) => zonaDe(v) === zona);
     // Páginas que vio en esa misma visita, en orden (llegan de la más nueva a la más vieja)
     const recorridos = {};
     visitas.forEach((v) => {
@@ -221,14 +231,14 @@ export async function obtenerVisitasRecientes(n = 10, proximamente = false) {
     return visitas
       .filter((v) => (v.sesionId ? recorridos[v.sesionId][0] === v : v.entrada))
       .slice(0, n)
-      .map((v) => ({ ...v, recorrido: (recorridos[v.sesionId] || [v]).map((x) => x.ruta) }));
+      .map((v) => ({ ...v, recorrido: (recorridos[v.sesionId] || [v]).map((x) => x.ruta), entro: entraron.has(v.sesionId) }));
   } catch (e) {
     console.error('Error obteniendo visitas recientes:', e);
     return [];
   }
 }
 
-const SIN_VISITAS = { total: 0, logueados: 0, visitasHoy: 0, visitantesUnicos: 0, porRuta: {}, porDia: {}, porPais: {}, ciudadesPorPais: {}, porDispositivo: {} };
+export const SIN_VISITAS = { total: 0, logueados: 0, visitasHoy: 0, visitantesUnicos: 0, robots: 0, porRuta: {}, porDia: {}, porPais: {}, ciudadesPorPais: {}, porDispositivo: {} };
 const contar = (grupos) => Object.fromEntries(Object.entries(grupos).map(([k, s]) => [k, s.size]));
 
 // Cuenta entradas reales y personas distintas (no cada página que recorren)
@@ -238,6 +248,7 @@ function resumir(visitas) {
   const personasPorCiudad = {}; // pais -> ciudad -> Set(persona)
   const personasPorDispositivo = {};
   const visitantesUnicos = new Set();
+  const robots = new Set();
   const sesionesPorDia = {}; // dia -> Set(sesionId): cuenta accesos reales, no cada página vista
   const sesionesTotal = new Set();
   const identificados = new Set();
@@ -262,6 +273,7 @@ function resumir(visitas) {
     sesionesPorDia[v.dia].add(sid);
 
     visitantesUnicos.add(identidad);
+    if (v.robot) robots.add(identidad);
   });
 
   const porDia = {};
@@ -272,6 +284,7 @@ function resumir(visitas) {
     logueados: identificados.size,
     visitasHoy: sesionesPorDia[hoy] ? sesionesPorDia[hoy].size : 0,
     visitantesUnicos: visitantesUnicos.size,
+    robots: robots.size,
     porRuta,
     porDia,
     porPais: contar(personasPorPais),
@@ -280,8 +293,7 @@ function resumir(visitas) {
   };
 }
 
-/** Obtener estadísticas agregadas (para gráficos) — excluye al admin.
- *  Las de la tienda van arriba y las de "Próximamente" en `proximamente`. */
+/** Obtener estadísticas agregadas (para gráficos) — excluye al admin. Una por zona. */
 export async function obtenerEstadisticas(diasAtras = 30) {
   try {
     const snap = await getDocs(
@@ -296,13 +308,10 @@ export async function obtenerEstadisticas(diasAtras = 30) {
       .filter((v) => (v.dia || '') >= limiteStr)
       .filter((v) => !esDueno(v.correo)); // excluir al dueño, también lo que vio antes de entrar con su cuenta
 
-    return {
-      ...resumir(visitas.filter((v) => !esProximamente(v))),
-      proximamente: resumir(visitas.filter(esProximamente)),
-    };
+    return Object.fromEntries(ZONAS.map((z) => [z, resumir(visitas.filter((v) => zonaDe(v) === z))]));
   } catch (e) {
     console.error('Error obteniendo estadísticas:', e);
-    return { ...SIN_VISITAS, proximamente: SIN_VISITAS };
+    return Object.fromEntries(ZONAS.map((z) => [z, SIN_VISITAS]));
   }
 }
 

@@ -8,7 +8,7 @@ import { esCorreoAdmin, NOMBRES } from '../config/admins';
 import {
   obtenerTodosPedidos, actualizarEstadoPedido,
 } from '../firebase/pedidos';
-import { obtenerEstadisticas, obtenerVisitasRecientes, nombreRuta } from '../firebase/visitas';
+import { obtenerEstadisticas, obtenerVisitasRecientes, nombreRuta, SIN_VISITAS } from '../firebase/visitas';
 import { obtenerReclamos, responderReclamo } from '../firebase/reclamos';
 import { diasHabilesHasta } from '../utils/diasHabiles';
 import { nombreEstado } from '../i18n/estadosPedido';
@@ -59,11 +59,11 @@ export default function Admin() {
   const { t } = useIdioma();
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
-  const [stats, setStats] = useState({ total: 0, logueados: 0, porRuta: {}, porDia: {}, porPais: {} });
+  const [stats, setStats] = useState({});
   const [visitasRecientes, setVisitasRecientes] = useState([]);
   const [visitasLimite, setVisitasLimite] = useState(10);
-  // Visitas de la tienda o de la pantalla "Próximamente" (mientras está cerrada)
-  const [zona, setZona] = useState(cerrado ? 'proximamente' : 'tienda');
+  // Visitas de la pantalla "Próximamente" (mientras está cerrada), del login o de la página
+  const [zona, setZona] = useState(cerrado ? 'proximamente' : 'pagina');
   const [paisAbierto, setPaisAbierto] = useState(null);
   const [pestana, setPestana] = useState('pedidos'); // 'pedidos' | 'visitas' | 'reclamos'
   const [msg, setMsg] = useState('');
@@ -81,7 +81,7 @@ export default function Admin() {
   const cargarStats = async (z = zona) => {
     setStats(await obtenerEstadisticas(30));
     setVisitasLimite(10);
-    setVisitasRecientes(await obtenerVisitasRecientes(10, z === 'proximamente'));
+    setVisitasRecientes(await obtenerVisitasRecientes(10, z));
   };
 
   const cambiarZona = (z) => {
@@ -92,7 +92,7 @@ export default function Admin() {
   const verMasVisitas = async () => {
     const nuevoLimite = visitasLimite + 10;
     setVisitasLimite(nuevoLimite);
-    setVisitasRecientes(await obtenerVisitasRecientes(nuevoLimite, zona === 'proximamente'));
+    setVisitasRecientes(await obtenerVisitasRecientes(nuevoLimite, zona));
   };
 
   const [cambiandoTienda, setCambiandoTienda] = useState(false);
@@ -186,7 +186,7 @@ export default function Admin() {
     });
   };
 
-  const datos = (zona === 'proximamente' ? stats.proximamente : stats) || stats;
+  const datos = stats[zona] || SIN_VISITAS;
 
   // PagoEfectivo se confirma solo: solo el Yape con QR lo revisa el admin
   const pedidosVerificando = pedidos.filter(p => ['verificando_pago', 'verificando'].includes(p.estado) && p.metodoPago !== 'efectivo');
@@ -282,23 +282,26 @@ export default function Admin() {
           <div className="admin-visitas">
             <div className="admin-pedidos-filtros">
               {[
-                { key: 'tienda', label: 'Tienda' },
                 { key: 'proximamente', label: 'Próximamente' },
+                { key: 'login', label: 'Login' },
+                { key: 'pagina', label: 'Página' },
               ].map((z) => (
                 <button
                   key={z.key}
                   className={`admin-filtro-btn ${zona === z.key ? 'activo' : ''}`}
                   onClick={() => cambiarZona(z.key)}
                 >
-                  {z.label} ({(z.key === 'proximamente' ? stats.proximamente : stats)?.total || 0})
+                  {z.label} ({stats[z.key]?.total || 0})
                 </button>
               ))}
             </div>
-            {zona === 'proximamente' && (
-              <p style={{ color: '#999', fontSize: 13, marginTop: -8, marginBottom: 16 }}>
-                Gente que entró mientras la tienda estaba cerrada: solo vio el video de «Coming soon».
-              </p>
-            )}
+            <p style={{ color: '#999', fontSize: 13, marginTop: -8, marginBottom: 16 }}>
+              {{
+                proximamente: 'Gente que entró mientras la tienda estaba cerrada: solo vio el video de «Coming soon». Si escribió otra dirección, sale cuál quiso abrir.',
+                login: 'Quienes abrieron el inicio de sesión y si lograron entrar con su cuenta.',
+                pagina: 'Quienes vieron la página por dentro (con la tienda cerrada, solo los admins).',
+              }[zona]}
+            </p>
 
             <div className="admin-contadores">
               <div className="contador-card" style={{ borderTop: '4px solid #ff6b35' }}>
@@ -314,7 +317,10 @@ export default function Admin() {
               <div className="contador-card" style={{ borderTop: '4px solid #2196f3' }}>
                 <span className="contador-num">{datos.visitantesUnicos || 0}</span>
                 <span className="contador-label">Visitantes únicos</span>
-                <span className="contador-sub">personas distintas (una que vuelve no se cuenta 2 veces)</span>
+                <span className="contador-sub">
+                  personas distintas (una que vuelve no se cuenta 2 veces)
+                  {datos.robots > 0 && ` · ${datos.robots} ${datos.robots === 1 ? 'es robot' : 'son robots'}`}
+                </span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #4caf50' }}>
                 <span className="contador-num">{datos.logueados}</span>
@@ -357,6 +363,8 @@ export default function Admin() {
                       <div className="visita-quien">
                         {v.correo ? (
                           <strong>{NOMBRES[v.correo] ? `${NOMBRES[v.correo]} · ${v.correo}` : v.correo}</strong>
+                        ) : v.robot ? (
+                          <span style={{ color:'#888' }}>🤖 Entró un robot (un programa, no una persona)</span>
                         ) : (
                           <span style={{ color:'#888' }}>Visitante anónimo</span>
                         )}
@@ -364,7 +372,9 @@ export default function Admin() {
                       <div className="visita-meta">
                         {v.ciudad && v.ciudad !== 'Desconocida' ? `${v.ciudad}, ` : ''}{v.pais || '—'} · {v.dispositivo} · {v.navegador}
                       </div>
-                      {zona === 'tienda' && <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>}
+                      {zona === 'pagina' && <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>}
+                      {zona === 'proximamente' && v.pidio && <div className="visita-recorrido">Quiso abrir: {v.pidio}</div>}
+                      {zona === 'login' && <div className="visita-recorrido">{v.entro ? 'Entró con su cuenta' : 'No entró'}</div>}
                     </div>
                     <div className="visita-ruta">
                       <span className="visita-pagina">{rutaNombre}</span>
@@ -406,7 +416,7 @@ export default function Admin() {
               )}
             </div>
 
-            {zona === 'tienda' && (<>
+            {zona === 'pagina' && (<>
             <h3 style={{ marginTop: 32, marginBottom: 4 }}>Páginas más visitadas</h3>
             <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Qué páginas recorren dentro de una misma visita.</p>
             <div className="admin-tabla-stats">

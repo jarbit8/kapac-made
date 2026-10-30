@@ -82,7 +82,8 @@ service cloud.firestore {
     match /visitas/{docId} {
       allow read: if esAdmin();
       allow create: if request.resource.data.keys().hasOnly(['fecha', 'dia', 'ruta', 'sesionId', 'entrada', 'email',
-                                                             'uid', 'pais', 'ciudad', 'dispositivo', 'navegador'])
+                                                             'uid', 'pais', 'ciudad', 'dispositivo', 'navegador',
+                                                             'robot', 'pidio'])
                     && (request.resource.data.get('email', null) == null
                         || (request.auth != null && request.auth.token.email == request.resource.data.email))
                     && (request.resource.data.get('uid', null) == null
@@ -90,7 +91,10 @@ service cloud.firestore {
                     && request.resource.data.get('ruta', '') is string
                     && request.resource.data.get('ruta', '').size() <= 60
                     && request.resource.data.get('sesionId', '') is string
-                    && request.resource.data.get('sesionId', '').size() <= 80;
+                    && request.resource.data.get('sesionId', '').size() <= 80
+                    && request.resource.data.get('robot', false) is bool
+                    && (request.resource.data.get('pidio', null) == null
+                        || (request.resource.data.pidio is string && request.resource.data.pidio.size() <= 200));
       allow update, delete: if false;
     }
 
