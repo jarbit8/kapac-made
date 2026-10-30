@@ -1,5 +1,5 @@
 import { getDocs } from 'firebase/firestore';
-import { obtenerEstadisticas } from './visitas';
+import { obtenerEstadisticas, detectarDispositivo, detectarNavegador } from './visitas';
 
 jest.mock('./config', () => ({ db: {} }));
 jest.mock('firebase/firestore', () => ({
@@ -29,4 +29,23 @@ test('cuenta personas por país y por ciudad, separando Próximamente de la tien
   expect(stats.proximamente.ciudadesPorPais).toEqual({ Peru: { Arequipa: 1, Lima: 1 }, Chile: { Santiago: 1 } });
   expect(stats.porPais).toEqual({ Peru: 1 });
   expect(stats.ciudadesPorPais).toEqual({ Peru: { Cusco: 1 } });
+});
+
+test('reconoce el dispositivo y el navegador', () => {
+  const iphoneInstagram = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 345.0.0.0';
+  const androidChrome = 'Mozilla/5.0 (Linux; Android 14; SM-A546E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36';
+  const ipadSafari = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15';
+  const pcEdge = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0';
+  const facebook = 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/480.0]';
+
+  expect(detectarDispositivo(iphoneInstagram)).toBe('iPhone');
+  expect(detectarNavegador(iphoneInstagram)).toBe('Instagram');
+  expect(detectarDispositivo(androidChrome)).toBe('Android');
+  expect(detectarNavegador(androidChrome)).toBe('Chrome');
+  expect(detectarDispositivo(ipadSafari, 5)).toBe('iPad');
+  expect(detectarDispositivo(ipadSafari, 0)).toBe('Mac');
+  expect(detectarNavegador(ipadSafari)).toBe('Safari');
+  expect(detectarDispositivo(pcEdge)).toBe('PC Windows');
+  expect(detectarNavegador(pcEdge)).toBe('Edge');
+  expect(detectarNavegador(facebook)).toBe('Facebook');
 });

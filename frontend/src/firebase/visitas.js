@@ -16,8 +16,9 @@ const esProximamente = (v) => v.ruta === 'proximamente';
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
-function detectarDispositivo(ua = navigator.userAgent) {
-  if (/iPad/i.test(ua)) return 'iPad';
+function detectarDispositivo(ua = navigator.userAgent, toques = navigator.maxTouchPoints || 0) {
+  // El iPad nuevo se presenta como Mac: se le reconoce porque tiene pantalla táctil
+  if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && toques > 1)) return 'iPad';
   if (/iPhone/i.test(ua)) return 'iPhone';
   if (/Android/i.test(ua)) return /Mobile/i.test(ua) ? 'Android' : 'Tablet Android';
   if (/Mobi/i.test(ua)) return 'Móvil';
@@ -28,6 +29,10 @@ function detectarDispositivo(ua = navigator.userAgent) {
 }
 
 function detectarNavegador(ua = navigator.userAgent) {
+  // Los que abren el enlace desde Instagram o Facebook usan el navegador de la app
+  if (/Instagram/i.test(ua)) return 'Instagram';
+  if (/FBAN|FBAV|FB_IAB/i.test(ua)) return 'Facebook';
+  if (/SamsungBrowser/i.test(ua)) return 'Samsung Internet';
   if (/Edg\//i.test(ua)) return 'Edge';
   if (/OPR|Opera/i.test(ua)) return 'Opera';
   if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) return 'Chrome';
@@ -131,6 +136,8 @@ async function obtenerUbicacion() {
 /**
  * Registra una visita. Antiduplicación por sesión.
  */
+export { detectarDispositivo, detectarNavegador };
+
 export async function registrarVisita(ruta = '/', usuario = null) {
   try {
     const segmento = ruta.split('/').filter(Boolean)[0] || 'home';
