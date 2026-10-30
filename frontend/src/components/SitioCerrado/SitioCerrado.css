@@ -59,17 +59,6 @@
   animation: cerrado-luz 11s ease-in-out 2.5s infinite both;
 }
 
-/* Golpe de luz cuando el título termina de entrar */
-.cerrado-destello {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 80%, rgba(255, 236, 210, 0.55), transparent 70%);
-  opacity: 0;
-  animation: cerrado-destello 1.4s ease-out 1.9s both;
-}
-
 .cerrado-grano {
   position: absolute;
   inset: -50%;
@@ -139,87 +128,54 @@
   font-family: 'Archivo', sans-serif !important;
   font-weight: 900;
   font-stretch: 125%;
-  text-shadow: 0 0 40px rgba(0, 0, 0, 0.35), 0 0 70px rgba(255, 210, 150, 0.12);
-  opacity: 0;
+  text-align: center;
+  text-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
 }
 
-.cerrado-palabra.contorno span {
+.cerrado-palabra.contorno span.fija {
   color: transparent;
   -webkit-text-stroke: 0.028em #fff;
   text-shadow: none;
 }
 
-/* Las letras suben desde el desenfoque una tras otra y la palabra se cierra */
-.cerrado-titulo.listo .cerrado-palabra {
-  animation: cerrado-junta 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+.cerrado-palabra span.mezcla {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.7);
+  text-shadow: none;
 }
 
-.cerrado-titulo.listo .cerrado-palabra span {
-  animation:
-    cerrado-letra 1.5s cubic-bezier(0.16, 1, 0.3, 1) calc(0.15s + var(--i) * 0.07s) both,
-    cerrado-golpe 0.5s steps(1) 1.9s both;
+.cerrado-palabra span.destello {
+  text-shadow: 0.05em 0 rgba(255, 40, 90, 0.85), -0.05em 0 rgba(0, 220, 255, 0.85);
 }
 
-/* Raya de luz que se abre bajo el título */
-.cerrado-titulo::after {
-  content: '';
+.cerrado-medidor {
   position: absolute;
-  left: 50%;
-  bottom: 4px;
-  width: min(70%, 520px);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
-  transform: translateX(-50%) scaleX(0);
+  top: 0;
+  left: -9999px;
+  visibility: hidden;
+  white-space: pre;
+  font-family: 'Archivo', sans-serif !important;
+  font-size: 100px;
+  font-weight: 900;
+  font-stretch: 125%;
 }
 
-.cerrado-titulo.listo::after {
-  animation: cerrado-raya 1.6s cubic-bezier(0.16, 1, 0.3, 1) 1.9s both;
+/* En cada vuelta la palabra se corta en franjas y se vuelve a armar */
+.cerrado-titulo.cambiando {
+  animation: cerrado-glitch 0.36s steps(1) both;
 }
 
-/* Cada tanto la palabra se corta en franjas, como una señal que se pierde */
-.cerrado-titulo.listo {
-  animation: cerrado-corte 9s steps(1) 6s infinite;
+@keyframes cerrado-glitch {
+  0% { transform: translateX(-0.04em) skewX(-10deg); clip-path: inset(8% 0 52% 0); }
+  20% { transform: translateX(0.05em); clip-path: inset(58% 0 6% 0); }
+  40% { transform: translateX(-0.02em) skewX(8deg); clip-path: inset(28% 0 34% 0); }
+  60% { transform: translateX(0.03em); clip-path: inset(0 0 68% 0); }
+  80% { transform: translateX(-0.01em); clip-path: inset(44% 0 0 0); }
+  100% { transform: none; clip-path: none; }
 }
 
-@keyframes cerrado-corte {
-  0%, 93% { transform: none; clip-path: none; }
-  94% { transform: translateX(-0.04em) skewX(-10deg); clip-path: inset(8% 0 52% 0); }
-  95% { transform: translateX(0.05em); clip-path: inset(58% 0 6% 0); }
-  96% { transform: translateX(-0.02em) skewX(8deg); clip-path: inset(28% 0 34% 0); }
-  97% { transform: translateX(0.03em); clip-path: inset(0 0 68% 0); }
-  98% { transform: none; clip-path: none; }
-}
 
-@keyframes cerrado-letra {
-  from { opacity: 0; transform: translateY(0.35em) scale(1.18); filter: blur(12px); }
-  to { opacity: 1; transform: none; filter: none; }
-}
 
-@keyframes cerrado-junta {
-  from { gap: 0.22em; }
-  to { gap: 0; }
-}
-
-/* Al cerrar: un instante de colores separados, como el destello de antes */
-@keyframes cerrado-golpe {
-  0% { text-shadow: 0.06em 0 rgba(255, 40, 90, 0.85), -0.06em 0 rgba(0, 220, 255, 0.85); }
-  40% { text-shadow: 0.025em 0 rgba(255, 40, 90, 0.6), -0.025em 0 rgba(0, 220, 255, 0.6); }
-}
-
-@keyframes cerrado-raya {
-  to { transform: translateX(-50%) scaleX(1); }
-}
-
-@keyframes cerrado-destello {
-  0% { opacity: 0; }
-  12% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-@keyframes cerrado-luz {
-  0% { transform: translateX(-45%); }
-  60%, 100% { transform: translateX(45%); }
-}
 
 .cerrado-pie {
   display: flex;
@@ -262,6 +218,10 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes cerrado-luz {
+  0% { transform: translateX(-45%); }
+  60%, 100% { transform: translateX(45%); }
+}
 @keyframes cerrado-aparece {
   from { opacity: 0; }
   to { opacity: 1; }

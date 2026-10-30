@@ -64,6 +64,7 @@ export default function Admin() {
   const [visitasLimite, setVisitasLimite] = useState(10);
   // Visitas de la tienda o de la pantalla "Próximamente" (mientras está cerrada)
   const [zona, setZona] = useState(cerrado ? 'proximamente' : 'tienda');
+  const [paisAbierto, setPaisAbierto] = useState(null);
   const [pestana, setPestana] = useState('pedidos'); // 'pedidos' | 'visitas' | 'reclamos'
   const [msg, setMsg] = useState('');
   const [reclamos, setReclamos] = useState([]);
@@ -429,20 +430,35 @@ export default function Admin() {
             </div>
             </>)}
 
-            <h3 style={{ marginTop: 32, marginBottom: 16 }}>Visitantes por país</h3>
+            <h3 style={{ marginTop: 32, marginBottom: 4 }}>Visitantes por país</h3>
+            <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Personas distintas. Toca un país para ver sus ciudades.</p>
             <div className="admin-tabla-stats">
               {Object.entries(datos.porPais)
                 .sort((a, b) => b[1] - a[1])
                 .map(([pais, n]) => {
                   const max = Math.max(...Object.values(datos.porPais), 1);
                   const ancho = Math.max(8, (n / max) * 100);
+                  const abierto = paisAbierto === pais;
+                  const ciudades = Object.entries(datos.ciudadesPorPais?.[pais] || {}).sort((a, b) => b[1] - a[1]);
                   return (
-                    <div key={pais} className="stat-row">
-                      <span className="stat-fecha">{pais}</span>
-                      <div className="stat-bar-wrap">
-                        <div className="stat-bar" style={{ width: `${ancho}%`, background: '#4caf50' }} />
-                      </div>
-                      <span className="stat-num">{n}</span>
+                    <div key={pais} className="stat-grupo">
+                      <button type="button" className={`stat-row stat-pais${abierto ? ' abierto' : ''}`} aria-expanded={abierto}
+                        onClick={() => setPaisAbierto(abierto ? null : pais)}>
+                        <span className="stat-fecha"><span className="stat-flecha">›</span>{pais}</span>
+                        <div className="stat-bar-wrap">
+                          <div className="stat-bar" style={{ width: `${ancho}%`, background: '#4caf50' }} />
+                        </div>
+                        <span className="stat-num">{n}</span>
+                      </button>
+                      {abierto && ciudades.map(([ciudad, m]) => (
+                        <div key={ciudad} className="stat-row stat-ciudad">
+                          <span className="stat-fecha">{ciudad}</span>
+                          <div className="stat-bar-wrap">
+                            <div className="stat-bar" style={{ width: `${Math.max(8, (m / n) * 100)}%`, background: '#a5d6a7' }} />
+                          </div>
+                          <span className="stat-num">{m}</span>
+                        </div>
+                      ))}
                     </div>
                   );
                 })}

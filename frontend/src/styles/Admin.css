@@ -330,6 +330,27 @@
 
 .stat-row:last-child { border-bottom: none; }
 
+/* País que se despliega para ver sus ciudades */
+.stat-grupo { border-bottom: 1px solid #f5f5f5; }
+.stat-grupo:last-child { border-bottom: none; }
+.stat-grupo .stat-row { border-bottom: none; }
+.stat-pais {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.stat-flecha {
+  display: inline-block;
+  width: 14px;
+  color: #999;
+  transition: transform 0.2s ease;
+}
+.stat-pais.abierto .stat-flecha { transform: rotate(90deg); }
+.stat-ciudad .stat-fecha { padding-left: 14px; color: #888; }
+
 .stat-fecha {
   flex: 0 0 130px;
   font-size: 14px;

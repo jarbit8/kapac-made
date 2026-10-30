@@ -36,6 +36,18 @@ function detectarNavegador(ua = navigator.userAgent) {
   return 'Otro';
 }
 
+// Algunos servicios dan el código ("PE") y otros el nombre ("Peru"): todo queda como nombre
+let regiones = null;
+function nombrePais(pais) {
+  if (!/^[A-Z]{2}$/.test(pais || '')) return pais;
+  try {
+    regiones ||= new Intl.DisplayNames(['en'], { type: 'region' });
+    return regiones.of(pais) || pais;
+  } catch (_) {
+    return pais;
+  }
+}
+
 const aleatorio = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 // Número al azar que se queda en este navegador: distingue a una persona de otra
@@ -99,7 +111,7 @@ async function obtenerUbicacion() {
       const info = svc.parse(data);
       if (info && info.pais) {
         const limpio = {
-          pais:   info.pais || 'Desconocido',
+          pais:   nombrePais(info.pais) || 'Desconocido',
           ciudad: info.ciudad || 'Desconocida',
         };
         sessionStorage.setItem('kapac_ubicacion', JSON.stringify(limpio));
@@ -180,12 +192,14 @@ export async function obtenerVisitasRecientes(n = 10, proximamente = false) {
   }
 }
 
-const SIN_VISITAS = { total: 0, logueados: 0, visitasHoy: 0, visitantesUnicos: 0, porRuta: {}, porDia: {}, porPais: {}, porDispositivo: {} };
+const SIN_VISITAS = { total: 0, logueados: 0, visitasHoy: 0, visitantesUnicos: 0, porRuta: {}, porDia: {}, porPais: {}, ciudadesPorPais: {}, porDispositivo: {} };
+const contar = (grupos) => Object.fromEntries(Object.entries(grupos).map(([k, s]) => [k, s.size]));
 
 // Cuenta entradas reales y personas distintas (no cada página que recorren)
 function resumir(visitas) {
   const porRuta = {};
   const personasPorPais = {};
+  const personasPorCiudad = {}; // pais -> ciudad -> Set(persona)
   const personasPorDispositivo = {};
   const visitantesUnicos = new Set();
   const sesionesPorDia = {}; // dia -> Set(sesionId): cuenta accesos reales, no cada página vista
@@ -204,7 +218,9 @@ function resumir(visitas) {
     // Persona: su correo, o el número de su navegador; las visitas viejas (sin ese
     // número) se aproximan por país, ciudad, dispositivo y navegador
     const identidad = v.email || (v.sesionId?.includes('.') ? v.sesionId.split('.')[0] : `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`);
-    (personasPorPais[v.pais || 'Desconocido'] ||= new Set()).add(identidad);
+    const pais = nombrePais(v.pais) || 'Desconocido';
+    (personasPorPais[pais] ||= new Set()).add(identidad);
+    ((personasPorCiudad[pais] ||= {})[v.ciudad || 'Desconocida'] ||= new Set()).add(identidad);
     (personasPorDispositivo[v.dispositivo || 'Otro'] ||= new Set()).add(identidad);
     const sid = v.sesionId || `${v.dia}_${identidad}`;
     sesionesTotal.add(sid);
@@ -224,8 +240,9 @@ function resumir(visitas) {
     visitantesUnicos: visitantesUnicos.size,
     porRuta,
     porDia,
-    porPais: Object.fromEntries(Object.entries(personasPorPais).map(([k, s]) => [k, s.size])),
-    porDispositivo: Object.fromEntries(Object.entries(personasPorDispositivo).map(([k, s]) => [k, s.size])),
+    porPais: contar(personasPorPais),
+    ciudadesPorPais: Object.fromEntries(Object.entries(personasPorCiudad).map(([pais, ciudades]) => [pais, contar(ciudades)])),
+    porDispositivo: contar(personasPorDispositivo),
   };
 }
 
