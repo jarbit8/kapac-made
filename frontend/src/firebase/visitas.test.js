@@ -1,5 +1,7 @@
-import { getDocs } from 'firebase/firestore';
-import { obtenerEstadisticas, obtenerVisitasRecientes, detectarDispositivo, detectarNavegador } from './visitas';
+import fs from 'fs';
+import path from 'path';
+import { getDocs, addDoc } from 'firebase/firestore';
+import { registrarVisita, obtenerEstadisticas, obtenerVisitasRecientes, detectarDispositivo, detectarNavegador } from './visitas';
 
 jest.mock('./config', () => ({ db: {} }));
 jest.mock('firebase/firestore', () => ({
@@ -61,6 +63,23 @@ test('Próximamente, login y página van por separado, y la misma persona cuenta
   const pagina = await obtenerVisitasRecientes(10, 'pagina');
   expect(pagina).toHaveLength(1);
   expect(pagina[0].recorrido).toEqual(['home']);
+});
+
+test('guarda solo campos que aceptan las reglas, y sin los nuevos si las publicadas son viejas', async () => {
+  global.fetch = jest.fn().mockRejectedValue(new Error('sin red'));
+  addDoc.mockRejectedValueOnce({ code: 'permission-denied' }).mockResolvedValueOnce({});
+
+  await registrarVisita('/proximamente', null, '/admin');
+
+  const [completa, basica] = addDoc.mock.calls.map((c) => c[1]);
+  expect(completa).toMatchObject({ ruta: 'proximamente', pidio: '/admin', robot: false, entrada: true });
+  expect(basica).not.toHaveProperty('pidio');
+  expect(basica).not.toHaveProperty('robot');
+
+  // firestore.rules usa hasOnly: un campo que no esté en esa lista hace fallar todas las visitas
+  const reglas = fs.readFileSync(path.join(__dirname, '../../../firestore.rules'), 'utf8');
+  const permitidos = reglas.match(/match \/visitas[\s\S]*?hasOnly\(\[([^\]]*)\]/)[1].match(/'\w+'/g).map((x) => x.slice(1, -1));
+  expect(permitidos).toEqual(expect.arrayContaining(Object.keys(completa)));
 });
 
 test('reconoce el dispositivo y el navegador', () => {

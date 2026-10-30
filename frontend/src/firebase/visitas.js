@@ -66,7 +66,7 @@ function nombrePais(pais) {
   }
 }
 
-const aleatorio = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+const aleatorio = () => (window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 // Número al azar que se queda en este navegador: distingue a una persona de otra
 // sin saber quién es (la misma persona en otra pestaña u otro día cuenta una vez)
@@ -184,7 +184,14 @@ export async function registrarVisita(ruta = '/', usuario = null, pidio = '') {
       pidio:       pidio && pidio !== '/' ? pidio.slice(0, 200) : null, // con la tienda cerrada: la dirección que quiso abrir
     };
 
-    await addDoc(collection(db, COLECCION), visitaDoc);
+    try {
+      await addDoc(collection(db, COLECCION), visitaDoc);
+    } catch (e) {
+      // Si las reglas publicadas aún no conocen los campos nuevos, se guarda sin ellos
+      if (e?.code !== 'permission-denied') throw e;
+      const { robot, pidio, ...basica } = visitaDoc;
+      await addDoc(collection(db, COLECCION), basica);
+    }
   } catch (e) {
     console.warn('No se pudo registrar visita:', e?.message);
   }
