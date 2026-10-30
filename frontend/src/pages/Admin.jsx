@@ -364,7 +364,7 @@ export default function Admin() {
                       <div className="visita-meta">
                         {v.ciudad && v.ciudad !== 'Desconocida' ? `${v.ciudad}, ` : ''}{v.pais || '—'} · {v.dispositivo} · {v.navegador}
                       </div>
-                      {(zona === 'tienda' || v.recorrido.length > 1) && <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>}
+                      {zona === 'tienda' && <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>}
                     </div>
                     <div className="visita-ruta">
                       <span className="visita-pagina">{rutaNombre}</span>

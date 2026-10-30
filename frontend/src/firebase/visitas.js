@@ -185,33 +185,26 @@ export async function registrarVisita(ruta = '/', usuario = null) {
 // El número del navegador va al inicio del sesionId ("visitante.sesión")
 const visitanteDe = (v) => (v.sesionId?.includes('.') ? v.sesionId.split('.')[0] : '');
 
-// A cada visita le pone su persona y su zona.
-// Persona: su correo si alguna vez entró con su cuenta desde ese navegador (así no cuenta
-// como dos personas antes y después del login), o el número del navegador; las visitas
-// viejas, sin ese número, se aproximan por país, ciudad, dispositivo y navegador.
-// Zona: la de la página por donde entró. Si entró por "Próximamente" y después fue al
-// login, todo eso es de Próximamente (antes el resto caía en la tienda sin su entrada).
+// A cada visita le pone su persona: su correo si alguna vez entró con su cuenta desde
+// ese navegador (así no cuenta como dos personas antes y después del login), o el número
+// del navegador; las visitas viejas, sin ese número, se aproximan por país, ciudad,
+// dispositivo y navegador.
 function agrupar(visitas) {
   const correoDe = {};
-  const entroPorProximamente = {};
   visitas.forEach((v) => {
     const visitante = visitanteDe(v);
     if (v.email && visitante) correoDe[visitante] = v.email;
-    if (v.entrada && v.sesionId) entroPorProximamente[v.sesionId] = esProximamente(v);
   });
   return visitas.map((v) => {
     const visitante = visitanteDe(v);
     const correo = v.email || correoDe[visitante] || null;
-    return {
-      ...v,
-      correo,
-      persona: correo || visitante || `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`,
-      proximamente: entroPorProximamente[v.sesionId] ?? esProximamente(v),
-    };
+    return { ...v, correo, persona: correo || visitante || `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}` };
   });
 }
 
-/** Obtener las últimas N entradas al sitio (no cada página que recorren) para la lista del admin */
+/** Obtener las últimas N entradas al sitio (no cada página que recorren) para la lista del admin.
+ *  Cada zona va por separado: quien vio "Próximamente" y después fue al login aparece en
+ *  Próximamente y también en la tienda, donde su visita empieza en el login. */
 export async function obtenerVisitasRecientes(n = 10, proximamente = false) {
   try {
     // Traemos más para luego filtrar al admin y quedarnos solo con entradas, sin perder cantidad
@@ -219,16 +212,16 @@ export async function obtenerVisitasRecientes(n = 10, proximamente = false) {
       query(collection(db, COLECCION), orderBy('fecha', 'desc'), limit(Math.max(n * 6, 120)))
     );
     const visitas = agrupar(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
-      .filter((v) => !esDueno(v.correo));
+      .filter((v) => !esDueno(v.correo) && esProximamente(v) === proximamente);
     // Páginas que vio en esa misma visita, en orden (llegan de la más nueva a la más vieja)
     const recorridos = {};
     visitas.forEach((v) => {
-      if (v.sesionId) (recorridos[v.sesionId] = recorridos[v.sesionId] || []).unshift(v.ruta);
+      if (v.sesionId) (recorridos[v.sesionId] = recorridos[v.sesionId] || []).unshift(v);
     });
     return visitas
-      .filter((v) => v.entrada && v.proximamente === proximamente)
+      .filter((v) => (v.sesionId ? recorridos[v.sesionId][0] === v : v.entrada))
       .slice(0, n)
-      .map((v) => ({ ...v, recorrido: recorridos[v.sesionId] || [v.ruta] }));
+      .map((v) => ({ ...v, recorrido: (recorridos[v.sesionId] || [v]).map((x) => x.ruta) }));
   } catch (e) {
     console.error('Error obteniendo visitas recientes:', e);
     return [];
@@ -304,8 +297,8 @@ export async function obtenerEstadisticas(diasAtras = 30) {
       .filter((v) => !esDueno(v.correo)); // excluir al dueño, también lo que vio antes de entrar con su cuenta
 
     return {
-      ...resumir(visitas.filter((v) => !v.proximamente)),
-      proximamente: resumir(visitas.filter((v) => v.proximamente)),
+      ...resumir(visitas.filter((v) => !esProximamente(v))),
+      proximamente: resumir(visitas.filter(esProximamente)),
     };
   } catch (e) {
     console.error('Error obteniendo estadísticas:', e);

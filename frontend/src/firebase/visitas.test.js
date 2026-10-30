@@ -31,7 +31,7 @@ test('cuenta personas por país y por ciudad, separando Próximamente de la tien
   expect(stats.ciudadesPorPais).toEqual({ Peru: { Cusco: 1 } });
 });
 
-test('quien entra por Próximamente y luego va al login sigue en Próximamente, como una sola persona', async () => {
+test('quien ve Próximamente y luego va al login cuenta en cada zona por separado, como una sola persona', async () => {
   // Llegan de la más nueva a la más vieja
   getDocs.mockResolvedValue({ docs: [
     visita('c', 1, 'home', 'Peru', 'Lima', { entrada: false, email: 'cristhiandccapa@gmail.com' }),
@@ -42,17 +42,22 @@ test('quien entra por Próximamente y luego va al login sigue en Próximamente, 
   ] });
 
   const stats = await obtenerEstadisticas(30);
-  expect(stats.total).toBe(0);
+  expect(stats.total).toBe(1);
+  expect(stats.visitantesUnicos).toBe(1);
+  expect(stats.logueados).toBe(1);
+  expect(stats.porRuta).toEqual({ login: 1, home: 1 });
   expect(stats.proximamente.total).toBe(1);
   expect(stats.proximamente.visitantesUnicos).toBe(1);
-  expect(stats.proximamente.logueados).toBe(1);
   expect(stats.proximamente.porPais).toEqual({ Peru: 1 });
 
-  expect(await obtenerVisitasRecientes(10, false)).toEqual([]);
-  const [entrada, ...resto] = await obtenerVisitasRecientes(10, true);
-  expect(resto).toEqual([]);
-  expect(entrada.correo).toBe('cristhiandccapa@gmail.com');
-  expect(entrada.recorrido).toEqual(['proximamente', 'login', 'home']);
+  const tienda = await obtenerVisitasRecientes(10, false);
+  expect(tienda).toHaveLength(1);
+  expect(tienda[0].ruta).toBe('login');
+  expect(tienda[0].correo).toBe('cristhiandccapa@gmail.com');
+  expect(tienda[0].recorrido).toEqual(['login', 'home']);
+  const proximamente = await obtenerVisitasRecientes(10, true);
+  expect(proximamente).toHaveLength(1);
+  expect(proximamente[0].recorrido).toEqual(['proximamente']);
 });
 
 test('reconoce el dispositivo y el navegador', () => {
