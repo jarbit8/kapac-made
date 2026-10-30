@@ -11,6 +11,9 @@ import { esDueno } from '../config/admins';
 
 const COLECCION = 'visitas';
 
+// Con la tienda cerrada el visitante solo ve el video: eso se cuenta en su propia zona
+const esProximamente = (v) => v.ruta === 'proximamente';
+
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
 function detectarDispositivo(ua = navigator.userAgent) {
@@ -153,7 +156,7 @@ export async function registrarVisita(ruta = '/', usuario = null) {
 }
 
 /** Obtener las últimas N entradas al sitio (no cada página que recorren) para la lista del admin */
-export async function obtenerVisitasRecientes(n = 10) {
+export async function obtenerVisitasRecientes(n = 10, proximamente = false) {
   try {
     // Traemos más para luego filtrar al admin y quedarnos solo con entradas, sin perder cantidad
     const snap = await getDocs(
@@ -168,7 +171,7 @@ export async function obtenerVisitasRecientes(n = 10) {
       if (v.sesionId) (recorridos[v.sesionId] = recorridos[v.sesionId] || []).unshift(v.ruta);
     });
     return visitas
-      .filter((v) => v.entrada)
+      .filter((v) => v.entrada && esProximamente(v) === proximamente)
       .slice(0, n)
       .map((v) => ({ ...v, recorrido: recorridos[v.sesionId] || [v.ruta] }));
   } catch (e) {
@@ -177,7 +180,57 @@ export async function obtenerVisitasRecientes(n = 10) {
   }
 }
 
-/** Obtener estadísticas agregadas (para gráficos) — excluye al admin */
+const SIN_VISITAS = { total: 0, logueados: 0, visitasHoy: 0, visitantesUnicos: 0, porRuta: {}, porDia: {}, porPais: {}, porDispositivo: {} };
+
+// Cuenta entradas reales y personas distintas (no cada página que recorren)
+function resumir(visitas) {
+  const porRuta = {};
+  const personasPorPais = {};
+  const personasPorDispositivo = {};
+  const visitantesUnicos = new Set();
+  const sesionesPorDia = {}; // dia -> Set(sesionId): cuenta accesos reales, no cada página vista
+  const sesionesTotal = new Set();
+  const identificados = new Set();
+
+  const hoy = new Date().toISOString().slice(0, 10);
+
+  visitas.forEach((v) => {
+    porRuta[v.ruta]  = (porRuta[v.ruta]  || 0) + 1;
+
+    if (v.email) identificados.add(v.email);
+
+    // Sesión = 1 entrada real al sitio. Las visitas viejas (sin sesionId) se agrupan
+    // por persona+día como aproximación, para no contar cada página que recorrieron.
+    // Persona: su correo, o el número de su navegador; las visitas viejas (sin ese
+    // número) se aproximan por país, ciudad, dispositivo y navegador
+    const identidad = v.email || (v.sesionId?.includes('.') ? v.sesionId.split('.')[0] : `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`);
+    (personasPorPais[v.pais || 'Desconocido'] ||= new Set()).add(identidad);
+    (personasPorDispositivo[v.dispositivo || 'Otro'] ||= new Set()).add(identidad);
+    const sid = v.sesionId || `${v.dia}_${identidad}`;
+    sesionesTotal.add(sid);
+    if (!sesionesPorDia[v.dia]) sesionesPorDia[v.dia] = new Set();
+    sesionesPorDia[v.dia].add(sid);
+
+    visitantesUnicos.add(identidad);
+  });
+
+  const porDia = {};
+  Object.entries(sesionesPorDia).forEach(([dia, set]) => { porDia[dia] = set.size; });
+
+  return {
+    total: sesionesTotal.size,
+    logueados: identificados.size,
+    visitasHoy: sesionesPorDia[hoy] ? sesionesPorDia[hoy].size : 0,
+    visitantesUnicos: visitantesUnicos.size,
+    porRuta,
+    porDia,
+    porPais: Object.fromEntries(Object.entries(personasPorPais).map(([k, s]) => [k, s.size])),
+    porDispositivo: Object.fromEntries(Object.entries(personasPorDispositivo).map(([k, s]) => [k, s.size])),
+  };
+}
+
+/** Obtener estadísticas agregadas (para gráficos) — excluye al admin.
+ *  Las de la tienda van arriba y las de "Próximamente" en `proximamente`. */
 export async function obtenerEstadisticas(diasAtras = 30) {
   try {
     const snap = await getDocs(
@@ -193,52 +246,13 @@ export async function obtenerEstadisticas(diasAtras = 30) {
       .filter((v) => (v.dia || '') >= limiteStr)
       .filter((v) => !esDueno(v.email)); // excluir al dueño
 
-    const porRuta = {};
-    const personasPorPais = {};
-    const personasPorDispositivo = {};
-    const visitantesUnicos = new Set();
-    const sesionesPorDia = {}; // dia -> Set(sesionId): cuenta accesos reales, no cada página vista
-    const sesionesTotal = new Set();
-    const identificados = new Set();
-
-    const hoy = new Date().toISOString().slice(0, 10);
-
-    visitas.forEach((v) => {
-      porRuta[v.ruta]  = (porRuta[v.ruta]  || 0) + 1;
-
-      if (v.email) identificados.add(v.email);
-
-      // Sesión = 1 entrada real al sitio. Las visitas viejas (sin sesionId) se agrupan
-      // por persona+día como aproximación, para no contar cada página que recorrieron.
-      // Persona: su correo, o el número de su navegador; las visitas viejas (sin ese
-      // número) se aproximan por país, ciudad, dispositivo y navegador
-      const identidad = v.email || (v.sesionId?.includes('.') ? v.sesionId.split('.')[0] : `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`);
-      (personasPorPais[v.pais || 'Desconocido'] ||= new Set()).add(identidad);
-      (personasPorDispositivo[v.dispositivo || 'Otro'] ||= new Set()).add(identidad);
-      const sid = v.sesionId || `${v.dia}_${identidad}`;
-      sesionesTotal.add(sid);
-      if (!sesionesPorDia[v.dia]) sesionesPorDia[v.dia] = new Set();
-      sesionesPorDia[v.dia].add(sid);
-
-      visitantesUnicos.add(identidad);
-    });
-
-    const porDia = {};
-    Object.entries(sesionesPorDia).forEach(([dia, set]) => { porDia[dia] = set.size; });
-
     return {
-      total: sesionesTotal.size,
-      logueados: identificados.size,
-      visitasHoy: sesionesPorDia[hoy] ? sesionesPorDia[hoy].size : 0,
-      visitantesUnicos: visitantesUnicos.size,
-      porRuta,
-      porDia,
-      porPais: Object.fromEntries(Object.entries(personasPorPais).map(([k, s]) => [k, s.size])),
-      porDispositivo: Object.fromEntries(Object.entries(personasPorDispositivo).map(([k, s]) => [k, s.size])),
+      ...resumir(visitas.filter((v) => !esProximamente(v))),
+      proximamente: resumir(visitas.filter(esProximamente)),
     };
   } catch (e) {
     console.error('Error obteniendo estadísticas:', e);
-    return { total: 0, logueados: 0, visitasHoy: 0, visitantesUnicos: 0, porRuta: {}, porDia: {}, porPais: {}, porDispositivo: {} };
+    return { ...SIN_VISITAS, proximamente: SIN_VISITAS };
   }
 }
 

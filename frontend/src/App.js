@@ -59,7 +59,6 @@ function RedirigirA({ ruta }) {
 }
 
 function AppRoutes() {
-  useTrackVisita();
   return (
     <Routes>
       <Route path="/"         element={<Home />} />
@@ -98,7 +97,10 @@ const esDispositivoAdmin = () => {
   try { return localStorage.getItem('kapac_dispositivo_admin') === '1'; } catch (_) { return false; }
 };
 
+// Las visitas se cuentan aquí y no en las rutas: con la tienda cerrada las rutas
+// no se montan y la gente que solo vio "Próximamente" no quedaba registrada
 function CierreGate({ children }) {
+  useTrackVisita();
   const { cerrado } = useTema();
   const { cargando, esAdmin } = useAuth();
   const { pathname } = useLocation();

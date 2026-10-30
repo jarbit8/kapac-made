@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../../styles/Header.css';
 import '../EditableImage.css';
 import { useCart } from '../../context/CartContext';
@@ -51,7 +51,7 @@ export default function Header({ transparente = false }) {
   }, [termino, productos]);
   const navigate = useNavigate();
   const { totalItems } = useCart();
-  const { usuario, puedeEditar: esAdmin, esAdmin: administrador } = useAuth();
+  const { usuario, puedeEditar: esAdmin } = useAuth();
   const { idioma, setIdioma, t } = useIdioma();
 
   const cerrarBuscador = () => {
@@ -90,7 +90,7 @@ export default function Header({ transparente = false }) {
   };
 
   const esSolido = !transparente || scrolled;
-  const { logo, logoListo, setTema, cerrado, setCerrado } = useTema();
+  const { logo, logoListo, setTema } = useTema();
   const logoSrc  = fotoRapida(logo) || logoTerracota; // logo del admin o el de la marca
 
   // El logo se cambia acá mismo (antes vivía en la pestaña Fotos del admin).
@@ -107,12 +107,15 @@ export default function Header({ transparente = false }) {
     return () => document.removeEventListener('pointerdown', fuera);
   }, [logoMarcado]);
 
-  // Sin hover, el primer toque al logo muestra "Cambiar logo"; el segundo vuelve al inicio
+  // Sin hover, el primer toque al logo muestra "Cambiar logo"; el segundo vuelve al inicio.
+  // No es un enlace: así el navegador no muestra la dirección abajo al pasar el mouse.
   const alTocarLogo = (e) => {
-    if (!esAdmin || logoMarcado || e.target.closest('.editable-img-btn')) return;
-    if (!window.matchMedia('(hover: none)').matches) return;
-    e.preventDefault();
-    setLogoMarcado(true);
+    if (e.target.closest('.editable-img-btn')) return;
+    if (esAdmin && !logoMarcado && window.matchMedia('(hover: none)').matches) {
+      setLogoMarcado(true);
+      return;
+    }
+    navigate('/');
   };
 
   const cambiarLogo = async (e) => {
@@ -131,37 +134,13 @@ export default function Header({ transparente = false }) {
     setSubiendoLogo(false);
   };
 
-  const [cambiandoTienda, setCambiandoTienda] = useState(false);
-  const cambiarTienda = async () => {
-    const abrir = cerrado;
-    const pregunta = abrir
-      ? '¿Seguro que quieres ABRIR la tienda? Todos podrán ver la página y comprar.'
-      : '¿Seguro que quieres CERRAR la tienda? Los visitantes verán la pantalla «Próximamente».';
-    if (!window.confirm(pregunta)) return;
-    setCambiandoTienda(true);
-    try {
-      await cambiarContenido(() => ({ cerrado: !abrir }));
-      setCerrado(!abrir);
-      try { localStorage.setItem('kapac_cerrado_v1', abrir ? '0' : '1'); } catch (_) {}
-    } catch (_) {
-      window.alert('No se pudo cambiar. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
-    }
-    setCambiandoTienda(false);
-  };
-
   return (
     <>
       {/* Header — siempre solo el logo centrado, sin hamburger ni carrito */}
       <header className={`header${esSolido ? ' header-solido' : ''}`}>
         <div className="header-container">
-          {administrador && (
-            <button type="button" className={`header-tienda${cerrado ? ' cerrada' : ''}`} onClick={cambiarTienda} disabled={cambiandoTienda}
-              title={cerrado ? 'Abrir la tienda al público' : 'Cerrar la tienda al público'}>
-              <span className="header-tienda-punto" />
-              {cambiandoTienda ? 'Guardando…' : (cerrado ? 'Tienda cerrada' : 'Tienda abierta')}
-            </button>
-          )}
-          <Link ref={logoRef} to="/" onClick={alTocarLogo}
+          <div ref={logoRef} role="link" tabIndex={0} aria-label="Kapac Made" onClick={alTocarLogo}
+            onKeyDown={(e) => { if (e.key === 'Enter') navigate('/'); }}
             className={`logo${esAdmin ? ' editable-img-wrap editable-toque' : ''}${logoMarcado ? ' editable-marcado' : ''}`}>
             {/* key: al pasar a admin se crea otra imagen, así vuelve a marcarse como cargada */}
             <img key={esAdmin ? 'admin' : 'visita'} src={logoSrc} alt="Kapac Made" className={`logo-simbolo${esAdmin ? ' editable-img' : ''}`}
@@ -180,7 +159,7 @@ export default function Header({ transparente = false }) {
                   onClick={(e) => e.stopPropagation()} />
               </>
             )}
-          </Link>
+          </div>
         </div>
       </header>
     </>

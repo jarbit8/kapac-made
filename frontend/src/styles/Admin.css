@@ -17,6 +17,42 @@
   margin-bottom: 24px;
 }
 
+/* Título a la izquierda y, en la esquina, abrir o cerrar la tienda */
+.admin-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.admin-tienda {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 999px;
+  background: #d4edda;
+  color: #155724;
+  font: 600 12px/1 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.admin-tienda.cerrada { background: #f8d7da; color: #842029; }
+.admin-tienda:disabled { cursor: default; }
+.admin-tienda-punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (pointer: coarse) {
+  .admin-tienda { padding: 10px 14px; }
+}
+
 .admin-msg {
   padding: 12px 16px;
   background: #f0f8f0;

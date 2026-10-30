@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import { useAuth } from '../context/AuthContext';
+import { useTema } from '../context/TemaContext';
+import { cambiarContenido } from '../firebase/contenido';
 import { esCorreoAdmin, NOMBRES } from '../config/admins';
 import {
   obtenerTodosPedidos, actualizarEstadoPedido,
@@ -53,12 +55,15 @@ const ESTADO_COLORES = {
 
 export default function Admin() {
   const { usuario, cargando } = useAuth();
+  const { cerrado, setCerrado } = useTema();
   const { t } = useIdioma();
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
   const [stats, setStats] = useState({ total: 0, logueados: 0, porRuta: {}, porDia: {}, porPais: {} });
   const [visitasRecientes, setVisitasRecientes] = useState([]);
   const [visitasLimite, setVisitasLimite] = useState(10);
+  // Visitas de la tienda o de la pantalla "Próximamente" (mientras está cerrada)
+  const [zona, setZona] = useState(cerrado ? 'proximamente' : 'tienda');
   const [pestana, setPestana] = useState('pedidos'); // 'pedidos' | 'visitas' | 'reclamos'
   const [msg, setMsg] = useState('');
   const [reclamos, setReclamos] = useState([]);
@@ -72,16 +77,39 @@ export default function Admin() {
     setPedidos(await obtenerTodosPedidos());
   };
 
-  const cargarStats = async () => {
+  const cargarStats = async (z = zona) => {
     setStats(await obtenerEstadisticas(30));
     setVisitasLimite(10);
-    setVisitasRecientes(await obtenerVisitasRecientes(10));
+    setVisitasRecientes(await obtenerVisitasRecientes(10, z === 'proximamente'));
+  };
+
+  const cambiarZona = (z) => {
+    setZona(z);
+    cargarStats(z);
   };
 
   const verMasVisitas = async () => {
     const nuevoLimite = visitasLimite + 10;
     setVisitasLimite(nuevoLimite);
-    setVisitasRecientes(await obtenerVisitasRecientes(nuevoLimite));
+    setVisitasRecientes(await obtenerVisitasRecientes(nuevoLimite, zona === 'proximamente'));
+  };
+
+  const [cambiandoTienda, setCambiandoTienda] = useState(false);
+  const cambiarTienda = async () => {
+    const abrir = cerrado;
+    const pregunta = abrir
+      ? '¿Seguro que quieres ABRIR la tienda? Todos podrán ver la página y comprar.'
+      : '¿Seguro que quieres CERRAR la tienda? Los visitantes verán la pantalla «Próximamente».';
+    if (!window.confirm(pregunta)) return;
+    setCambiandoTienda(true);
+    try {
+      await cambiarContenido(() => ({ cerrado: !abrir }));
+      setCerrado(!abrir);
+      try { localStorage.setItem('kapac_cerrado_v1', abrir ? '0' : '1'); } catch (_) {}
+    } catch (_) {
+      window.alert('No se pudo cambiar. Verifica tu conexión o que tu sesión siga activa, e intenta de nuevo.');
+    }
+    setCambiandoTienda(false);
   };
 
   const cargarReclamos = async () => {
@@ -157,6 +185,8 @@ export default function Admin() {
     });
   };
 
+  const datos = (zona === 'proximamente' ? stats.proximamente : stats) || stats;
+
   // PagoEfectivo se confirma solo: solo el Yape con QR lo revisa el admin
   const pedidosVerificando = pedidos.filter(p => ['verificando_pago', 'verificando'].includes(p.estado) && p.metodoPago !== 'efectivo');
   const reclamosPendientes = reclamos.filter((r) => r.estado !== 'respondido');
@@ -207,8 +237,17 @@ export default function Admin() {
     <>
       <Header />
       <div className="admin-page">
-        <h1>{t('admin.titulo')}</h1>
-        <p className="admin-sub">{t('admin.sub')}</p>
+        <div className="admin-cabecera">
+          <div>
+            <h1>{t('admin.titulo')}</h1>
+            <p className="admin-sub">{t('admin.sub')}</p>
+          </div>
+          <button type="button" className={`admin-tienda${cerrado ? ' cerrada' : ''}`} onClick={cambiarTienda} disabled={cambiandoTienda}
+            title={cerrado ? 'Abrir la tienda al público' : 'Cerrar la tienda al público'}>
+            <span className="admin-tienda-punto" />
+            {cambiandoTienda ? 'Guardando…' : (cerrado ? 'Tienda cerrada' : 'Tienda abierta')}
+          </button>
+        </div>
         {msg && <div className="admin-msg">{msg}</div>}
 
         {/* Pestañas */}
@@ -242,29 +281,49 @@ export default function Admin() {
         {/* ====== SECCIÓN VISITAS ====== */}
         {pestana === 'visitas' && (
           <div className="admin-visitas">
+            <div className="admin-pedidos-filtros">
+              {[
+                { key: 'tienda', label: 'Tienda' },
+                { key: 'proximamente', label: 'Próximamente' },
+              ].map((z) => (
+                <button
+                  key={z.key}
+                  className={`admin-filtro-btn ${zona === z.key ? 'activo' : ''}`}
+                  onClick={() => cambiarZona(z.key)}
+                >
+                  {z.label} ({(z.key === 'proximamente' ? stats.proximamente : stats)?.total || 0})
+                </button>
+              ))}
+            </div>
+            {zona === 'proximamente' && (
+              <p style={{ color: '#999', fontSize: 13, marginTop: -8, marginBottom: 16 }}>
+                Gente que entró mientras la tienda estaba cerrada: solo vio el video de «Coming soon».
+              </p>
+            )}
+
             <div className="admin-contadores">
               <div className="contador-card" style={{ borderTop: '4px solid #ff6b35' }}>
-                <span className="contador-num">{stats.visitasHoy || 0}</span>
+                <span className="contador-num">{datos.visitasHoy || 0}</span>
                 <span className="contador-label">Hoy</span>
                 <span className="contador-sub">veces que entraron al sitio hoy</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #5f0a87' }}>
-                <span className="contador-num">{stats.total}</span>
+                <span className="contador-num">{datos.total}</span>
                 <span className="contador-label">Últimos 30 días</span>
                 <span className="contador-sub">veces que entraron en el mes</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #2196f3' }}>
-                <span className="contador-num">{stats.visitantesUnicos || 0}</span>
+                <span className="contador-num">{datos.visitantesUnicos || 0}</span>
                 <span className="contador-label">Visitantes únicos</span>
                 <span className="contador-sub">personas distintas (una que vuelve no se cuenta 2 veces)</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #4caf50' }}>
-                <span className="contador-num">{stats.logueados}</span>
+                <span className="contador-num">{datos.logueados}</span>
                 <span className="contador-label">Identificados</span>
                 <span className="contador-sub">personas que entraron con su cuenta</span>
               </div>
               <div className="contador-card" style={{ borderTop: '4px solid #f57c00' }}>
-                <span className="contador-num">{Object.keys(stats.porPais).length}</span>
+                <span className="contador-num">{Object.keys(datos.porPais).length}</span>
                 <span className="contador-label">Países distintos</span>
               </div>
             </div>
@@ -306,7 +365,7 @@ export default function Admin() {
                       <div className="visita-meta">
                         {v.ciudad && v.ciudad !== 'Desconocida' ? `${v.ciudad}, ` : ''}{v.pais || '—'} · {v.dispositivo} · {v.navegador}
                       </div>
-                      <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>
+                      {zona === 'tienda' && <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>}
                     </div>
                     <div className="visita-ruta">
                       <span className="visita-pagina">{rutaNombre}</span>
@@ -325,11 +384,11 @@ export default function Admin() {
             <h3 style={{ marginTop: 32, marginBottom: 4 }}>Visitas por día</h3>
             <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Cuántas veces entraron al sitio cada día.</p>
             <div className="admin-tabla-stats">
-              {Object.entries(stats.porDia)
+              {Object.entries(datos.porDia)
                 .sort((a, b) => b[0].localeCompare(a[0]))
                 .slice(0, 30)
                 .map(([fecha, n]) => {
-                  const max = Math.max(...Object.values(stats.porDia), 1);
+                  const max = Math.max(...Object.values(datos.porDia), 1);
                   const ancho = Math.max(8, (n / max) * 100);
                   return (
                     <div key={fecha} className="stat-row">
@@ -341,20 +400,21 @@ export default function Admin() {
                     </div>
                   );
                 })}
-              {Object.keys(stats.porDia).length === 0 && (
+              {Object.keys(datos.porDia).length === 0 && (
                 <p style={{ color: '#999', textAlign: 'center', padding: 30 }}>
                   {t('admin.sin_visitas')}
                 </p>
               )}
             </div>
 
+            {zona === 'tienda' && (<>
             <h3 style={{ marginTop: 32, marginBottom: 4 }}>Páginas más visitadas</h3>
             <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Qué páginas recorren dentro de una misma visita.</p>
             <div className="admin-tabla-stats">
-              {Object.entries(stats.porRuta)
+              {Object.entries(datos.porRuta)
                 .sort((a, b) => b[1] - a[1])
                 .map(([ruta, n]) => {
-                  const max = Math.max(...Object.values(stats.porRuta), 1);
+                  const max = Math.max(...Object.values(datos.porRuta), 1);
                   const ancho = Math.max(8, (n / max) * 100);
                   return (
                     <div key={ruta} className="stat-row">
@@ -367,13 +427,14 @@ export default function Admin() {
                   );
                 })}
             </div>
+            </>)}
 
             <h3 style={{ marginTop: 32, marginBottom: 16 }}>Visitantes por país</h3>
             <div className="admin-tabla-stats">
-              {Object.entries(stats.porPais)
+              {Object.entries(datos.porPais)
                 .sort((a, b) => b[1] - a[1])
                 .map(([pais, n]) => {
-                  const max = Math.max(...Object.values(stats.porPais), 1);
+                  const max = Math.max(...Object.values(datos.porPais), 1);
                   const ancho = Math.max(8, (n / max) * 100);
                   return (
                     <div key={pais} className="stat-row">
@@ -388,14 +449,14 @@ export default function Admin() {
             </div>
 
             {/* Dispositivos */}
-            {stats.porDispositivo && Object.keys(stats.porDispositivo).length > 0 && (
+            {datos.porDispositivo && Object.keys(datos.porDispositivo).length > 0 && (
               <>
                 <h3 style={{ marginTop: 32, marginBottom: 16 }}>Dispositivos</h3>
                 <div className="admin-tabla-stats">
-                  {Object.entries(stats.porDispositivo)
+                  {Object.entries(datos.porDispositivo)
                     .sort((a, b) => b[1] - a[1])
                     .map(([disp, n]) => {
-                      const max = Math.max(...Object.values(stats.porDispositivo), 1);
+                      const max = Math.max(...Object.values(datos.porDispositivo), 1);
                       const ancho = Math.max(8, (n / max) * 100);
                       return (
                         <div key={disp} className="stat-row">
