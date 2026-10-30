@@ -29,24 +29,33 @@
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   margin-top: 4px;
-  padding: 7px 14px;
-  border: none;
+  padding: 8px 15px;
+  border: 1px solid #a8d5b5;
   border-radius: 999px;
-  background: #d4edda;
-  color: #155724;
-  font: 600 12px/1 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: #e3f4e8;
+  color: #1a7d3b;
+  font: 700 12px/1 system-ui, -apple-system, 'Segoe UI', sans-serif;
   white-space: nowrap;
   cursor: pointer;
 }
-.admin-tienda.cerrada { background: #f8d7da; color: #842029; }
+.admin-tienda.cerrada { background: #fde2e1; border-color: #f1a9a3; color: #b42318; }
 .admin-tienda:disabled { cursor: default; }
 .admin-tienda-punto {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: currentColor;
+  background: #1a7d3b;
+}
+/* Cerrada: punto rojo que late, para que se note */
+.admin-tienda.cerrada .admin-tienda-punto {
+  background: #d92d20;
+  animation: admin-latido 1.6s ease-in-out infinite;
+}
+@keyframes admin-latido {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 45, 32, 0.55); }
+  50% { box-shadow: 0 0 0 5px rgba(217, 45, 32, 0); }
 }
 
 @media (pointer: coarse) {
@@ -342,14 +351,29 @@
   text-align: left;
   cursor: pointer;
 }
-.stat-flecha {
-  display: inline-block;
-  width: 14px;
-  color: #999;
-  transition: transform 0.2s ease;
+.stat-pais .stat-fecha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.stat-pais.abierto .stat-flecha { transform: rotate(90deg); }
-.stat-ciudad .stat-fecha { padding-left: 14px; color: #888; }
+.stat-flecha {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #cfcfcf;
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  color: #555;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.stat-pais:hover .stat-flecha { background: #f0f0f0; }
+.admin-page .stat-pais.abierto .stat-flecha { transform: rotate(90deg); background: #111; border-color: #111; color: #fff; }
+.stat-ciudad { background: #fafaf8; border-radius: 8px; }
+.stat-ciudad .stat-fecha { padding-left: 28px; color: #777; }
 
 .stat-fecha {
   flex: 0 0 130px;
@@ -667,16 +691,6 @@
 .admin-pedido-metodo .icono, .admin-pedido-envio .icono { flex-shrink: 0; color: #666; }
 .admin-ok { color: #155724; font-size: 12px; font-weight: 600; }
 .visita-bandera { color: #777; }
-.admin-tienda-punto {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background: #1a7d3b;
-  vertical-align: 1px;
-}
-.admin-tienda-punto.cerrada { background: #b42318; }
 
 .visita-recorrido {
   margin-top: 3px;

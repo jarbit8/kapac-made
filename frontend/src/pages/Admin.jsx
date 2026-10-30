@@ -239,16 +239,14 @@ export default function Admin() {
       <Header />
       <div className="admin-page">
         <div className="admin-cabecera">
-          <div>
-            <h1>{t('admin.titulo')}</h1>
-            <p className="admin-sub">{t('admin.sub')}</p>
-          </div>
+          <h1>{t('admin.titulo')}</h1>
           <button type="button" className={`admin-tienda${cerrado ? ' cerrada' : ''}`} onClick={cambiarTienda} disabled={cambiandoTienda}
             title={cerrado ? 'Abrir la tienda al público' : 'Cerrar la tienda al público'}>
             <span className="admin-tienda-punto" />
             {cambiandoTienda ? 'Guardando…' : (cerrado ? 'Tienda cerrada' : 'Tienda abierta')}
           </button>
         </div>
+        <p className="admin-sub">{t('admin.sub')}</p>
         {msg && <div className="admin-msg">{msg}</div>}
 
         {/* Pestañas */}
