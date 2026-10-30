@@ -1,5 +1,5 @@
 import { getDocs } from 'firebase/firestore';
-import { obtenerEstadisticas, detectarDispositivo, detectarNavegador } from './visitas';
+import { obtenerEstadisticas, obtenerVisitasRecientes, detectarDispositivo, detectarNavegador } from './visitas';
 
 jest.mock('./config', () => ({ db: {} }));
 jest.mock('firebase/firestore', () => ({
@@ -7,9 +7,9 @@ jest.mock('firebase/firestore', () => ({
   orderBy: jest.fn(), limit: jest.fn(), serverTimestamp: jest.fn(),
 }));
 
-const hoy = new Date().toISOString().slice(0, 10);
-const visita = (persona, sesion, ruta, pais, ciudad) => ({
-  data: () => ({ dia: hoy, ruta, sesionId: `${persona}.${sesion}`, entrada: true, pais, ciudad, dispositivo: 'PC Windows', navegador: 'Chrome' }),
+const hoy = new Date(Date.now() - 5 * 3600000).toISOString().slice(0, 10);
+const visita = (persona, sesion, ruta, pais, ciudad, extra = {}) => ({
+  data: () => ({ dia: hoy, ruta, sesionId: `${persona}.${sesion}`, entrada: true, pais, ciudad, dispositivo: 'PC Windows', navegador: 'Chrome', ...extra }),
 });
 
 test('cuenta personas por país y por ciudad, separando Próximamente de la tienda', async () => {
@@ -29,6 +29,30 @@ test('cuenta personas por país y por ciudad, separando Próximamente de la tien
   expect(stats.proximamente.ciudadesPorPais).toEqual({ Peru: { Arequipa: 1, Lima: 1 }, Chile: { Santiago: 1 } });
   expect(stats.porPais).toEqual({ Peru: 1 });
   expect(stats.ciudadesPorPais).toEqual({ Peru: { Cusco: 1 } });
+});
+
+test('quien entra por Próximamente y luego va al login sigue en Próximamente, como una sola persona', async () => {
+  // Llegan de la más nueva a la más vieja
+  getDocs.mockResolvedValue({ docs: [
+    visita('c', 1, 'home', 'Peru', 'Lima', { entrada: false, email: 'cristhiandccapa@gmail.com' }),
+    visita('c', 1, 'login', 'Peru', 'Lima', { entrada: false }),
+    visita('c', 1, 'proximamente', 'Peru', 'Lima'),
+    visita('j', 1, 'admin', 'Peru', 'Arequipa', { entrada: false, email: 'jarb2299@gmail.com' }),
+    visita('j', 1, 'proximamente', 'Peru', 'Arequipa'),
+  ] });
+
+  const stats = await obtenerEstadisticas(30);
+  expect(stats.total).toBe(0);
+  expect(stats.proximamente.total).toBe(1);
+  expect(stats.proximamente.visitantesUnicos).toBe(1);
+  expect(stats.proximamente.logueados).toBe(1);
+  expect(stats.proximamente.porPais).toEqual({ Peru: 1 });
+
+  expect(await obtenerVisitasRecientes(10, false)).toEqual([]);
+  const [entrada, ...resto] = await obtenerVisitasRecientes(10, true);
+  expect(resto).toEqual([]);
+  expect(entrada.correo).toBe('cristhiandccapa@gmail.com');
+  expect(entrada.recorrido).toEqual(['proximamente', 'login', 'home']);
 });
 
 test('reconoce el dispositivo y el navegador', () => {

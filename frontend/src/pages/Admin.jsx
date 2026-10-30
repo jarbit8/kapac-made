@@ -355,8 +355,8 @@ export default function Admin() {
                     <div className="visita-bandera"><Icono nombre="ubicacion" tam={18} /></div>
                     <div className="visita-info">
                       <div className="visita-quien">
-                        {v.email ? (
-                          <strong>{NOMBRES[v.email] ? `${NOMBRES[v.email]} · ${v.email}` : v.email}</strong>
+                        {v.correo ? (
+                          <strong>{NOMBRES[v.correo] ? `${NOMBRES[v.correo]} · ${v.correo}` : v.correo}</strong>
                         ) : (
                           <span style={{ color:'#888' }}>Visitante anónimo</span>
                         )}
@@ -364,7 +364,7 @@ export default function Admin() {
                       <div className="visita-meta">
                         {v.ciudad && v.ciudad !== 'Desconocida' ? `${v.ciudad}, ` : ''}{v.pais || '—'} · {v.dispositivo} · {v.navegador}
                       </div>
-                      {zona === 'tienda' && <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>}
+                      {(zona === 'tienda' || v.recorrido.length > 1) && <div className="visita-recorrido">Vio: {v.recorrido.map(nombreRuta).join(' → ')}</div>}
                     </div>
                     <div className="visita-ruta">
                       <span className="visita-pagina">{rutaNombre}</span>

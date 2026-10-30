@@ -14,6 +14,13 @@ const COLECCION = 'visitas';
 // Con la tienda cerrada el visitante solo ve el video: eso se cuenta en su propia zona
 const esProximamente = (v) => v.ruta === 'proximamente';
 
+// Los días van con la hora de Perú (UTC-5, sin horario de verano): con la hora
+// universal, lo que entraba después de las 7 de la noche caía al día siguiente
+const diaPeru = (fecha = new Date()) => new Date(fecha.getTime() - 5 * 3600000).toISOString().slice(0, 10);
+
+// Buscadores, vistas previas de enlaces y navegadores automáticos no son visitas
+const esRobot = () => navigator.webdriver || /bot\/|crawler|spider|headless|lighthouse|facebookexternalhit/i.test(navigator.userAgent);
+
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
 function detectarDispositivo(ua = navigator.userAgent, toques = navigator.maxTouchPoints || 0) {
@@ -140,6 +147,7 @@ export { detectarDispositivo, detectarNavegador };
 
 export async function registrarVisita(ruta = '/', usuario = null) {
   try {
+    if (esRobot()) return;
     const segmento = ruta.split('/').filter(Boolean)[0] || 'home';
 
     // 1 visita por ruta por sesión (no duplicar refrescos)
@@ -153,7 +161,7 @@ export async function registrarVisita(ruta = '/', usuario = null) {
 
     const visitaDoc = {
       fecha: serverTimestamp(),
-      dia:   new Date().toISOString().slice(0, 10),
+      dia:   diaPeru(),
       ruta:  segmento,
       sesionId,
       entrada: esNueva, // true solo la primera página de la sesión (recién entró al sitio)
@@ -174,6 +182,35 @@ export async function registrarVisita(ruta = '/', usuario = null) {
   }
 }
 
+// El número del navegador va al inicio del sesionId ("visitante.sesión")
+const visitanteDe = (v) => (v.sesionId?.includes('.') ? v.sesionId.split('.')[0] : '');
+
+// A cada visita le pone su persona y su zona.
+// Persona: su correo si alguna vez entró con su cuenta desde ese navegador (así no cuenta
+// como dos personas antes y después del login), o el número del navegador; las visitas
+// viejas, sin ese número, se aproximan por país, ciudad, dispositivo y navegador.
+// Zona: la de la página por donde entró. Si entró por "Próximamente" y después fue al
+// login, todo eso es de Próximamente (antes el resto caía en la tienda sin su entrada).
+function agrupar(visitas) {
+  const correoDe = {};
+  const entroPorProximamente = {};
+  visitas.forEach((v) => {
+    const visitante = visitanteDe(v);
+    if (v.email && visitante) correoDe[visitante] = v.email;
+    if (v.entrada && v.sesionId) entroPorProximamente[v.sesionId] = esProximamente(v);
+  });
+  return visitas.map((v) => {
+    const visitante = visitanteDe(v);
+    const correo = v.email || correoDe[visitante] || null;
+    return {
+      ...v,
+      correo,
+      persona: correo || visitante || `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`,
+      proximamente: entroPorProximamente[v.sesionId] ?? esProximamente(v),
+    };
+  });
+}
+
 /** Obtener las últimas N entradas al sitio (no cada página que recorren) para la lista del admin */
 export async function obtenerVisitasRecientes(n = 10, proximamente = false) {
   try {
@@ -181,16 +218,15 @@ export async function obtenerVisitasRecientes(n = 10, proximamente = false) {
     const snap = await getDocs(
       query(collection(db, COLECCION), orderBy('fecha', 'desc'), limit(Math.max(n * 6, 120)))
     );
-    const visitas = snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((v) => !esDueno(v.email));
+    const visitas = agrupar(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+      .filter((v) => !esDueno(v.correo));
     // Páginas que vio en esa misma visita, en orden (llegan de la más nueva a la más vieja)
     const recorridos = {};
     visitas.forEach((v) => {
       if (v.sesionId) (recorridos[v.sesionId] = recorridos[v.sesionId] || []).unshift(v.ruta);
     });
     return visitas
-      .filter((v) => v.entrada && esProximamente(v) === proximamente)
+      .filter((v) => v.entrada && v.proximamente === proximamente)
       .slice(0, n)
       .map((v) => ({ ...v, recorrido: recorridos[v.sesionId] || [v.ruta] }));
   } catch (e) {
@@ -213,18 +249,16 @@ function resumir(visitas) {
   const sesionesTotal = new Set();
   const identificados = new Set();
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = diaPeru();
 
   visitas.forEach((v) => {
     porRuta[v.ruta]  = (porRuta[v.ruta]  || 0) + 1;
 
-    if (v.email) identificados.add(v.email);
+    if (v.correo) identificados.add(v.correo);
 
     // Sesión = 1 entrada real al sitio. Las visitas viejas (sin sesionId) se agrupan
     // por persona+día como aproximación, para no contar cada página que recorrieron.
-    // Persona: su correo, o el número de su navegador; las visitas viejas (sin ese
-    // número) se aproximan por país, ciudad, dispositivo y navegador
-    const identidad = v.email || (v.sesionId?.includes('.') ? v.sesionId.split('.')[0] : `${v.pais}|${v.ciudad}|${v.dispositivo}|${v.navegador}`);
+    const identidad = v.persona;
     const pais = nombrePais(v.pais) || 'Desconocido';
     (personasPorPais[pais] ||= new Set()).add(identidad);
     ((personasPorCiudad[pais] ||= {})[v.ciudad || 'Desconocida'] ||= new Set()).add(identidad);
@@ -263,16 +297,15 @@ export async function obtenerEstadisticas(diasAtras = 30) {
 
     const limite = new Date();
     limite.setDate(limite.getDate() - diasAtras);
-    const limiteStr = limite.toISOString().slice(0, 10);
+    const limiteStr = diaPeru(limite);
 
-    const visitas = snap.docs
-      .map((d) => d.data())
+    const visitas = agrupar(snap.docs.map((d) => d.data()))
       .filter((v) => (v.dia || '') >= limiteStr)
-      .filter((v) => !esDueno(v.email)); // excluir al dueño
+      .filter((v) => !esDueno(v.correo)); // excluir al dueño, también lo que vio antes de entrar con su cuenta
 
     return {
-      ...resumir(visitas.filter((v) => !esProximamente(v))),
-      proximamente: resumir(visitas.filter(esProximamente)),
+      ...resumir(visitas.filter((v) => !v.proximamente)),
+      proximamente: resumir(visitas.filter((v) => v.proximamente)),
     };
   } catch (e) {
     console.error('Error obteniendo estadísticas:', e);
