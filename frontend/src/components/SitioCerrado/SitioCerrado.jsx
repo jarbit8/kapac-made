@@ -8,7 +8,7 @@ import videoFondo from '../../assets/videos/proximamente-fondo.mp4';
 import poster from '../../assets/images/proximamente.jpg';
 import './SitioCerrado.css';
 
-const FRASES = ['COMING SOON', 'NEXT WEEK'];
+const FRASES = ['COMING SOON'];
 const GLIFOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&/*+<>';
 const PANTALLA_ANCHA = '(min-aspect-ratio: 3/4)';
 const MAPA = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Arequipa, Perú');
@@ -48,7 +48,7 @@ function reproducir(v) {
 }
 
 // Las letras se mezclan y se van fijando de izquierda a derecha; cada pocos
-// segundos la palabra se corta con un glitch y pasa a la siguiente frase.
+// segundos la palabra se corta con un glitch y se vuelve a armar.
 function useTitulo() {
   const [letras, setLetras] = useState([]);
   const [cambiando, setCambiando] = useState(false);
@@ -111,7 +111,7 @@ export default function SitioCerrado() {
 
   useEffect(() => {
     if (!document.fonts) return;
-    document.fonts.load('900 100px "Archivo"', 'COMING SOON NEXT WEEK')
+    document.fonts.load('900 100px "Archivo"', 'COMING SOON')
       .then(() => setFuenteLista(true))
       .catch(() => {});
   }, []);
@@ -155,6 +155,7 @@ export default function SitioCerrado() {
         onTimeUpdate={sincronizar}
       />
       <div className="cerrado-velo" />
+      <div className="cerrado-luz" />
       <div className="cerrado-grano" />
 
       <header className="cerrado-top">
@@ -169,7 +170,7 @@ export default function SitioCerrado() {
         </a>
       </header>
 
-      <h1 className={`cerrado-titulo ${cambiando ? 'cambiando' : ''}`} aria-label="Coming soon, next week">
+      <h1 className={`cerrado-titulo ${cambiando ? 'cambiando' : ''}`} aria-label="Coming soon">
         {enPalabras(letras).map((palabra, k) => (
           <span key={k} className={`cerrado-palabra${k ? ' contorno' : ''}`}>
             {palabra.map((l) => (

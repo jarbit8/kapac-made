@@ -18,6 +18,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: sepia(0.14) saturate(0.62) contrast(1.2) brightness(0.86);
   animation: cerrado-zoom 24s ease-out both;
 }
 
@@ -38,13 +39,24 @@
 .cerrado-velo {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.6) 0%,
-    rgba(0, 0, 0, 0.25) 35%,
-    rgba(0, 0, 0, 0.35) 60%,
-    rgba(0, 0, 0, 0.85) 100%
-  );
+  background:
+    radial-gradient(ellipse 75% 65% at 50% 45%, transparent 40%, rgba(0, 0, 0, 0.6) 100%),
+    linear-gradient(
+      to bottom,
+      rgba(6, 16, 28, 0.7) 0%,
+      rgba(10, 24, 38, 0.25) 35%,
+      rgba(40, 24, 8, 0.3) 62%,
+      rgba(0, 0, 0, 0.9) 100%
+    );
+}
+
+/* Un haz de luz cálida que cruza despacio, como sol entre los árboles */
+.cerrado-luz {
+  position: absolute;
+  inset: -20% -60%;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 214, 160, 0.13) 50%, transparent 58%);
+  animation: cerrado-luz 11s ease-in-out 2.5s infinite both;
 }
 
 .cerrado-grano {
@@ -148,7 +160,7 @@
   font-stretch: 125%;
 }
 
-/* Al pasar de una frase a otra la palabra se corta en franjas y salta */
+/* En cada vuelta la palabra se corta en franjas y se vuelve a armar */
 .cerrado-titulo.cambiando {
   animation: cerrado-glitch 0.36s steps(1) both;
 }
@@ -188,7 +200,6 @@
   opacity: 0.55;
 }
 
-/* Entrada discreta al login del admin */
 @keyframes cerrado-zoom {
   from { transform: scale(1.12); }
   to { transform: scale(1); }
@@ -207,6 +218,10 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes cerrado-luz {
+  0% { transform: translateX(-45%); }
+  60%, 100% { transform: translateX(45%); }
+}
 @keyframes cerrado-aparece {
   from { opacity: 0; }
   to { opacity: 1; }
