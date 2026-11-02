@@ -42,10 +42,7 @@ def main():
 
     resultados = []
     for nombre, cmd, carpeta, entorno in bloques(a):
-        print(f'
-{"=" * 78}
-{nombre}
-{"=" * 78}', flush=True)
+        print(f'\n{"=" * 78}\n{nombre}\n{"=" * 78}', flush=True)
         t0 = time.time()
         try:
             codigo = subprocess.run(cmd, cwd=carpeta, env={**os.environ, **entorno}, shell=WIN).returncode
@@ -54,16 +51,11 @@ def main():
             codigo = 1
         resultados.append((nombre, codigo, time.time() - t0))
 
-    print(f'
-{"=" * 78}
-RESUMEN
-{"=" * 78}')
+    print(f'\n{"=" * 78}\nRESUMEN\n{"=" * 78}')
     for nombre, codigo, seg in resultados:
         print(f'{"OK   " if codigo == 0 else "FALLA"}  {nombre:34} {seg:6.1f} s')
     mal = [n for n, c, _ in resultados if c]
-    print('
-TODO OK' if not mal else '
-FALLÓ: ' + ', '.join(mal))
+    print('\nTODO OK' if not mal else '\nFALLÓ: ' + ', '.join(mal))
     return 1 if mal else 0
 
 

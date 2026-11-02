@@ -21,3 +21,6 @@ functions/.runtimeconfig.json
 # Vistas que arma descripcion/Ver cambios.bat (se regeneran)
 descripcion/*.html
 descripcion/capturas/
+
+__pycache__/
+*.pyc
