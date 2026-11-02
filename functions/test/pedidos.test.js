@@ -231,3 +231,13 @@ test('permitirIP: inventar IPs al principio de x-forwarded-for no salta el lími
   assert.equal(await permitirIP(db, req('2.2.2.2, 203.0.113.9'), 5), false);
   assert.equal(await permitirIP(db, req('3.3.3.3, 203.0.113.9'), 5), false);
 });
+
+// BUG: lib/pedidos.js:11-23. El pedido puede traer el mismo producto en dos líneas (las reglas solo
+// limitan la lista a 50 y la página arma el pedido). recalcularPedido revisa el stock línea por línea:
+// con stock 3 y dos líneas de 2 unidades acepta las 4 y cobra 4 (centimos 40000, 2 líneas).
+test.todo('recalcularPedido: dos líneas del mismo producto suman sus cantidades contra el stock (hoy acepta 4 con stock 3)');
+
+// BUG: lib/pedidos.js:36-52. moverStock lee cada línea por separado y escribe stock = actual - cantidad,
+// así que dos líneas del mismo producto se pisan: con stock 5 y líneas 1 + 1 el stock queda en 4, no en 3
+// (se venden 2 unidades y solo se descuenta 1).
+test.todo('moverStock: dos líneas del mismo producto descuentan la suma (hoy con stock 5 y 1+1 queda 4, debería quedar 3)');
