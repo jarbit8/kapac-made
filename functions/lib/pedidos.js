@@ -8,6 +8,7 @@ const { ipCliente } = require('./validar');
 async function recalcularPedido(db, items, { revisarStock = true } = {}) {
   let soles = 0;
   const limpios = [];
+  const pedidas = {}; // el mismo producto puede venir en varias líneas
   for (const it of (items || [])) {
     if (!it?.id) throw new Error('Item sin id de producto');
     const snap = await db.collection('productos').doc(it.id).get();
@@ -17,7 +18,8 @@ async function recalcularPedido(db, items, { revisarStock = true } = {}) {
     const cant = Math.min(Math.max(parseInt(it.cantidad, 10) || 0, 1), 99);
     if (!(precio > 0)) throw new Error('Precio inválido: ' + it.id);
     const stock = Number(prod.stock);
-    if (revisarStock && Number.isFinite(stock) && cant > stock) throw new Error('Sin stock suficiente: ' + (prod.nombre || it.id));
+    pedidas[it.id] = (pedidas[it.id] || 0) + cant;
+    if (revisarStock && Number.isFinite(stock) && pedidas[it.id] > stock) throw new Error('Sin stock suficiente: ' + (prod.nombre || it.id));
     soles += precio * cant;
     limpios.push({ id: it.id, nombre: prod.nombre || '', precio, cantidad: cant });
   }
@@ -38,17 +40,16 @@ async function moverStock(db, pedidoRef, signo) {
     // Se anota cuánto bajó de verdad: si había menos stock que lo pedido, al cancelar
     // solo vuelve eso. Los pedidos viejos no lo tienen y devuelven su cantidad.
     const movido = items.map(() => 0);
+    const stocks = {}; // con dos líneas del mismo producto, la segunda parte de lo que dejó la primera
     productos.forEach((p, i) => {
       if (!p.exists) return;
-      const actual = Number(p.data().stock);
+      const { id } = items[i];
+      const actual = id in stocks ? stocks[id] : Number(p.data().stock);
       if (!Number.isFinite(actual)) return;
       const cantidad = parseInt(items[i].cantidad, 10) || 0;
-      if (signo < 0) {
-        movido[i] = Math.min(actual, cantidad);
-        tx.update(refs[i], { stock: actual - movido[i] });
-      } else {
-        tx.update(refs[i], { stock: actual + (pedido.stockReservado?.[i] ?? cantidad) });
-      }
+      if (signo < 0) movido[i] = Math.min(actual, cantidad);
+      stocks[id] = signo < 0 ? actual - movido[i] : actual + (pedido.stockReservado?.[i] ?? cantidad);
+      tx.update(refs[i], { stock: stocks[id] });
     });
     tx.update(pedidoRef, { stockDescontado: signo < 0, stockReservado: signo < 0 ? movido : null });
   });

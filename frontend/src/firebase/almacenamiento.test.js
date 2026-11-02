@@ -204,7 +204,7 @@ describe('subirMedia', () => {
     expect(REGLAS).toContain('request.resource.size < 50 * 1024 * 1024');
   });
 
-  // BUG: almacenamiento.js:126 usa "> 50 * 1024 * 1024": un archivo de exactamente 50 MB pasa la validación
-  // de la página y storage.rules (size < 50 MB) lo rechaza al subir.
-  test.todo('un archivo de exactamente 50 MB se rechaza en la página con mensaje claro (hoy pasa y falla en Storage)');
+  test('un archivo de exactamente 50 MB se rechaza en la página, igual que en Storage', async () => {
+    await expect(subirMedia(archivo('v.mp4', 'video/mp4', 50 * MB))).rejects.toThrow('50 MB');
+  });
 });

@@ -58,7 +58,7 @@ export async function subirMedia(file, carpeta = 'fondos') {
   const esImagen = file.type.startsWith('image/');
   const esVideo = file.type.startsWith('video/');
   if (!esImagen && !esVideo) throw new Error('Debe ser una imagen o un video');
-  if (file.size > 50 * 1024 * 1024) throw new Error('El archivo supera los 50 MB');
+  if (file.size >= 50 * 1024 * 1024) throw new Error('El archivo supera los 50 MB');
   if (esImagen) file = await optimizar(file, carpeta);
 
   const ext = (file.name.split('.').pop() || (esVideo ? 'mp4' : 'jpg')).toLowerCase();
