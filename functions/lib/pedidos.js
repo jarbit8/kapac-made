@@ -35,14 +35,22 @@ async function moverStock(db, pedidoRef, signo) {
     const items = pedido.items || [];
     const refs = items.map((i) => db.collection('productos').doc(i.id));
     const productos = await Promise.all(refs.map((r) => tx.get(r)));
+    // Se anota cuánto bajó de verdad: si había menos stock que lo pedido, al cancelar
+    // solo vuelve eso. Los pedidos viejos no lo tienen y devuelven su cantidad.
+    const movido = items.map(() => 0);
     productos.forEach((p, i) => {
       if (!p.exists) return;
       const actual = Number(p.data().stock);
       if (!Number.isFinite(actual)) return;
       const cantidad = parseInt(items[i].cantidad, 10) || 0;
-      tx.update(refs[i], { stock: Math.max(0, actual + signo * cantidad) });
+      if (signo < 0) {
+        movido[i] = Math.min(actual, cantidad);
+        tx.update(refs[i], { stock: actual - movido[i] });
+      } else {
+        tx.update(refs[i], { stock: actual + (pedido.stockReservado?.[i] ?? cantidad) });
+      }
     });
-    tx.update(pedidoRef, { stockDescontado: signo < 0 });
+    tx.update(pedidoRef, { stockDescontado: signo < 0, stockReservado: signo < 0 ? movido : null });
   });
 }
 

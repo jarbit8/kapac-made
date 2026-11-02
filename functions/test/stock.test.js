@@ -111,15 +111,13 @@ test('reserva: sin stock el pedido igual pasa y el stock queda en cero', async (
   assert.equal(e.db.leer('pedidos/ped1').stockDescontado, true);
 });
 
-test('reserva: cancelar un pedido que reservó sin tener todo el stock no deja más stock del que había',
-  { todo: 'moverStock devuelve la cantidad completa aunque al reservar el stock solo bajó hasta 0: stock 2, pedido de 9, reserva -> 0, cancelación -> 9 (functions/lib/pedidos.js)' },
-  async (t) => {
+test('reserva: cancelar un pedido que reservó sin tener todo el stock no deja más stock del que había', async (t) => {
     const e = entorno(t);
     const antes = pedido({ metodoPago: 'yape', items: [{ id: 'p2', precio: 250, cantidad: 9 }] });
     await cambiar(e, antes, { ...antes, estado: 'verificando_pago' });
     const reservado = e.db.leer('pedidos/ped1');
     await cambiar(e, reservado, { ...reservado, estado: 'cancelado' });
-    assert.ok(stock(e, 'p2') <= 2, `el stock quedó en ${stock(e, 'p2')}`);
+    assert.equal(stock(e, 'p2'), 2);
   });
 
 // ─── crearOrdenCulqi con la reserva ──────────────────────────────────────────

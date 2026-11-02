@@ -355,34 +355,3 @@ export function nombreRuta(ruta) {
 }
 
 /** Mapa de país → emoji bandera. Soporta nombres en ES y EN */
-export function banderaPais(pais) {
-  if (!pais || pais === 'Desconocido') return '🌍';
-  const mapa = {
-    'Peru': '🇵🇪', 'Perú': '🇵🇪',
-    'Mexico': '🇲🇽', 'México': '🇲🇽',
-    'Argentina': '🇦🇷',
-    'Chile': '🇨🇱',
-    'Colombia': '🇨🇴',
-    'Bolivia': '🇧🇴',
-    'Ecuador': '🇪🇨',
-    'Venezuela': '🇻🇪',
-    'Uruguay': '🇺🇾',
-    'Paraguay': '🇵🇾',
-    'Brazil': '🇧🇷', 'Brasil': '🇧🇷',
-    'United States': '🇺🇸', 'Estados Unidos': '🇺🇸', 'USA': '🇺🇸',
-    'Canada': '🇨🇦', 'Canadá': '🇨🇦',
-    'Spain': '🇪🇸', 'España': '🇪🇸',
-    'France': '🇫🇷', 'Francia': '🇫🇷',
-    'Germany': '🇩🇪', 'Alemania': '🇩🇪',
-    'Italy': '🇮🇹', 'Italia': '🇮🇹',
-    'United Kingdom': '🇬🇧', 'Reino Unido': '🇬🇧',
-    'Portugal': '🇵🇹',
-    'Netherlands': '🇳🇱', 'Países Bajos': '🇳🇱',
-    'China': '🇨🇳',
-    'Japan': '🇯🇵', 'Japón': '🇯🇵',
-    'India': '🇮🇳',
-    'Australia': '🇦🇺',
-    'Russia': '🇷🇺', 'Rusia': '🇷🇺',
-  };
-  return mapa[pais] || '🌎';
-}

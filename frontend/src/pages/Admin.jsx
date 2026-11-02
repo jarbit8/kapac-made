@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import { useAuth } from '../context/AuthContext';
@@ -60,7 +60,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
   const [stats, setStats] = useState({});
-  const [visitasRecientes, setVisitasRecientes] = useState([]);
+  const [visitasRecientes, setVisitasRecientes] = useState(null);
   const [visitasLimite, setVisitasLimite] = useState(10);
   // Visitas de la pantalla "Próximamente" (mientras está cerrada), del login o de la página
   const [zona, setZona] = useState(cerrado ? 'proximamente' : 'pagina');
@@ -78,21 +78,30 @@ export default function Admin() {
     setPedidos(await obtenerTodosPedidos());
   };
 
+  // Si se cambia de zona rápido, la respuesta que llega tarde no pisa la lista de la zona actual
+  const ultimaZona = useRef(0);
+
   const cargarStats = async (z = zona) => {
+    const pedido = ++ultimaZona.current;
     setStats(await obtenerEstadisticas(30));
+    const recientes = await obtenerVisitasRecientes(10, z);
+    if (pedido !== ultimaZona.current) return;
     setVisitasLimite(10);
-    setVisitasRecientes(await obtenerVisitasRecientes(10, z));
+    setVisitasRecientes(recientes);
   };
 
   const cambiarZona = (z) => {
     setZona(z);
+    setVisitasRecientes(null);
     cargarStats(z);
   };
 
   const verMasVisitas = async () => {
     const nuevoLimite = visitasLimite + 10;
     setVisitasLimite(nuevoLimite);
-    setVisitasRecientes(await obtenerVisitasRecientes(nuevoLimite, zona));
+    const pedido = ++ultimaZona.current;
+    const recientes = await obtenerVisitasRecientes(nuevoLimite, zona);
+    if (pedido === ultimaZona.current) setVisitasRecientes(recientes);
   };
 
   const [cambiandoTienda, setCambiandoTienda] = useState(false);
@@ -127,6 +136,7 @@ export default function Admin() {
   const autorizado = !cargando && !!usuario && esCorreoAdmin(usuario.email);
   useEffect(() => {
     if (autorizado) { cargarPedidos(); cargarStats(); cargarReclamos(); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autorizado]);
 
   const abrirReclamo = (id) => {
@@ -336,12 +346,13 @@ export default function Admin() {
             <h3 style={{ marginTop: 32, marginBottom: 4 }}>Actividad reciente</h3>
             <p style={{ color: '#999', fontSize: 13, marginBottom: 16 }}>Cada vez que alguien entró al sitio (no cada página que recorrió después).</p>
             <div className="admin-visitas-lista">
-              {visitasRecientes.length === 0 && (
+              {!visitasRecientes && <p style={{ color: '#999', textAlign: 'center', padding: 30 }}>Cargando…</p>}
+              {visitasRecientes?.length === 0 && (
                 <p style={{ color: '#999', textAlign: 'center', padding: 30 }}>
                   {t('admin.sin_visitas')}
                 </p>
               )}
-              {visitasRecientes.map((v) => {
+              {visitasRecientes?.map((v) => {
                 const fechaObj = v.fecha?.toDate ? v.fecha.toDate() : null;
                 const fechaTxt = fechaObj
                   ? fechaObj.toLocaleString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
@@ -384,7 +395,7 @@ export default function Admin() {
                 );
               })}
             </div>
-            {visitasRecientes.length >= visitasLimite && (
+            {visitasRecientes?.length >= visitasLimite && (
               <button type="button" className="admin-fila-agregar" style={{ marginTop: 12 }} onClick={verMasVisitas}>
                 Ver más
               </button>

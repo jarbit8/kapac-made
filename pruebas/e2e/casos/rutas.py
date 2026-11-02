@@ -107,4 +107,4 @@ def indexacion(ctx):
     mapa = http.get(ORIGEN + '/sitemap.xml')
     assert 'www.kapac-made.com' in mapa and '<urlset' in mapa
     desconocida = http.get(ORIGEN + '/producto/kapac-test')
-    assert re.search(r'<div id="?root"?>', desconocida), 'la ruta de un producto no devuelve la página'
+    assert re.search(r'<div id="?root"?[ >]', desconocida), 'la ruta de un producto no devuelve la página'

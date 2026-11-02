@@ -201,7 +201,6 @@
 
 .libro-opcion input:focus-visible + span { outline: 2px solid var(--clay); outline-offset: 2px; }
 
-
 /* Interruptor "Soy menor de edad" (opcional) */
 .libro-switch {
   display: inline-flex;
@@ -438,9 +437,9 @@
 /* Al imprimir sale solo la hoja registrada */
 @media print {
   header.header,
+
   nav.navbar-sticky,
   footer.footer,
-  .navbar-anuncio,
   .navbar-backdrop,
   .barra-edicion,
   .wa-float,

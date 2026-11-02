@@ -136,7 +136,7 @@ def menu_celular_abierto(ctx):
     assert s.ev("getComputedStyle(document.querySelector('.navbar-left.abierto')).backgroundColor") == 'rgb(246, 246, 246)'
     assert s.ev("Number(getComputedStyle(document.querySelector('.navbar-sticky')).zIndex)") >= 1000, 'el menú quedaría debajo del encabezado'
     carrito = s.pg.locator('.navbar-menu-carrito')
-    assert carrito.inner_text().strip() == ctx.t('Carrito (2)', 'Cart (2)'), carrito.inner_text()
+    assert carrito.inner_text().strip().upper() == ctx.t('CARRITO (2)', 'CART (2)'), carrito.inner_text()
     s.pg.mouse.wheel(0, 700)
     s.pg.wait_for_timeout(300)
     assert s.ev('window.scrollY') == antes, 'la página de atrás se movió con el menú abierto'

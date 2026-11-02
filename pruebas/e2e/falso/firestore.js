@@ -21,7 +21,7 @@ function resolver(v) {
     if ('__hace' in v) return new Marca(Date.now() - v.__hace * 3600000);
     if ('__seg' in v) return Math.floor(Date.now() / 1000) + v.__seg;
     if ('__ts' in v) return new Marca(v.__ts);
-    if ('__dia' in v) return new Date(Date.now() - v.__dia * 86400000).toISOString().slice(0, 10);
+    if ('__dia' in v) return new Date(Date.now() - 5 * 3600000 - v.__dia * 86400000).toISOString().slice(0, 10); // hora de Perú
     return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, resolver(x)]));
   }
   return v;

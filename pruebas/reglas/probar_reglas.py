@@ -114,6 +114,11 @@ FIRESTORE = [
     caso('visita con uid ajeno', 'DENY', 'create', '/visitas/v1', ANON, con(VISITA, uid='u2')),
     caso('visita con campo extra', 'DENY', 'create', '/visitas/v1', None, con(VISITA, basura='x' * 50)),
     caso('visita con ruta enorme', 'DENY', 'create', '/visitas/v1', None, con(VISITA, ruta='x' * 500)),
+    # La API de prueba toma el texto que empieza con / como ruta: aquí va sin la barra
+    caso('visita de robot que quiso abrir otra dirección', 'ALLOW', 'create', '/visitas/v1', None, con(VISITA, robot=True, pidio='admin')),
+    caso('visita con robot que no es verdadero o falso', 'DENY', 'create', '/visitas/v1', None, con(VISITA, robot='si')),
+    caso('visita con dirección enorme', 'DENY', 'create', '/visitas/v1', None, con(VISITA, pidio='x' * 201)),
+    caso('visita con dirección que no es texto', 'DENY', 'create', '/visitas/v1', None, con(VISITA, pidio=5)),
     caso('leer visitas sin ser admin', 'DENY', 'get', '/visitas/v1', ANON, None, VISITA),
     caso('admin lee visitas', 'ALLOW', 'get', '/visitas/v1', ADMIN, None, VISITA),
     caso('producto: cualquiera lee', 'ALLOW', 'get', '/productos/x', None, None, {'nombre': 'a'}),
@@ -169,8 +174,7 @@ STORAGE = [
     caso('borrar: sin sesión', 'DENY', 'delete', 'productos/a.webp', None, base=BUCKET),
     caso('borrar: invitado anónimo', 'DENY', 'delete', 'productos/a.webp', ANON, base=BUCKET),
     caso('borrar: cliente con cuenta', 'DENY', 'delete', 'productos/a.webp', CLIENTE, base=BUCKET),
-    caso('borrar: admin', 'ALLOW', 'delete', 'productos/a.webp', ADMIN, base=BUCKET,
-         bug='la regla usa request.resource.size y en un borrado no hay request.resource: el admin no puede borrar fotos (borrarMedia lo ignora y quedan huérfanas)'),
+    caso('borrar: admin', 'ALLOW', 'delete', 'productos/a.webp', ADMIN, base=BUCKET),
 ]
 
 

@@ -115,3 +115,12 @@ def producto_borrado(ctx):
     assert nombres_tienda(s) == ['KAPAC TEST'], nombres_tienda(s)
     s.ir(OTRO_PRODUCTO, 600)
     assert ctx.tr('producto.no_encontrado').lower() in s.main().lower()
+
+
+@prueba('la ficha avisa cuando queda una unidad o quedan pocas')
+def pocas_unidades(ctx):
+    import datos
+    for stock, es, en in ((1, '¡Última unidad!', 'Last one left!'), (3, '¡Últimas 3 unidades!', 'Only 3 left!')):
+        s = ctx.sesion(datos={f'productos/{datos.PRODUCTO_ID}': datos.producto(stock=stock)})
+        s.ir(f'/producto/{datos.PRODUCTO_ID}', 900)
+        assert ctx.t(es, en).upper() in s.main().upper(), s.main()[:400]

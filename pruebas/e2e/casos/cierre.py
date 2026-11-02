@@ -57,8 +57,8 @@ def admin_entra(ctx):
         for ruta in ('/', '/shop', '/carrito', '/admin'):
             s.ir(ruta, 600)
             assert s.n('.cerrado-page') == 0, f'{usuario["email"]} ve Próximamente en {ruta}'
-        s.ir('/shop', 500)
-        assert s.txt('.header-tienda') == 'Tienda cerrada', s.txt('.header-tienda')
+        s.ir('/admin', 900)
+        assert s.txt('.admin-tienda') == 'Tienda cerrada', s.txt('.admin-tienda')
         s.cerrar()
 
 

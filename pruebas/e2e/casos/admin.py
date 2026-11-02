@@ -8,7 +8,7 @@ import json
 
 TEXTOS = json.loads((RAIZ / 'descripcion' / 'textos-pedidos.json').read_text(encoding='utf-8'))['estados']
 ES = ('es',)
-TOLERADO = ('button.header-tienda', '"/legal"')  # controles del propio admin: miden 29 y 16 px de alto en celular
+TOLERADO = ('button.admin-tienda', '"/legal"')  # controles del propio admin: miden 29 y 16 px de alto en celular
 
 
 def tarjetas(s):
@@ -33,15 +33,15 @@ def pestana(s, nombre):
 @prueba('el admin abre y cierra la tienda con confirmación y queda guardado', idioma=ES)
 def tienda_abierta_cerrada(ctx):
     s = ctx.sesion(usuario=ADMIN, idioma='es')
-    s.ir('/shop', 800)
-    assert s.txt('.header-tienda') == 'Tienda abierta'
-    s.tocar(s.pg.locator('.header-tienda'))
-    s.pg.wait_for_function("document.querySelector('.header-tienda').innerText.trim() === 'Tienda cerrada'")
+    s.ir('/admin', 900)
+    assert s.txt('.admin-tienda') == 'Tienda abierta'
+    s.tocar(s.pg.locator('.admin-tienda'))
+    s.pg.wait_for_function("document.querySelector('.admin-tienda').innerText.trim() === 'Tienda cerrada'")
     assert 'CERRAR la tienda' in s.dialogos[-1][1] and s.dialogos[-1][0] == 'confirm', s.dialogos
     assert s.escrituras('contenido')[-1]['datos'] == {'cerrado': True}
     assert s.local('kapac_cerrado_v1') == '1'
-    s.tocar(s.pg.locator('.header-tienda'))
-    s.pg.wait_for_function("document.querySelector('.header-tienda').innerText.trim() === 'Tienda abierta'")
+    s.tocar(s.pg.locator('.admin-tienda'))
+    s.pg.wait_for_function("document.querySelector('.admin-tienda').innerText.trim() === 'Tienda abierta'")
     assert 'ABRIR la tienda' in s.dialogos[-1][1]
     assert s.escrituras('contenido')[-1]['datos'] == {'cerrado': False} and s.local('kapac_cerrado_v1') == '0'
 
@@ -49,17 +49,17 @@ def tienda_abierta_cerrada(ctx):
 @prueba('si el admin rechaza el aviso la tienda no cambia', idioma=ES)
 def tienda_sin_confirmar(ctx):
     s = ctx.sesion(usuario=ADMIN, idioma='es', dialogos='rechazar')
-    s.ir('/shop', 800)
-    s.tocar(s.pg.locator('.header-tienda'))
+    s.ir('/admin', 900)
+    s.tocar(s.pg.locator('.admin-tienda'))
     s.pg.wait_for_timeout(500)
-    assert s.txt('.header-tienda') == 'Tienda abierta' and not s.escrituras('contenido')
+    assert s.txt('.admin-tienda') == 'Tienda abierta' and not s.escrituras('contenido')
 
 
 @prueba('el visitante no ve el botón de la tienda ni el menú de admin', idioma=ES)
 def visitante_sin_botones(ctx):
     s = ctx.sesion(usuario=CLIENTE, idioma='es')
     s.ir('/shop', 800)
-    assert s.n('.header-tienda') == 0 and s.n('.navbar-admin') == 0 and s.n('.navbar-modo') == 0
+    assert s.n('.admin-tienda') == 0 and s.n('.navbar-admin') == 0 and s.n('.navbar-modo') == 0
 
 
 @prueba('el panel muestra los pedidos pendientes con su estado, método y entrega', idioma=ES)
@@ -140,12 +140,39 @@ def visitas(ctx):
     pestana(s, 'Visitas')
     s.pg.wait_for_selector('text=Actividad reciente')
     t = s.main()
-    for esperado in ('5 HOY', '7 ÚLTIMOS 30 DÍAS', '6 VISITANTES ÚNICOS', '2 IDENTIFICADOS', '3 PAÍSES DISTINTOS'):
+    for esperado in ('Próximamente (1)', 'Login (0)', 'Página (6)', '5 HOY', '6 ÚLTIMOS 30 DÍAS', '5 VISITANTES ÚNICOS', '2 IDENTIFICADOS', '2 PAÍSES DISTINTOS'):
         assert esperado in t, f'falta "{esperado}" en: {t[:500]}'
     assert 'Cristhian · cristhiandccapa@gmail.com' in t
     assert 'jarb2299' not in t, 'las visitas del dueño no deben contarse ni listarse'
     assert 'Vio: Inicio → Tienda → Detalle de producto → Carrito' in t, t[:900]
     assert 'ana@ejemplo.com' in t
+    sin_fallas(s, tolerar=TOLERADO)
+
+
+def visita(id_, sesion, ruta, **extra):
+    return f'visitas/{id_}', {'fecha': datos.hace(1), 'dia': {'__dia': 0}, 'ruta': ruta, 'sesionId': sesion, 'entrada': True, 'email': None,
+                              'uid': None, 'pais': 'Peru', 'ciudad': 'Tacna', 'dispositivo': 'Android', 'navegador': 'Chrome', **extra}
+
+
+@prueba('Visitas: cada zona por separado, con robots, lo que quiso abrir y si entró en el login', idioma=ES)
+def visitas_por_zona(ctx):
+    extra = dict([
+        visita('r1', 'bot.a', 'proximamente', robot=True, pais='United States', ciudad='Boardman'),
+        visita('p1', 'x.b', 'proximamente', pidio='/admin'),
+        visita('l1', 'x.b', 'login'),
+        visita('l2', 'y.c', 'login'),
+        visita('h1', 'y.c', 'home', email='ana@ejemplo.com'),
+    ])
+    s = a_admin(ctx, datos=extra)
+    pestana(s, 'Visitas')
+    s.pg.wait_for_selector('text=Actividad reciente')
+    s.tocar(s.pg.locator('button', has_text='Próximamente ('))
+    s.pg.wait_for_selector('text=Entró un robot')
+    assert 'Quiso abrir: /admin' in s.main(), s.main()[:600]
+    s.tocar(s.pg.locator('button', has_text='Login ('))
+    s.pg.wait_for_selector('text=No entró')
+    assert 'Entró con su cuenta' in s.main() and 'ana@ejemplo.com' in s.main(), s.main()[:600]
+    assert s.desborde()[0] <= s.desborde()[1]
     sin_fallas(s, tolerar=TOLERADO)
 
 
@@ -187,3 +214,17 @@ def responder_reclamo(ctx):
 def cristhian(ctx):
     s = a_admin(ctx, usuario=CRISTHIAN)
     assert s.n('.admin-pestanas') == 1 and 'Panel admin' in s.main()
+
+
+@prueba('PagoEfectivo: avisa si el código venció sin pagarse, no con uno vigente ni con otro método', idioma=ES)
+def cip_vencido(ctx):
+    import time
+    ahora = int(time.time())
+    extra = dict([
+        datos.pedido('CIPVIEJO', 'verificando_pago', 'efectivo', datos.ENVIO_DOMICILIO, 'ana@ejemplo.com', 2, codigoPagoVence=ahora - 3600),
+        datos.pedido('CIPNUEVO', 'verificando_pago', 'efectivo', datos.ENVIO_DOMICILIO, 'ana@ejemplo.com', 2, codigoPagoVence=ahora + 3600),
+        datos.pedido('YAPEVIEJO', 'verificando_pago', 'yape', datos.ENVIO_DOMICILIO, 'ana@ejemplo.com', 2, codigoPagoVence=ahora - 3600),
+    ])
+    s = a_admin(ctx, datos=extra)
+    s.pg.wait_for_selector('.admin-pedido-card')
+    assert s.main().count('venció sin pagarse') == 1, s.main()[:600]

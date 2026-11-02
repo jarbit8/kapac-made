@@ -71,7 +71,7 @@ def reclamo(codigo, tipo, estado, nombre, email, dias_recibido, dias_limite, **e
 
 RECLAMOS = dict([
     reclamo('000002-2026', 'reclamo', 'pendiente', 'Ana Quispe Mamani', 'ana@ejemplo.com', 2, 19),
-    reclamo('000003-2026', 'queja', 'pendiente', 'Pedro Ramos', 'pedro@ejemplo.com', 18, -2, monto=None, bienTipo='servicio',
+    reclamo('000003-2026', 'queja', 'pendiente', 'Pedro Ramos', 'pedro@ejemplo.com', 40, -20, monto=None, bienTipo='servicio',
             bienDescripcion='Atención', pedidoId='', detalle='Tardaron en responder.', pedido='Nada.'),
     reclamo('000001-2026', 'queja', 'respondido', 'Luis Mamani Ccori', 'luis@ejemplo.com', 9, 12, monto=None, bienTipo='servicio',
             bienDescripcion='Atención por WhatsApp', pedidoId='', detalle='Escribí por WhatsApp y tardaron dos días en responderme.',

@@ -185,24 +185,6 @@
 
 .req { color: crimson; }
 
-/* Recojo */
-.recojo-info-box {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 16px 18px;
-  margin-bottom: 20px;
-}
-
-.recojo-pin { font-size: 28px; }
-
-.recojo-info-box strong { font-size: 15px; color: var(--ink); display: block; margin-bottom: 4px; }
-.recojo-info-box p { font-size: 13px; color: #888; margin: 2px 0; }
-.recojo-nota { font-size: 12px; color: #aaa; }
-
 /* Error y botón */
 .checkout-error {
   color: crimson;
@@ -238,7 +220,6 @@
 .step-num .icono { display: block; }
 .checkout-error { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .checkout-btn-continuar { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-.recojo-pin { font-size: 0; color: var(--ink); flex-shrink: 0; }
 
 /* Línea de confianza (carrito y método de pago) */
 .compra-seguro {

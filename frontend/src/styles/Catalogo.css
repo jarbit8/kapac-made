@@ -16,16 +16,6 @@
   padding: 56px 48px 110px;
 }
 
-.catalogo-page-title {
-  max-width: 1320px;
-  margin: 0 auto 40px;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  color: #000 !important;
-  letter-spacing: 2.5px !important;
-  text-transform: uppercase;
-}
-
 .catalogo-busqueda-info {
   max-width: 1320px;
   margin: 0 auto 24px;

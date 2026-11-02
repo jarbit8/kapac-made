@@ -1,14 +1,4 @@
 /* Barra de anuncio — envío gratis */
-.navbar-anuncio {
-  background: var(--clay);
-  color: #fff;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  padding: 8px 16px;
-}
 
 /* NavBar sticky — inline en desktop, hamburguesa en móvil */
 .navbar-sticky {
@@ -176,6 +166,7 @@
     display: block;
   }
   .navbar-menu-logo img { display: block; height: 30px; width: auto; }
+  .navbar-menu-logo::after, .navbar-menu-carrito::after { content: ''; position: absolute; inset: -8px 0; }
 
   /* la barra queda por encima del logo y la pastilla del header mientras el menú está abierto */
   .navbar-sticky.menu-abierto { z-index: 1000; }
@@ -198,6 +189,7 @@
   .navbar-admin { font-size: 13px; letter-spacing: 1.5px; }
 
   .navbar-menu-carrito {
+    position: relative;
     margin-top: 14px;
     background: none;
     border: none;
