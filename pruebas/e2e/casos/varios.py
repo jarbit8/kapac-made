@@ -141,7 +141,7 @@ def menu_celular_abierto(ctx):
     s.pg.wait_for_timeout(300)
     assert s.ev('window.scrollY') == antes, 'la página de atrás se movió con el menú abierto'
     assert s.n('.navbar-burger') == 0 and s.n('.navbar-cerrar') == 1
-    sin_fallas(s)
+    sin_fallas(s, tolerar=("a.navbar-ig",))  # queda detras del menu abierto
     s.tocar(s.pg.locator('.navbar-cerrar'))
     menu_cerrado(s)
     s.pg.wait_for_timeout(200)
