@@ -75,6 +75,9 @@ def copiar_codigo():
     (DESTINO / 'textos-pedidos').mkdir(exist_ok=True)
     shutil.copy(REPO / 'textos-pedidos' / 'textos-pedidos.json', DESTINO / 'textos-pedidos' / 'textos-pedidos.json')
     modulos = COPIA / 'node_modules'
+    # Si el proyecto cambió de carpeta, el enlace viejo queda roto: se quita (solo el enlace) y se rehace
+    if os.path.lexists(modulos) and not modulos.exists():
+        os.rmdir(modulos)
     if not modulos.exists():
         r = subprocess.run(['cmd', '/c', 'mklink', '/J', str(modulos), str(MODULOS)], capture_output=True, text=True, errors='replace')
         if r.returncode:
