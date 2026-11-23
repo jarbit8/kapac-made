@@ -16,7 +16,7 @@ import urllib.request
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
-CA = RAIZ / 'archivo' / 'fotos-originales-productos' / 'ca_todo.pem'
+CA = RAIZ / 'scripts' / 'certificado' / 'ca_todo.pem'
 API = 'https://firebaserules.googleapis.com/v1/projects/kapac-made:test'
 DOCS = '/databases/(default)/documents'
 BUCKET = '/b/kapac-made.firebasestorage.app/o/'

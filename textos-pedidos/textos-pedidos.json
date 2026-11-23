@@ -6,7 +6,7 @@
     "\"correo\": null quiere decir que en ese paso no se manda correo.",
     "_en es el texto de la página en inglés. Los correos solo van en español.",
     "Para ver cómo queda: doble clic en 'Ver cambios.bat' (se abre pedidos.html).",
-    "Para que salga en la página real: dile a Claude que publique la web. Para los correos: doble clic en archivo/Publicar correos.bat."
+    "Para que salga en la página real: doble clic en scripts/Publicar web.bat. Para los correos: doble clic en scripts/Publicar funciones.bat."
   ],
 
   "correo_comun": {

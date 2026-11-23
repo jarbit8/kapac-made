@@ -12,7 +12,7 @@ import urllib.request
 from pathlib import Path
 
 PROYECTO = Path(__file__).resolve().parents[2]
-CA = PROYECTO / 'archivo' / 'fotos-originales-productos' / 'ca_todo.pem'
+CA = PROYECTO / 'scripts' / 'certificado' / 'ca_todo.pem'
 ENV = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
 if CA.exists():
     ENV['CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE'] = str(CA)

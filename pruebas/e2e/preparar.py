@@ -51,7 +51,7 @@ def huella():
         if f.is_file():
             e = f.stat()
             h.update(f'{nombre_de(f)}{e.st_size}{e.st_mtime_ns}'.encode())
-    for f in (FRONT / 'package.json', REPO / 'descripcion' / 'textos-pedidos.json', AQUI / 'datos.py', Path(__file__)):
+    for f in (FRONT / 'package.json', REPO / 'textos-pedidos' / 'textos-pedidos.json', AQUI / 'datos.py', Path(__file__)):
         h.update(f.read_bytes())
     return h.hexdigest()
 
@@ -72,8 +72,8 @@ def copiar_codigo():
     espejo(FRONT / 'public', COPIA / 'public')
     espejo(FRONT / 'scripts', COPIA / 'scripts')
     shutil.copy(FRONT / 'package.json', COPIA / 'package.json')
-    (DESTINO / 'descripcion').mkdir(exist_ok=True)
-    shutil.copy(REPO / 'descripcion' / 'textos-pedidos.json', DESTINO / 'descripcion' / 'textos-pedidos.json')
+    (DESTINO / 'textos-pedidos').mkdir(exist_ok=True)
+    shutil.copy(REPO / 'textos-pedidos' / 'textos-pedidos.json', DESTINO / 'textos-pedidos' / 'textos-pedidos.json')
     modulos = COPIA / 'node_modules'
     if not modulos.exists():
         r = subprocess.run(['cmd', '/c', 'mklink', '/J', str(modulos), str(MODULOS)], capture_output=True, text=True, errors='replace')

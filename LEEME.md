@@ -1,22 +1,21 @@
 # Kapac Made
 
-Toda esta carpeta es el repo de GitHub `jarbit8/kapac-made` (público). `marca\`, `material\` y `archivo\` quedan solo en la PC.
+Tienda online de mochilas artesanales de montaña — **www.kapac-made.com**
 
-Tienda online de mochilas artesanales — www.kapac-made.com
+Toda esta carpeta es el repositorio `github.com/jarbit8/kapac-made`. Para entender el proyecto completo: **`docs/PROYECTO.md`**.
 
 | Carpeta / archivo | Qué hay |
 |---|---|
-| `frontend\` | La página (React); se publica en GitHub Pages. |
-| `functions\` | Funciones del servidor en Firebase (pagos Culqi, correos, stock, corte de facturación). |
-| `firestore.rules`, `storage.rules` | Reglas de seguridad de la base de datos y de las fotos. |
-| `firebase.json`, `.firebaserc` | Configuración de Firebase (proyecto `kapac-made`). |
-| `scripts\` | Script viejo para cargar productos. |
-| `marca\` | Identidad de marca: isotipos, logotipos (.ai y .png), ilustraciones, etiquetas. |
-| `material\fotos\` | Fotos de la portada y de "in the zone" (`para subir\` son las versiones optimizadas) y `originales\`. |
-| `material\video\` | Video original de la pantalla Próximamente y los teasers. En `trabajo\` está lo necesario para volver a generarlos (video base, logo, letra Archivo y músicas). |
-| `material\documentos\` | Pedidos de cambios (INSTRUCCIONES y KAPAC INFO), PDF con los textos de la web y el mapa del proyecto. |
-| `material\seguridad\` | Capturas de la auditoría de seguridad (jun 2026). |
-| `archivo\` | Lo que ya no se usa: el chat Kapac AI retirado, un respaldo viejo del código la propuesta de diseño descartada y respaldos de las reglas y funciones del 13 oct. |
+| `docs/` | `PROYECTO.md` (arquitectura, datos, historia, pendientes) y `PROMPT.md` (contexto para quien trabaje en el código) |
+| `frontend/` | La web (React). Se publica en GitHub Pages |
+| `functions/` | El servidor (Firebase Cloud Functions): pagos con Culqi, correos, stock, reclamos, boletín, tope de gasto |
+| `textos-pedidos/` | Textos de cada estado del pedido y de los correos. Se editan aquí; `Ver cambios.bat` muestra cómo quedan |
+| `pruebas/` | Pruebas automáticas: doble clic en `Probar todo.bat` |
+| `scripts/` | Doble clic para publicar la web, las funciones o las reglas, y para cambiar claves |
+| `firestore.rules`, `storage.rules` | Reglas de seguridad de la base de datos y de las fotos |
+| `firebase.json`, `.firebaserc` | Configuración de Firebase (proyecto `kapac-made`) |
+| `marca/` | Solo en la PC: isotipo, logotipos (.ai y .png), ilustraciones, etiquetas, fotos de WhatsApp |
+| `material/` | Solo en la PC: fotos, videos (Próximamente y teasers), documentos y el QR de pago |
+| `archivo/` | Solo en la PC: lo que ya no se usa (respaldos, versiones y scripts viejos) |
 
-Publicar la página: dentro de `frontend\`, `npm run build` y luego `npx gh-pages -d build --dotfiles --add`.
-Funciones y reglas: `firebase deploy --only ...` desde esta carpeta.
+**Publicar:** `scripts\Publicar web.bat` (la web) · `scripts\Publicar funciones.bat` (el servidor) · `scripts\Publicar reglas.bat` (reglas de Firestore). Antes, `pruebas\Probar todo.bat`.

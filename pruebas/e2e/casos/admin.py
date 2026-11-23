@@ -6,7 +6,7 @@ from base import ADMIN, CRISTHIAN, CLIENTE, RAIZ, prueba, sin_fallas
 
 import json
 
-TEXTOS = json.loads((RAIZ / 'descripcion' / 'textos-pedidos.json').read_text(encoding='utf-8'))['estados']
+TEXTOS = json.loads((RAIZ / 'textos-pedidos' / 'textos-pedidos.json').read_text(encoding='utf-8'))['estados']
 ES = ('es',)
 TOLERADO = ('button.admin-tienda', '"/legal"')  # controles del propio admin: miden 29 y 16 px de alto en celular
 

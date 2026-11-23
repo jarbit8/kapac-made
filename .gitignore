@@ -7,20 +7,18 @@ archivo/
 node_modules/
 build/
 
-# Herramientas locales
-.claude/
-.agents/
-skills-lock.json
+# Locales
 .firebase/
 *.log
+scripts/certificado/
 
 # Firebase
 functions/.env*
 functions/.runtimeconfig.json
 
-# Vistas que arma descripcion/Ver cambios.bat (se regeneran)
-descripcion/*.html
-descripcion/capturas/
+# Vistas que arma textos-pedidos/Ver cambios.bat (se regeneran)
+textos-pedidos/*.html
+textos-pedidos/capturas/
 
 __pycache__/
 *.pyc

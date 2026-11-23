@@ -1,11 +1,11 @@
-"""Confirmación del pedido y Mis pedidos: los textos de cada estado salen de descripcion/textos-pedidos.json."""
+"""Confirmación del pedido y Mis pedidos: los textos de cada estado salen de textos-pedidos/textos-pedidos.json."""
 import json
 import re
 
 import datos
 from base import ANONIMO, CLIENTE, RAIZ, esperar, prueba, sin_fallas
 
-TEXTOS = json.loads((RAIZ / 'descripcion' / 'textos-pedidos.json').read_text(encoding='utf-8'))['estados']
+TEXTOS = json.loads((RAIZ / 'textos-pedidos' / 'textos-pedidos.json').read_text(encoding='utf-8'))['estados']
 
 
 def caso(estado, metodo, envio):
