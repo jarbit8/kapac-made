@@ -15,7 +15,8 @@ KAPAC-MADE/
 ├── docs/PROYECTO.md       Documento completo: arquitectura, datos, historia, decisiones, pendientes. LEERLO PRIMERO.
 ├── frontend/              Web en React 18 (Create React App), español e inglés
 │   ├── src/App.js         Rutas (BrowserRouter) y CierreGate (Próximamente con la tienda cerrada)
-│   ├── src/pages/         Una página por ruta; las grandes tienen su carpeta (pages/admin/, ...)
+│   ├── src/pages/         Una página por ruta; las grandes son un contenedor corto y sus partes van en su
+│   │                      carpeta: admin/, producto/, libro/, confirmacion/, pago/, login/
 │   ├── src/components/    NavBar, Header, Footer, Hero, SitioCerrado, Editable, EditableImage, ProductoEditable...
 │   ├── src/context/       AuthContext, CartContext, LanguageContext, TemaContext, TextosContext
 │   ├── src/firebase/      Acceso a datos: un archivo por colección (productos, pedidos, visitas, reclamos...)

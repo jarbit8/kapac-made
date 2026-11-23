@@ -85,8 +85,9 @@ frontend/
 │   └── paginas.js     crea /shop.html, /info.html... y 404.html para que cada ruta tenga su página
 └── src/
     ├── App.js         Rutas + CierreGate (muestra "Próximamente" si la tienda está cerrada)
-    ├── pages/         Una página por ruta (ver tabla abajo); las grandes tienen su carpeta
-    │                  con sus partes (p. ej. pages/admin/)
+    ├── pages/         Una página por ruta (ver tabla abajo). Las grandes son un contenedor
+    │                  corto y sus partes (componentes y hooks) van en su carpeta:
+    │                  admin/, producto/, libro/, confirmacion/, pago/, login/
     ├── components/    Piezas compartidas: NavBar, Header, Footer, Hero, Lifestyle, WhatsApp,
     │                  SitioCerrado (Próximamente), Editable / EditableImage (edición en la página),
     │                  ProductoEditable (ficha editable), BarraEdicion, Modal, Cargando...
