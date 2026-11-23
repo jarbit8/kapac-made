@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const RAIZ = path.join(__dirname, '..', '..');
-const ORIGEN = path.join(RAIZ, 'descripcion', 'textos-pedidos.json');
+const ORIGEN = path.join(RAIZ, 'textos-pedidos', 'textos-pedidos.json');
 const COPIAS = [
   path.join(RAIZ, 'functions', 'textos-pedidos.json'),
   path.join(RAIZ, 'frontend', 'src', 'config', 'textosPedidos.json'),
@@ -20,7 +20,7 @@ const casos = Object.entries(TEXTOS.estados).flatMap(([estado, porCaso]) => Obje
 test('las copias de los textos de pedidos son idénticas al original', () => {
   const original = fs.readFileSync(ORIGEN, 'utf8');
   for (const copia of COPIAS) {
-    assert.equal(fs.readFileSync(copia, 'utf8'), original, `${path.relative(RAIZ, copia)} no coincide con descripcion/textos-pedidos.json (corre Ver cambios.bat)`);
+    assert.equal(fs.readFileSync(copia, 'utf8'), original, `${path.relative(RAIZ, copia)} no coincide con textos-pedidos/textos-pedidos.json (corre Ver cambios.bat)`);
   }
 });
 

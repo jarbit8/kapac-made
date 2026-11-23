@@ -19,7 +19,7 @@ const estadosPosibles = (estado) => {
   return [estado, ...siguientes, ...(estado === 'entregado' ? [] : ['cancelado'])];
 };
 
-// Los mismos nombres que ve el cliente (descripcion/textos-pedidos.json)
+// Los mismos nombres que ve el cliente (textos-pedidos/textos-pedidos.json)
 const etiquetaEstado = (estado, pedido) => nombreEstado(pedido, 'es', estado);
 
 const METODO_PAGO = {

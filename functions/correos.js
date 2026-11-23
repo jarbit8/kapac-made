@@ -12,7 +12,7 @@ const GRIS = '#6b6760';
 const LINEA = '#e7e3dc';
 
 // Los nombres de los estados y lo que dice cada correo están en textos-pedidos.json
-// (se copia de descripcion/ al publicar)
+// (se copia de textos-pedidos/ al publicar)
 const TEXTOS = require('./textos-pedidos.json');
 const COMUN = TEXTOS.correo_comun;
 
