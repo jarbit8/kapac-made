@@ -27,7 +27,9 @@ KAPAC-MADE/
 │   └── scripts/           Pasos de la compilación: textos.js (antes), fotos.js y paginas.js (después)
 ├── functions/             Servidor: Firebase Cloud Functions (Node 22)
 │   ├── index.js           Solo declara las 9 funciones con sus opciones
-│   ├── lib/               La lógica, un módulo por tema (pagos, stock, boletín, reclamos, facturación, validación)
+│   ├── lib/               La lógica, un módulo por tema: servicios (base, correo, RESPONDER_A), pagos,
+│   │                      notificaciones, pedidos (stock), boletin, reclamos, facturacion, validar.
+│   │                      Reciben Firebase y Resend desde index.js: no los importan por su cuenta
 │   ├── correos.js         HTML de todos los correos
 │   └── test/              Pruebas con node --test y una base de datos falsa
 ├── textos-pedidos/        textos-pedidos.json: nombres de los estados, textos de la página y de los correos (ES/EN)
@@ -111,6 +113,6 @@ scripts\Publicar reglas.bat                      # subir reglas de Firestore
 3. Día de abrir:
    - botón "Tienda abierta";
    - volver a publicar la web;
-   - poner en `RESPONDER_A` el correo de la tienda y publicar las funciones.
+   - poner en `RESPONDER_A` (`functions/lib/servicios.js`) el correo de la tienda y publicar las funciones.
 4. Agregar el aviso de privacidad en login y registro.
 5. El dominio vence el 19 ene 2027.

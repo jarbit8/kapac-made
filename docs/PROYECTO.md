@@ -140,7 +140,20 @@ Rutas viejas (`/catalogo`, `/alma`, `/contacto`, `/#/...`) redirigen a las nueva
 | `responderReclamo` | Cambio de un reclamo | Cuando el admin responde, envía la respuesta al cliente | `RESEND_API_KEY` |
 | `cortarFacturacion` | Aviso del presupuesto (Pub/Sub `corte-facturacion`) | Si el gasto del mes llega a S/ 1, desvincula la facturación del proyecto y el servidor se apaga | — |
 
-- `functions/index.js` solo declara las funciones; la lógica está en `functions/lib/` (un módulo por tema) y `functions/correos.js` (HTML de los correos).
+- `functions/index.js` solo declara las 9 funciones con sus opciones (región `us-central1`, CORS, claves). La lógica está en `functions/lib/`:
+
+  | Módulo | Qué tiene |
+  |---|---|
+  | `servicios.js` | base de datos, envío de correos con Resend, `RESPONDER_A` (a quién llegan las respuestas) |
+  | `pagos.js` | `cobrarCulqi`, `crearOrdenCulqi`, `culqiWebhook` |
+  | `notificaciones.js` | `notificarCambioEstado` (stock y correo por estado) |
+  | `pedidos.js` | recálculo del pedido desde la base, reserva/descuento/devolución de stock, límite por IP |
+  | `boletin.js` | código del boletín |
+  | `reclamos.js` | Libro de Reclamaciones |
+  | `facturacion.js` | corte automático del gasto |
+  | `validar.js` | validaciones (correo, IP real, hoja de reclamo, nombre para Culqi) |
+
+  `functions/correos.js` arma el HTML de todos los correos. Los módulos de `lib/` reciben Firebase y Resend desde `index.js` (no los importan por su cuenta), así las pruebas pueden darles una base falsa.
 - `functions/textos-pedidos.json` es una **copia**: el original está en `textos-pedidos/`.
 - Pruebas del servidor: `functions/test/` (con una base de datos falsa en memoria).
 
@@ -200,7 +213,7 @@ En GitHub, cada push a `main` corre las unitarias.
 - Si el pedido se **cancela**, vuelve exactamente lo que se descontó (`stockReservado`).
 - El servidor revisa el stock sumando todas las líneas del mismo producto.
 
-**Correos:** solo si el cliente dejó su correo en la Confirmación (`canalNotificacion: 'email'`). Remitente `Kapac Made <pedidos@kapac-made.com>`; las respuestas llegan al correo de la tienda (`RESPONDER_A` en `functions/correos.js`).
+**Correos:** solo si el cliente dejó su correo en la Confirmación (`canalNotificacion: 'email'`). Remitente `Kapac Made <pedidos@kapac-made.com>`; las respuestas llegan al correo de la tienda (`RESPONDER_A` en `functions/lib/servicios.js`).
 
 ---
 
