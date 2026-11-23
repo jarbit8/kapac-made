@@ -141,11 +141,14 @@ def menu_celular_abierto(ctx):
     s.pg.wait_for_timeout(300)
     assert s.ev('window.scrollY') == antes, 'la página de atrás se movió con el menú abierto'
     assert s.n('.navbar-burger') == 0 and s.n('.navbar-cerrar') == 1
-    sin_fallas(s, tolerar=("a.navbar-ig",))  # queda detras del menu abierto
     s.tocar(s.pg.locator('.navbar-cerrar'))
     menu_cerrado(s)
     s.pg.wait_for_timeout(200)
-    assert s.ev('window.scrollY') == antes, 'la página volvió a otra altura al cerrar el menú'
+    despues = s.ev('window.scrollY')
+    assert despues == antes, f'la página volvió a otra altura al cerrar el menú: {antes} -> {despues}'
+    # Al medir las áreas de toque se mueve lo de atrás, por eso va al final; lo tapado por el menú mide 1x1
+    abrir_menu(s)
+    sin_fallas(s, tolerar=('de 1x1 px',))
 
 
 @prueba('menú del celular: cambia de idioma sin cerrarse y navega o se cierra con el logo, los enlaces y el carrito', tam=('c390', 'c360'))
