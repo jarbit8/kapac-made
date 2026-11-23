@@ -15,3 +15,5 @@ Ninguna prueba toca Firebase, Culqi ni Resend de verdad: usan bases y servidores
 - El punta a punta arma una copia en `%TEMP%\kapac-pruebas` (no toca el repo) y la reutiliza si el código no cambió. Algunas pruebas lentas corren solo en PC y 390 px.
 - Una prueba marcada `bug` falla hoy a propósito y no corta la corrida; si empieza a pasar, avisa que hay que quitarle la marca.
 - En GitHub, cada push a `main` corre solo frontend y servidor (`.github/workflows/pruebas.yml`).
+- La API de prueba de reglas toma el texto que empieza con `/` como ruta y no como texto: en esos casos el valor va sin la barra.
+- No son bugs: los precios con decimales no se soportan a propósito; los textos de producto en inglés salen de la traducción automática; las áreas de toque se miden con `behavior: 'instant'`.
